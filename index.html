@@ -101,6 +101,9 @@
 .login-card .cup-mark{width:64px;height:64px;margin-bottom:10px;object-fit:cover;border-radius:50%;}
 .login-card h1{font-size:19px;margin:0 0 4px;color:var(--caramel-dark);}
 .login-card p{font-size:12.5px;color:var(--espresso-soft);margin:0 0 22px;}
+.admin-gate{padding:10px 0 30px;}
+.admin-gate-icon{font-size:40px;margin-bottom:6px;}
+.deleted-order-row{border-color:var(--danger-light);background:#FFFBF9;}
 .pin-dots{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:8px;min-height:15px;}
 .pin-dot{width:15px;height:15px;border-radius:50%;border:2px solid var(--border);background:transparent;transition:all .12s;}
 .pin-dot.filled{background:var(--caramel);border-color:var(--caramel);}
@@ -427,6 +430,7 @@ var CATEGORY_PALETTE = ['caramel','taro','matcha','coral'];
    which is what makes this real, server-checked protection. */
 var STAFF_EMAIL = "staff@memetea-pos.com";
 var MANAGER_EMAIL = "manager@memetea-pos.com";
+var ADMIN_EMAIL = "admin@memetea-pos.com";
 
 /* ================= STATE ================= */
 var state = {
@@ -438,6 +442,13 @@ var state = {
   managerPinInput:'',
   managerPinError:false,
   managerPinChecking:false,
+  adminUnlocked:false,
+  adminPinInput:'',
+  adminPinError:false,
+  adminPinChecking:false,
+  deletedOrders:[],
+  deletedOrdersLoaded:false,
+  restoringOrderId:null,
   loaded:false,
   settingsLoaded:false, menuLoaded:false, toppingsLoaded:false, ordersLoaded:false,
   syncStatus:'connecting', // connecting | synced | error
@@ -477,6 +488,13 @@ var appInitialized = false;
 // so checking the manager PIN never disturbs the staff member's own session.
 var managerApp = firebase.initializeApp(FIREBASE_CONFIG, "managerApp");
 var managerDb = managerApp.firestore();
+
+// A third, isolated Firebase app instance for the administrator — the only
+// account permitted to view and restore deleted orders. Also fully separate
+// from the staff and manager sessions.
+var adminApp = firebase.initializeApp(FIREBASE_CONFIG, "adminApp");
+var adminDb = adminApp.firestore();
+var deletedOrdersUnsub = null;
 
 function ensureInitialized(){
   if(!appInitialized){
@@ -654,6 +672,7 @@ function buildAppHTML(){
   if(state.tab==='order') html += buildOrderTab();
   else if(state.tab==='menu') html += buildMenuTab();
   else if(state.tab==='history') html += buildHistoryTab();
+  else if(state.tab==='deleted') html += buildDeletedOrdersTab();
   else if(state.tab==='settings') html += buildSettingsTab();
   html += '</div>';
   if(state.modal) html += buildItemModal();
@@ -664,7 +683,7 @@ function buildAppHTML(){
 
 function buildHeader(){
   var s = state.settings;
-  var tabs = [['order','🧋 Order'],['menu','📋 Menu'],['history','🧾 History'],['settings','⚙️ Settings']];
+  var tabs = [['order','🧋 Order'],['menu','📋 Menu'],['history','🧾 History'],['deleted','🔒 Deleted'],['settings','⚙️ Settings']];
   var navHtml = tabs.map(function(t){
     return '<button class="'+(state.tab===t[0]?'active':'')+'" onclick="POS.setTab(\''+t[0]+'\')">'+t[1]+'</button>';
   }).join('');
@@ -1390,6 +1409,90 @@ function buildOrderRow(o){
 }
 
 /* ================= SETTINGS TAB ================= */
+/* ================= DELETED ORDERS TAB (admin-only) ================= */
+function buildDeletedOrdersTab(){
+  if(!state.adminUnlocked){
+    return buildAdminPinGate();
+  }
+  if(!state.deletedOrdersLoaded){
+    return '<div class="pos-loading" style="min-height:30vh;">🔒 Loading deleted orders…</div>';
+  }
+  var html = '' +
+  '<div class="section-card" style="background:var(--taro-light);border-color:var(--taro);">' +
+    '<h2 style="color:var(--taro);">🔒 Administrator Area</h2>' +
+    '<p class="hint">Orders deleted by a manager are archived here, not permanently erased. Only the administrator account can view or restore them.</p>' +
+    '<button class="btn btn-ghost btn-small" onclick="POS.lockAdminTab(); POS.setTab(\'deleted\')">Lock this tab now</button>' +
+  '</div>';
+
+  if(!state.deletedOrders.length){
+    html += '<div class="empty-note">No deleted orders. Anything a manager deletes will show up here.</div>';
+    return html;
+  }
+
+  var groups = {};
+  state.deletedOrders.slice().sort(function(a,b){ return new Date(b.deletedAt||b.timestamp)-new Date(a.deletedAt||a.timestamp); }).forEach(function(o){
+    var k = dateKey(o.deletedAt || o.timestamp);
+    (groups[k]=groups[k]||[]).push(o);
+  });
+  var groupKeys = Object.keys(groups).sort().reverse();
+
+  html += groupKeys.map(function(k){
+    var rows = groups[k].map(function(o){ return buildDeletedOrderRow(o); }).join('');
+    return '<div class="day-group"><div class="day-header"><span>Deleted '+prettyDate(k)+'</span></div>'+rows+'</div>';
+  }).join('');
+
+  return html;
+}
+
+function buildDeletedOrderRow(o){
+  var d = new Date(o.timestamp);
+  var delD = o.deletedAt ? new Date(o.deletedAt) : null;
+  var cur = o.currency || 'LAK';
+  var busy = state.restoringOrderId===o.id;
+  return '' +
+  '<div class="order-row deleted-order-row">' +
+    '<div class="order-row-top">' +
+      '<div><div class="onum">Order #'+String(o.number).padStart(4,'0')+'</div>' +
+        '<div class="otime">Placed '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+'</div>' +
+        (delD ? '<div class="otime">Deleted '+delD.toLocaleDateString('en-GB')+' '+delD.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+'</div>' : '') +
+      '</div>' +
+      '<div class="ototal">'+orderPaidDisplay(o)+'</div>' +
+    '</div>' +
+    '<div class="order-detail">' +
+      o.items.map(function(l){ return '<div class="di"><span>'+l.qty+'x '+escapeHtml(l.name)+' ('+l.size+')</span><span>'+formatForeignAmount(fromLAK(l.unitPrice*l.qty, cur), cur)+'</span></div>'; }).join('') +
+      '<div class="dactions">' +
+        '<button class="btn btn-primary btn-small" style="width:auto;" '+(busy?'disabled':'')+' onclick="POS.restoreOrder(\''+o.id+'\')">'+(busy?'Restoring…':'↩ Restore Order')+'</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function buildAdminPinGate(){
+  var dots = '';
+  for(var i=0;i<state.adminPinInput.length;i++){
+    dots += '<span class="pin-dot filled'+(state.adminPinError?' error':'')+'"></span>';
+  }
+  if(!dots) dots = '<span class="pin-dots-empty">Admin PIN</span>';
+  var disabled = state.adminPinChecking;
+  var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
+  var keypadHtml = keys.map(function(k){
+    if(k==='back') return '<button class="pin-key-back" '+(disabled?'disabled':'')+' onclick="POS.adminPinBackspace()">⌫</button>';
+    if(k==='enter') return '<button class="pin-key-enter" '+(disabled?'disabled':'')+' onclick="POS.adminPinSubmit()">✓</button>';
+    return '<button '+(disabled?'disabled':'')+' onclick="POS.adminPinPress(\''+k+'\')">'+k+'</button>';
+  }).join('');
+  return '' +
+  '<div class="admin-gate">' +
+    '<div class="login-card" style="max-width:320px;margin:24px auto;">' +
+      '<div class="admin-gate-icon">🔒</div>' +
+      '<h1>Administrator Only</h1>' +
+      '<p>'+(state.adminPinChecking?'Checking…':'This area is restricted. Enter the admin PIN to view and restore deleted orders.')+'</p>' +
+      '<div class="pin-dots">'+dots+'</div>' +
+      '<div class="pin-error-msg">'+(state.adminPinError?'Incorrect admin PIN':'&nbsp;')+'</div>' +
+      '<div class="pin-keypad">'+keypadHtml+'</div>' +
+    '</div>' +
+  '</div>';
+}
+
 function buildSettingsTab(){
   var f = state.settingsForm || state.settings;
   return '' +
@@ -1503,19 +1606,30 @@ var POS = {
         task = managerDb.collection('pos_orders').get().then(function(snap){
           var docs = snap.docs;
           var chunks = [];
-          for(var i=0;i<docs.length;i+=450){ chunks.push(docs.slice(i,i+450)); }
+          for(var i=0;i<docs.length;i+=200){ chunks.push(docs.slice(i,i+200)); }
           var chain = Promise.resolve();
           chunks.forEach(function(chunk){
             chain = chain.then(function(){
               var batch = managerDb.batch();
-              chunk.forEach(function(d){ batch.delete(d.ref); });
+              chunk.forEach(function(d){
+                var archived = Object.assign({}, d.data(), {deletedAt: new Date().toISOString(), deletedBy: 'manager'});
+                batch.set(managerDb.collection('pos_deleted_orders').doc(d.id), archived);
+                batch.delete(d.ref);
+              });
               return batch.commit();
             });
           });
           return chain;
         });
       } else {
-        task = managerDb.collection('pos_orders').doc(prompt.orderId).delete();
+        var orderData = state.orders.filter(function(o){ return o.id===prompt.orderId; })[0];
+        if(orderData){
+          var archived = Object.assign({}, orderData, {deletedAt: new Date().toISOString(), deletedBy: 'manager'});
+          task = managerDb.collection('pos_deleted_orders').doc(prompt.orderId).set(archived)
+            .then(function(){ return managerDb.collection('pos_orders').doc(prompt.orderId).delete(); });
+        } else {
+          task = managerDb.collection('pos_orders').doc(prompt.orderId).delete();
+        }
       }
       return task.then(function(){ return managerAuth.signOut(); });
     }).then(function(){
@@ -1533,7 +1647,84 @@ var POS = {
     });
   },
 
+  /* ---- Administrator: view + restore deleted orders ---- */
+  adminPinPress: function(digit){
+    if(state.adminPinChecking) return;
+    if(state.adminPinInput.length >= 12) return;
+    state.adminPinInput += digit;
+    state.adminPinError = false;
+    render();
+  },
+  adminPinBackspace: function(){
+    if(state.adminPinChecking) return;
+    state.adminPinInput = state.adminPinInput.slice(0,-1);
+    state.adminPinError = false;
+    render();
+  },
+  adminPinSubmit: function(){
+    if(state.adminPinChecking || !state.adminPinInput) return;
+    state.adminPinChecking = true;
+    state.adminPinError = false;
+    render();
+    adminApp.auth().signInWithEmailAndPassword(ADMIN_EMAIL, state.adminPinInput).then(function(){
+      state.adminPinChecking = false;
+      state.adminPinInput = '';
+      state.adminUnlocked = true;
+      state.deletedOrdersLoaded = false;
+      render();
+      if(deletedOrdersUnsub){ deletedOrdersUnsub(); deletedOrdersUnsub = null; }
+      deletedOrdersUnsub = adminDb.collection('pos_deleted_orders').onSnapshot(function(snap){
+        state.deletedOrders = snap.docs.map(function(d){ return d.data(); });
+        state.deletedOrdersLoaded = true;
+        render();
+      }, function(e){
+        console.error('Could not load deleted orders', e);
+        state.deletedOrdersLoaded = true;
+        render();
+      });
+    }).catch(function(e){
+      console.error('Admin sign-in failed', e);
+      state.adminPinChecking = false;
+      state.adminPinError = true;
+      state.adminPinInput = '';
+      render();
+    });
+  },
+  lockAdminTab: function(){
+    if(deletedOrdersUnsub){ deletedOrdersUnsub(); deletedOrdersUnsub = null; }
+    adminApp.auth().signOut().catch(function(){});
+    state.adminUnlocked = false;
+    state.deletedOrders = [];
+    state.deletedOrdersLoaded = false;
+    state.adminPinInput = '';
+    state.adminPinError = false;
+  },
+  restoreOrder: function(orderId){
+    if(state.restoringOrderId) return;
+    if(!window.confirm('Restore this order back into Order History?')) return;
+    state.restoringOrderId = orderId;
+    render();
+    var order = state.deletedOrders.filter(function(o){ return o.id===orderId; })[0];
+    if(!order){ state.restoringOrderId=null; render(); return; }
+    var restored = Object.assign({}, order);
+    delete restored.deletedAt;
+    delete restored.deletedBy;
+    adminDb.collection('pos_orders').doc(orderId).set(restored)
+      .then(function(){ return adminDb.collection('pos_deleted_orders').doc(orderId).delete(); })
+      .then(function(){
+        state.restoringOrderId = null;
+        render();
+      }).catch(function(e){
+        state.restoringOrderId = null;
+        render();
+        window.alert('Could not restore this order: '+e.message);
+      });
+  },
+
   setTab: function(t){
+    if(state.tab==='deleted' && t!=='deleted'){
+      POS.lockAdminTab();
+    }
     state.tab = t;
     if(t==='settings') state.settingsForm = JSON.parse(JSON.stringify(state.settings));
     state.editingItemId=null; state.newItemDraft=null; state.editingToppingId=null; state.newToppingDraft=null;
