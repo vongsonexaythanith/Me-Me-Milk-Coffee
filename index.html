@@ -315,6 +315,22 @@
 .legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none;}
 .chart-empty{color:var(--espresso-soft);font-size:13px;padding:24px 6px;text-align:center;}
 .currency-chart-label{font-size:12.5px;font-weight:700;color:var(--caramel-dark);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.revenue-chart-row{display:flex;gap:18px;align-items:stretch;flex-wrap:wrap;}
+.revenue-total-callout{
+  flex:none;width:168px;background:linear-gradient(160deg,var(--caramel),var(--caramel-dark));
+  border-radius:14px;padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:center;
+  box-shadow:var(--shadow);
+}
+.rtc-icon{font-size:22px;opacity:.9;margin-bottom:6px;}
+.rtc-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;opacity:.85;font-weight:700;margin-bottom:4px;}
+.rtc-value{font-size:24px;font-weight:800;font-family:'Fredoka';line-height:1.15;word-break:break-word;}
+.revenue-chart-row .chart-scroll{flex:1;min-width:0;}
+@media (max-width:560px){
+  .revenue-chart-row{flex-direction:column;}
+  .revenue-total-callout{width:100%;flex-direction:row;align-items:center;gap:12px;}
+  .rtc-icon{margin-bottom:0;}
+  .rtc-label{margin-bottom:0;}
+}
 
 /* ---------- Settings ---------- */
 .danger-zone{border-color:var(--danger-light);background:#FFFBF9;}
@@ -1265,6 +1281,11 @@ function buildRevenueChart(orders){
 }
 
 function buildRevenueChartForCurrency(orders, cur){
+  var totalForCurrency = orders.reduce(function(sum,o){
+    var amt = cur==='LAK' ? o.total : (o.displayTotal!=null ? o.displayTotal : fromLAK(o.total, cur));
+    return sum + amt;
+  }, 0);
+
   var byDate = {};
   orders.forEach(function(o){
     var k = dateKey(o.timestamp);
@@ -1319,13 +1340,21 @@ function buildRevenueChartForCurrency(orders, cur){
   }).join('');
 
   var currencyLabel = cur==='LAK' ? '₭ Lao Kip' : (cur==='USD' ? '$ US Dollar' : '฿ Thai Baht');
+  var currencyIcon = currencySymbolFor(cur);
 
   return '' +
   '<div class="currency-chart-label">'+currencyLabel+'</div>' +
   (truncated ? '<p class="hint" style="margin-top:-4px;">Showing the most recent 31 days.</p>' : '') +
-  '<div class="chart-scroll"><svg viewBox="0 0 '+W+' '+chartH+'" width="'+W+'" height="'+chartH+'" style="min-width:'+Math.min(W,760)+'px;">' +
-    gridHtml + barsHtml +
-  '</svg></div>';
+  '<div class="revenue-chart-row">' +
+    '<div class="revenue-total-callout">' +
+      '<div class="rtc-icon">'+currencyIcon+'</div>' +
+      '<div class="rtc-label">Total Revenue</div>' +
+      '<div class="rtc-value">'+formatForeignAmount(totalForCurrency, cur)+'</div>' +
+    '</div>' +
+    '<div class="chart-scroll"><svg viewBox="0 0 '+W+' '+chartH+'" width="'+W+'" height="'+chartH+'" style="min-width:'+Math.min(W,760)+'px;">' +
+      gridHtml + barsHtml +
+    '</svg></div>' +
+  '</div>';
 }
 
 /* ---- Best sellers chart ---- */
