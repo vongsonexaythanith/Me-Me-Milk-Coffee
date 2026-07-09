@@ -537,7 +537,56 @@ var TRANSLATIONS = {
     checking:'Checking…',
     incorrect_pin:'Incorrect PIN, try again',
     no_ice:'No Ice', less_ice:'Less Ice', normal_ice:'Normal', extra_ice:'Extra Ice',
-    language:'Language'
+    language:'Language',
+    choose_category:'Choose a category to start an order', all_items:'All Items',
+    remove:'Remove',
+    receipt_payment:'Payment', receipt_change:'Change', paid_in:'Paid in',
+    order_number:'Order #', new_order:'New Order', print_receipt:'Print Receipt',
+    today:'Today', last_7_days:'Last 7 Days', all_time:'All Time', custom_range:'📅 Custom',
+    export_csv:'Export CSV',
+    revenue_by_payment:'Revenue by Payment Method', revenue_by_payment_hint:'Daily revenue in the currency it was actually paid in — never converted.',
+    best_sellers:'Best Sellers', best_sellers_hint:'Most sold drinks in this range, by quantity.',
+    orders_label:'Orders', top_seller:'Top Seller', revenue_label:'Revenue',
+    no_orders_range:'No orders in this range yet.', delete_order:'Delete Order',
+    admin_area_title:'🔒 Administrator Area', admin_area_hint:'Orders deleted by a manager are archived here, not permanently erased. Only the administrator account can view or restore them.',
+    lock_tab_now:'Lock this tab now', no_deleted_orders:'No deleted orders. Anything a manager deletes will show up here.',
+    deleted_prefix:'Deleted', placed_prefix:'Placed', restore_order:'↩ Restore Order', restoring:'Restoring…',
+    administrator_only:'Administrator Only', admin_gate_hint:'This area is restricted. Enter the admin PIN to view and restore deleted orders.',
+    admin_pin_placeholder:'Admin PIN', incorrect_admin_pin:'Incorrect admin PIN',
+    manager_admin_only:'Manager / Admin Only', settings_gate_hint:'This area is restricted. Enter the manager or admin PIN to view and change settings.',
+    manager_admin_pin_placeholder:'Manager / Admin PIN', incorrect_manager_admin_pin:'Incorrect PIN',
+    manager_admin_area_title:'🔒 Manager / Admin Area', settings_restricted_hint:'Settings can only be viewed or changed with a manager or administrator PIN.',
+    shop_details:'Shop Details', shop_details_hint:'Shown on the header and printed receipts.',
+    shop_name_label:'Shop name', tagline_label:'Tagline', phone_label:'Phone', address_label:'Address',
+    currency_symbol_label:'Currency symbol', service_charge_pct_label:'Service charge %', receipt_footer_label:'Receipt footer message',
+    save_settings:'Save Settings',
+    page_appearance:'Page Appearance', page_appearance_hint:'Set background photos for the app. Each product category page can also have its own unique background — it overrides the page background only while that category is being browsed.',
+    page_bg_label:'Page background photo', header_bg_label:'Header background photo',
+    category_bg_label:'Category page backgrounds', category_bg_empty_hint:'Add drinks to your menu first to set per-category backgrounds.',
+    category_bg_row_hint:'Background for this category page',
+    currency_rates:'Currency Exchange Rates', currency_rates_hint:'All prices are stored in Kip (₭). These rates convert to USD and THB on the Order tab — update them whenever the exchange rate moves.',
+    usd_rate_label:'₭ per 1 USD', thb_rate_label:'₭ per 1 THB',
+    security_heading:'Security', security_hint:'Lock the screen when you step away from the counter — staff will need the PIN to get back in.',
+    lock_screen_now:'Lock Screen Now',
+    danger_zone:'Danger Zone', danger_zone_hint:'These actions cannot be undone.',
+    reset_menu:'Reset Menu to Default', clear_all_history:'Clear All Order History',
+    categories_pictures_title:'Categories & Pictures', categories_pictures_hint:'Rename categories or add new ones, and set the picture shown for each on the main order screen. Renaming instantly updates every drink using it, and new categories immediately appear in the drink category dropdown and on the Page Appearance section above.',
+    categories_col_heading:'Categories', category_pictures_col_heading:'Category Pictures',
+    rename:'Rename', save:'Save', cancel:'Cancel', edit:'Edit', delete:'Delete',
+    change_photo:'Change Photo', choose_photo:'Choose Photo',
+    new_category_placeholder:'New category name', add_category:'Add Category',
+    menu_items_title:'Menu Items', menu_items_hint:'Edit drinks, prices per size, categories, and Lao/Thai names.',
+    add_new_drink:'+ Add New Drink',
+    toppings_addons_title:'Toppings & Add-ons', toppings_addons_hint:'Extra charges applied on top of the drink price.',
+    add_topping_btn:'+ Add Topping',
+    name_en_label:'Name (English)', name_lo_label:'Name (Lao)', name_th_label:'Name (Thai)',
+    category_label:'Category', emoji_label:'Emoji', photo_label:'Photo',
+    small_price_label:'Small price', medium_price_label:'Medium price', large_price_label:'Large price',
+    clear_all_history_title:'Clear ALL order history?', clear_all_history_sub:'This permanently removes every saved order for every device. Enter the manager PIN to confirm.',
+    delete_order_title:'Delete this order?', delete_order_sub:'This permanently removes the order for every device. Enter the manager PIN to confirm.',
+    manager_pin_placeholder:'Manager PIN', incorrect_manager_pin:'Incorrect manager PIN',
+    sugar_word:'sugar',
+    topping_name_label:'Name', extra_price_label:'Extra price'
   },
   lo: {
     tab_order:'🧋 ສັ່ງເຄື່ອງດື່ມ', tab_menu:'📋 ເມນູ', tab_history:'🧾 ປະຫວັດ', tab_deleted:'🔒 ລຶບແລ້ວ', tab_settings:'⚙️ ຕັ້ງຄ່າ',
@@ -559,7 +608,56 @@ var TRANSLATIONS = {
     checking:'ກຳລັງກວດສອບ…',
     incorrect_pin:'ລະຫັດຜິດ, ລອງໃໝ່',
     no_ice:'ບໍ່ເອົານ້ຳກ້ອນ', less_ice:'ນ້ຳກ້ອນໜ້ອຍ', normal_ice:'ປົກກະຕິ', extra_ice:'ນ້ຳກ້ອນຫຼາຍ',
-    language:'ພາສາ'
+    language:'ພາສາ',
+    choose_category:'ເລືອກໝວດໝູ່ເພື່ອເລີ່ມສັ່ງ', all_items:'ທັງໝົດ',
+    remove:'ລຶບ',
+    receipt_payment:'ການຊຳລະ', receipt_change:'ເງິນທອນ', paid_in:'ຈ່າຍເປັນ',
+    order_number:'ອໍເດີເລກທີ #', new_order:'ອໍເດີໃໝ່', print_receipt:'ພິມໃບບິນ',
+    today:'ມື້ນີ້', last_7_days:'7 ວັນຫຼ້າສຸດ', all_time:'ທັງໝົດ', custom_range:'📅 ກຳນົດເອງ',
+    export_csv:'ສົ່ງອອກ CSV',
+    revenue_by_payment:'ລາຍຮັບຕາມວິທີຊຳລະ', revenue_by_payment_hint:'ລາຍຮັບປະຈຳວັນຕາມສະກຸນເງິນທີ່ຈ່າຍຈິງ — ບໍ່ປ່ຽນສະກຸນເງິນ.',
+    best_sellers:'ສິນຄ້າຂາຍດີ', best_sellers_hint:'ເຄື່ອງດື່ມທີ່ຂາຍໄດ້ຫຼາຍທີ່ສຸດໃນຊ່ວງນີ້.',
+    orders_label:'ອໍເດີ', top_seller:'ຂາຍດີທີ່ສຸດ', revenue_label:'ລາຍຮັບ',
+    no_orders_range:'ຍັງບໍ່ມີອໍເດີໃນຊ່ວງນີ້.', delete_order:'ລຶບອໍເດີ',
+    admin_area_title:'🔒 ພື້ນທີ່ຜູ້ດູແລລະບົບ', admin_area_hint:'ອໍເດີທີ່ຖືກລຶບໂດຍຜູ້ຈັດການຈະຖືກເກັບໄວ້ບ່ອນນີ້, ບໍ່ໄດ້ຖືກລຶບຖາວອນ. ມີແຕ່ບັນຊີຜູ້ດູແລລະບົບເທົ່ານັ້ນທີ່ສາມາດເບິ່ງ ຫຼື ກູ້ຄືນໄດ້.',
+    lock_tab_now:'ລັອກແທັບນີ້ດຽວນີ້', no_deleted_orders:'ບໍ່ມີອໍເດີທີ່ຖືກລຶບ. ອັນໃດທີ່ຜູ້ຈັດການລຶບຈະສະແດງຢູ່ນີ້.',
+    deleted_prefix:'ລຶບແລ້ວ', placed_prefix:'ສັ່ງເມື່ອ', restore_order:'↩ ກູ້ຄືນອໍເດີ', restoring:'ກຳລັງກູ້ຄືນ…',
+    administrator_only:'ສະເພາະຜູ້ດູແລລະບົບ', admin_gate_hint:'ພື້ນທີ່ນີ້ຖືກຈຳກັດ. ໃສ່ລະຫັດຜູ້ດູແລລະບົບເພື່ອເບິ່ງ ແລະ ກູ້ຄືນອໍເດີທີ່ຖືກລຶບ.',
+    admin_pin_placeholder:'ລະຫັດຜູ້ດູແລລະບົບ', incorrect_admin_pin:'ລະຫັດຜູ້ດູແລລະບົບຜິດ',
+    manager_admin_only:'ສະເພາະຜູ້ຈັດການ / ຜູ້ດູແລລະບົບ', settings_gate_hint:'ພື້ນທີ່ນີ້ຖືກຈຳກັດ. ໃສ່ລະຫັດຜູ້ຈັດການ ຫຼື ຜູ້ດູແລລະບົບເພື່ອເບິ່ງ ແລະ ປ່ຽນການຕັ້ງຄ່າ.',
+    manager_admin_pin_placeholder:'ລະຫັດຜູ້ຈັດການ / ຜູ້ດູແລລະບົບ', incorrect_manager_admin_pin:'ລະຫັດຜິດ',
+    manager_admin_area_title:'🔒 ພື້ນທີ່ຜູ້ຈັດການ / ຜູ້ດູແລລະບົບ', settings_restricted_hint:'ການຕັ້ງຄ່າສາມາດເບິ່ງ ຫຼື ປ່ຽນໄດ້ດ້ວຍລະຫັດຜູ້ຈັດການ ຫຼື ຜູ້ດູແລລະບົບເທົ່ານັ້ນ.',
+    shop_details:'ຂໍ້ມູນຮ້ານ', shop_details_hint:'ສະແດງຢູ່ສ່ວນຫົວ ແລະ ໃບບິນທີ່ພິມ.',
+    shop_name_label:'ຊື່ຮ້ານ', tagline_label:'ຄຳຂວັນ', phone_label:'ເບີໂທ', address_label:'ທີ່ຢູ່',
+    currency_symbol_label:'ສັນຍາລັກສະກຸນເງິນ', service_charge_pct_label:'ອັດຕາຄ່າບໍລິການ %', receipt_footer_label:'ຂໍ້ຄວາມທ້າຍໃບບິນ',
+    save_settings:'ບັນທຶກການຕັ້ງຄ່າ',
+    page_appearance:'ຮູບແບບໜ້າເວັບ', page_appearance_hint:'ຕັ້ງຄ່າຮູບພື້ນຫຼັງສຳລັບແອັບ. ແຕ່ລະໝວດໝູ່ສິນຄ້າກໍ່ສາມາດມີພື້ນຫຼັງສະເພາະຂອງຕົນເອງໄດ້ — ມັນຈະທັບພື້ນຫຼັງໜ້າຫຼັກສະເພາະຕອນທີ່ກຳລັງເບິ່ງໝວດໝູ່ນັ້ນ.',
+    page_bg_label:'ຮູບພື້ນຫຼັງໜ້າ', header_bg_label:'ຮູບພື້ນຫຼັງສ່ວນຫົວ',
+    category_bg_label:'ພື້ນຫຼັງໜ້າໝວດໝູ່', category_bg_empty_hint:'ເພີ່ມເຄື່ອງດື່ມໃສ່ເມນູກ່ອນເພື່ອຕັ້ງພື້ນຫຼັງແຕ່ລະໝວດໝູ່.',
+    category_bg_row_hint:'ພື້ນຫຼັງສຳລັບໝວດໝູ່ນີ້',
+    currency_rates:'ອັດຕາແລກປ່ຽນສະກຸນເງິນ', currency_rates_hint:'ລາຄາທັງໝົດຖືກເກັບເປັນເງິນກີບ (₭). ອັດຕານີ້ໃຊ້ແປງເປັນ USD ແລະ THB ຢູ່ແທັບສັ່ງເຄື່ອງດື່ມ — ອັບເດດເມື່ອອັດຕາແລກປ່ຽນປ່ຽນແປງ.',
+    usd_rate_label:'₭ ຕໍ່ 1 USD', thb_rate_label:'₭ ຕໍ່ 1 THB',
+    security_heading:'ຄວາມປອດໄພ', security_hint:'ລັອກໜ້າຈໍເມື່ອທ່ານອອກຈາກເຄົາເຕີ — ພະນັກງານຈະຕ້ອງໃສ່ລະຫັດເພື່ອກັບເຂົ້າມາ.',
+    lock_screen_now:'ລັອກໜ້າຈໍດຽວນີ້',
+    danger_zone:'ເຂດອັນຕະລາຍ', danger_zone_hint:'ການກະທຳເຫຼົ່ານີ້ບໍ່ສາມາດຍົກເລີກໄດ້.',
+    reset_menu:'ຣີເຊັດເມນູກັບຄືນຄ່າເລີ່ມຕົ້ນ', clear_all_history:'ລ້າງປະຫວັດອໍເດີທັງໝົດ',
+    categories_pictures_title:'ໝວດໝູ່ ແລະ ຮູບພາບ', categories_pictures_hint:'ປ່ຽນຊື່ໝວດໝູ່ ຫຼື ເພີ່ມອັນໃໝ່, ແລະ ຕັ້ງຮູບພາບທີ່ຈະສະແດງໃນແຕ່ລະໝວດຢູ່ໜ້າສັ່ງເຄື່ອງດື່ມຫຼັກ. ການປ່ຽນຊື່ຈະອັບເດດເຄື່ອງດື່ມທັງໝົດທີ່ໃຊ້ມັນທັນທີ, ແລະ ໝວດໝູ່ໃໝ່ຈະປາກົດໃນລາຍການເລືອກໝວດໝູ່ ແລະ ໃນສ່ວນຮູບແບບໜ້າເວັບທັນທີ.',
+    categories_col_heading:'ໝວດໝູ່', category_pictures_col_heading:'ຮູບພາບໝວດໝູ່',
+    rename:'ປ່ຽນຊື່', save:'ບັນທຶກ', cancel:'ຍົກເລີກ', edit:'ແກ້ໄຂ', delete:'ລຶບ',
+    change_photo:'ປ່ຽນຮູບ', choose_photo:'ເລືອກຮູບ',
+    new_category_placeholder:'ຊື່ໝວດໝູ່ໃໝ່', add_category:'ເພີ່ມໝວດໝູ່',
+    menu_items_title:'ລາຍການເມນູ', menu_items_hint:'ແກ້ໄຂເຄື່ອງດື່ມ, ລາຄາຕາມຂະໜາດ, ໝວດໝູ່, ແລະ ຊື່ພາສາລາວ/ໄທ.',
+    add_new_drink:'+ ເພີ່ມເຄື່ອງດື່ມໃໝ່',
+    toppings_addons_title:'ທັອບປິ້ງ ແລະ ລາຍການເສີມ', toppings_addons_hint:'ຄ່າໃຊ້ຈ່າຍເພີ່ມທີ່ບວກໃສ່ລາຄາເຄື່ອງດື່ມ.',
+    add_topping_btn:'+ ເພີ່ມທັອບປິ້ງ',
+    name_en_label:'ຊື່ (ອັງກິດ)', name_lo_label:'ຊື່ (ລາວ)', name_th_label:'ຊື່ (ໄທ)',
+    category_label:'ໝວດໝູ່', emoji_label:'ອີໂມຈິ', photo_label:'ຮູບພາບ',
+    small_price_label:'ລາຄາຂະໜາດນ້ອຍ', medium_price_label:'ລາຄາຂະໜາດກາງ', large_price_label:'ລາຄາຂະໜາດໃຫຍ່',
+    clear_all_history_title:'ລ້າງປະຫວັດອໍເດີທັງໝົດ?', clear_all_history_sub:'ນີ້ຈະລຶບອໍເດີທີ່ບັນທຶກໄວ້ທັງໝົດຖາວອນສຳລັບທຸກອຸປະກອນ. ໃສ່ລະຫັດຜູ້ຈັດການເພື່ອຢືນຢັນ.',
+    delete_order_title:'ລຶບອໍເດີນີ້?', delete_order_sub:'ນີ້ຈະລຶບອໍເດີນີ້ຖາວອນສຳລັບທຸກອຸປະກອນ. ໃສ່ລະຫັດຜູ້ຈັດການເພື່ອຢືນຢັນ.',
+    manager_pin_placeholder:'ລະຫັດຜູ້ຈັດການ', incorrect_manager_pin:'ລະຫັດຜູ້ຈັດການຜິດ',
+    sugar_word:'ນ້ຳຕານ',
+    topping_name_label:'ຊື່', extra_price_label:'ລາຄາເພີ່ມ'
   },
   th: {
     tab_order:'🧋 สั่งเครื่องดื่ม', tab_menu:'📋 เมนู', tab_history:'🧾 ประวัติ', tab_deleted:'🔒 ที่ลบแล้ว', tab_settings:'⚙️ ตั้งค่า',
@@ -581,7 +679,56 @@ var TRANSLATIONS = {
     checking:'กำลังตรวจสอบ…',
     incorrect_pin:'รหัสผิด ลองอีกครั้ง',
     no_ice:'ไม่ใส่น้ำแข็ง', less_ice:'น้ำแข็งน้อย', normal_ice:'ปกติ', extra_ice:'น้ำแข็งเยอะ',
-    language:'ภาษา'
+    language:'ภาษา',
+    choose_category:'เลือกหมวดหมู่เพื่อเริ่มสั่ง', all_items:'ทั้งหมด',
+    remove:'ลบ',
+    receipt_payment:'การชำระเงิน', receipt_change:'เงินทอน', paid_in:'ชำระเป็น',
+    order_number:'ออเดอร์ #', new_order:'ออเดอร์ใหม่', print_receipt:'พิมพ์ใบเสร็จ',
+    today:'วันนี้', last_7_days:'7 วันล่าสุด', all_time:'ทั้งหมด', custom_range:'📅 กำหนดเอง',
+    export_csv:'ส่งออก CSV',
+    revenue_by_payment:'รายได้ตามวิธีชำระเงิน', revenue_by_payment_hint:'รายได้รายวันในสกุลเงินที่ชำระจริง — ไม่มีการแปลงสกุลเงิน',
+    best_sellers:'สินค้าขายดี', best_sellers_hint:'เครื่องดื่มที่ขายดีที่สุดในช่วงนี้',
+    orders_label:'ออเดอร์', top_seller:'ขายดีที่สุด', revenue_label:'รายได้',
+    no_orders_range:'ยังไม่มีออเดอร์ในช่วงนี้', delete_order:'ลบออเดอร์',
+    admin_area_title:'🔒 พื้นที่ผู้ดูแลระบบ', admin_area_hint:'ออเดอร์ที่ถูกลบโดยผู้จัดการจะถูกเก็บไว้ที่นี่ ไม่ได้ถูกลบถาวร มีเพียงบัญชีผู้ดูแลระบบเท่านั้นที่สามารถดูหรือกู้คืนได้',
+    lock_tab_now:'ล็อกแท็บนี้ตอนนี้', no_deleted_orders:'ไม่มีออเดอร์ที่ถูกลบ รายการที่ผู้จัดการลบจะแสดงที่นี่',
+    deleted_prefix:'ลบแล้ว', placed_prefix:'สั่งเมื่อ', restore_order:'↩ กู้คืนออเดอร์', restoring:'กำลังกู้คืน…',
+    administrator_only:'เฉพาะผู้ดูแลระบบ', admin_gate_hint:'พื้นที่นี้ถูกจำกัด ป้อนรหัส PIN ผู้ดูแลระบบเพื่อดูและกู้คืนออเดอร์ที่ถูกลบ',
+    admin_pin_placeholder:'รหัส PIN ผู้ดูแลระบบ', incorrect_admin_pin:'รหัส PIN ผู้ดูแลระบบไม่ถูกต้อง',
+    manager_admin_only:'เฉพาะผู้จัดการ / ผู้ดูแลระบบ', settings_gate_hint:'พื้นที่นี้ถูกจำกัด ป้อนรหัส PIN ผู้จัดการหรือผู้ดูแลระบบเพื่อดูและเปลี่ยนการตั้งค่า',
+    manager_admin_pin_placeholder:'รหัส PIN ผู้จัดการ / ผู้ดูแลระบบ', incorrect_manager_admin_pin:'รหัส PIN ไม่ถูกต้อง',
+    manager_admin_area_title:'🔒 พื้นที่ผู้จัดการ / ผู้ดูแลระบบ', settings_restricted_hint:'การตั้งค่าสามารถดูหรือเปลี่ยนแปลงได้ด้วยรหัส PIN ผู้จัดการหรือผู้ดูแลระบบเท่านั้น',
+    shop_details:'ข้อมูลร้าน', shop_details_hint:'แสดงบนส่วนหัวและใบเสร็จที่พิมพ์',
+    shop_name_label:'ชื่อร้าน', tagline_label:'แท็กไลน์', phone_label:'เบอร์โทร', address_label:'ที่อยู่',
+    currency_symbol_label:'สัญลักษณ์สกุลเงิน', service_charge_pct_label:'อัตราค่าบริการ %', receipt_footer_label:'ข้อความท้ายใบเสร็จ',
+    save_settings:'บันทึกการตั้งค่า',
+    page_appearance:'รูปลักษณ์หน้าเว็บ', page_appearance_hint:'ตั้งค่าภาพพื้นหลังสำหรับแอป แต่ละหมวดหมู่สินค้าสามารถมีพื้นหลังเฉพาะของตัวเองได้ — จะแทนที่พื้นหลังหน้าหลักเฉพาะตอนที่กำลังดูหมวดหมู่นั้น',
+    page_bg_label:'ภาพพื้นหลังหน้า', header_bg_label:'ภาพพื้นหลังส่วนหัว',
+    category_bg_label:'พื้นหลังหน้าหมวดหมู่', category_bg_empty_hint:'เพิ่มเครื่องดื่มลงในเมนูก่อนเพื่อตั้งค่าพื้นหลังแต่ละหมวดหมู่',
+    category_bg_row_hint:'พื้นหลังสำหรับหมวดหมู่นี้',
+    currency_rates:'อัตราแลกเปลี่ยนสกุลเงิน', currency_rates_hint:'ราคาทั้งหมดถูกเก็บเป็นเงินกีบ (₭) อัตรานี้ใช้แปลงเป็น USD และ THB ในแท็บสั่งซื้อ — อัปเดตเมื่ออัตราแลกเปลี่ยนเปลี่ยนแปลง',
+    usd_rate_label:'₭ ต่อ 1 USD', thb_rate_label:'₭ ต่อ 1 THB',
+    security_heading:'ความปลอดภัย', security_hint:'ล็อกหน้าจอเมื่อคุณออกจากเคาน์เตอร์ — พนักงานจะต้องใส่รหัส PIN เพื่อกลับเข้ามา',
+    lock_screen_now:'ล็อกหน้าจอตอนนี้',
+    danger_zone:'โซนอันตราย', danger_zone_hint:'การกระทำเหล่านี้ไม่สามารถย้อนกลับได้',
+    reset_menu:'รีเซ็ตเมนูเป็นค่าเริ่มต้น', clear_all_history:'ล้างประวัติออเดอร์ทั้งหมด',
+    categories_pictures_title:'หมวดหมู่และรูปภาพ', categories_pictures_hint:'เปลี่ยนชื่อหมวดหมู่หรือเพิ่มหมวดหมู่ใหม่ และตั้งค่ารูปภาพที่จะแสดงในแต่ละหมวดบนหน้าสั่งซื้อหลัก การเปลี่ยนชื่อจะอัปเดตเครื่องดื่มทั้งหมดที่ใช้ทันที และหมวดหมู่ใหม่จะปรากฏในดรอปดาวน์และส่วนรูปลักษณ์หน้าเว็บทันที',
+    categories_col_heading:'หมวดหมู่', category_pictures_col_heading:'รูปภาพหมวดหมู่',
+    rename:'เปลี่ยนชื่อ', save:'บันทึก', cancel:'ยกเลิก', edit:'แก้ไข', delete:'ลบ',
+    change_photo:'เปลี่ยนรูป', choose_photo:'เลือกรูป',
+    new_category_placeholder:'ชื่อหมวดหมู่ใหม่', add_category:'เพิ่มหมวดหมู่',
+    menu_items_title:'รายการเมนู', menu_items_hint:'แก้ไขเครื่องดื่ม ราคาตามขนาด หมวดหมู่ และชื่อภาษาลาว/ไทย',
+    add_new_drink:'+ เพิ่มเครื่องดื่มใหม่',
+    toppings_addons_title:'ท็อปปิ้งและรายการเสริม', toppings_addons_hint:'ค่าใช้จ่ายเพิ่มเติมที่บวกกับราคาเครื่องดื่ม',
+    add_topping_btn:'+ เพิ่มท็อปปิ้ง',
+    name_en_label:'ชื่อ (อังกฤษ)', name_lo_label:'ชื่อ (ลาว)', name_th_label:'ชื่อ (ไทย)',
+    category_label:'หมวดหมู่', emoji_label:'อีโมจิ', photo_label:'รูปภาพ',
+    small_price_label:'ราคาขนาดเล็ก', medium_price_label:'ราคาขนาดกลาง', large_price_label:'ราคาขนาดใหญ่',
+    clear_all_history_title:'ล้างประวัติออเดอร์ทั้งหมด?', clear_all_history_sub:'การดำเนินการนี้จะลบออเดอร์ที่บันทึกไว้ทั้งหมดอย่างถาวรสำหรับทุกอุปกรณ์ ป้อนรหัส PIN ผู้จัดการเพื่อยืนยัน',
+    delete_order_title:'ลบออเดอร์นี้?', delete_order_sub:'การดำเนินการนี้จะลบออเดอร์นี้อย่างถาวรสำหรับทุกอุปกรณ์ ป้อนรหัส PIN ผู้จัดการเพื่อยืนยัน',
+    manager_pin_placeholder:'รหัส PIN ผู้จัดการ', incorrect_manager_pin:'รหัส PIN ผู้จัดการไม่ถูกต้อง',
+    sugar_word:'น้ำตาล',
+    topping_name_label:'ชื่อ', extra_price_label:'ราคาเพิ่ม'
   }
 };
 function tr(key){
@@ -1019,15 +1166,15 @@ function buildLoginScreen(){
 function buildManagerPinModal(){
   var p = state.managerPrompt;
   var isClearAll = p.action==='clearHistory';
-  var title = isClearAll ? 'Clear ALL order history?' : 'Delete this order?';
+  var title = isClearAll ? tr('clear_all_history_title') : tr('delete_order_title');
   var sub = isClearAll
-    ? 'This permanently removes every saved order for every device. Enter the manager PIN to confirm.'
-    : 'This permanently removes the order for every device. Enter the manager PIN to confirm.';
+    ? tr('clear_all_history_sub')
+    : tr('delete_order_sub');
   var dots = '';
   for(var i=0;i<state.managerPinInput.length;i++){
     dots += '<span class="pin-dot filled'+(state.managerPinError?' error':'')+'"></span>';
   }
-  if(!dots) dots = '<span class="pin-dots-empty">Manager PIN</span>';
+  if(!dots) dots = '<span class="pin-dots-empty">'+tr('manager_pin_placeholder')+'</span>';
   var disabled = state.managerPinChecking;
   var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
   var keypadHtml = keys.map(function(k){
@@ -1040,9 +1187,9 @@ function buildManagerPinModal(){
     '<div class="pos-modal" style="max-width:320px;text-align:center;">' +
       '<button class="modal-close-x" '+(disabled?'disabled':'')+' onclick="POS.cancelManagerPrompt()">✕</button>' +
       '<h2 style="font-size:17px;">🔒 '+escapeHtml(title)+'</h2>' +
-      '<p style="font-size:12.5px;color:var(--espresso-soft);margin:4px 0 16px;">'+escapeHtml(state.managerPinChecking?'Checking…':sub)+'</p>' +
+      '<p style="font-size:12.5px;color:var(--espresso-soft);margin:4px 0 16px;">'+escapeHtml(state.managerPinChecking?tr('checking'):sub)+'</p>' +
       '<div class="pin-dots">'+dots+'</div>' +
-      '<div class="pin-error-msg">'+(state.managerPinError?'Incorrect manager PIN':'&nbsp;')+'</div>' +
+      '<div class="pin-error-msg">'+(state.managerPinError?tr('incorrect_manager_pin'):'&nbsp;')+'</div>' +
       '<div class="pin-keypad">'+keypadHtml+'</div>' +
     '</div>' +
   '</div>';
@@ -1131,21 +1278,21 @@ function buildCategoryPicker(){
     return '<button class="cat-card" style="--accent:'+accent+'" onclick="POS.selectCategory(\''+cat.replace(/'/g,"\\'")+'\')">' +
       visual +
       '<p class="cat-card-name">'+escapeHtml(cat)+'</p>' +
-      '<p class="cat-card-count">'+byCat[cat].length+' item(s)</p>' +
+      '<p class="cat-card-count">'+byCat[cat].length+' '+tr('items_suffix')+'</p>' +
     '</button>';
   }).join('');
 
   var allCard = '' +
     '<button class="cat-card cat-card-all" onclick="POS.selectCategory(\'All\')">' +
       '<div class="cat-card-photo cat-card-photo-emoji" style="--accent:var(--caramel);"><span class="emoji">🧋</span></div>' +
-      '<p class="cat-card-name">All Items</p>' +
-      '<p class="cat-card-count">'+state.menu.filter(function(m){return m.active!==false;}).length+' item(s)</p>' +
+      '<p class="cat-card-name">'+tr('all_items')+'</p>' +
+      '<p class="cat-card-count">'+state.menu.filter(function(m){return m.active!==false;}).length+' '+tr('items_suffix')+'</p>' +
     '</button>';
 
   return '' +
   '<div class="cat-picker">' +
     '<h2 class="cat-picker-title">'+escapeHtml(state.settings.shopName||'')+'</h2>' +
-    '<p class="cat-picker-sub">Choose a category to start an order</p>' +
+    '<p class="cat-picker-sub">'+tr('choose_category')+'</p>' +
     '<div class="cat-grid">' + allCard + cardsHtml + '</div>' +
   '</div>';
 }
@@ -1219,7 +1366,7 @@ function buildCartPanel(){
     linesHtml = '<div class="cart-empty">'+tr('cart_empty')+'</div>';
   } else {
     linesHtml = state.cart.map(function(l, idx){
-      var meta = l.size + ' · ' + l.sugar + '% sugar · ' + iceLabel(l.ice);
+      var meta = l.size + ' · ' + l.sugar + '% ' + tr('sugar_word') + ' · ' + iceLabel(l.ice);
       if(l.toppings.length) meta += ' · ' + l.toppings.map(function(t){return t.name;}).join(', ');
       return '' +
       '<div class="cart-line">' +
@@ -1231,7 +1378,7 @@ function buildCartPanel(){
           '<button onclick="POS.cartQty('+idx+',-1)">−</button>' +
           '<span class="qv">'+l.qty+'</span>' +
           '<button onclick="POS.cartQty('+idx+',1)">+</button>' +
-          '<button class="remove-line" onclick="POS.removeCartLine('+idx+')">Remove</button>' +
+          '<button class="remove-line" onclick="POS.removeCartLine('+idx+')">'+tr('remove')+'</button>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -1321,11 +1468,17 @@ function buildItemModal(){
 }
 
 /* ---- Receipt ---- */
+function paymentMethodLabel(pm){
+  if(pm==='cash') return tr('cash');
+  if(pm==='transfer') return tr('transfer');
+  if(pm==='qr') return tr('qr_pay');
+  return pm;
+}
 function buildReceiptModal(){
   var o = state.receiptOrder;
   var s = state.settings;
   var itemsHtml = o.items.map(function(l){
-    var meta = l.size+' · '+l.sugar+'% sugar · '+iceLabel(l.ice) + (l.toppings.length? ' · '+l.toppings.map(function(t){return t.name;}).join(', ') : '');
+    var meta = l.size+' · '+l.sugar+'% '+tr('sugar_word')+' · '+iceLabel(l.ice) + (l.toppings.length? ' · '+l.toppings.map(function(t){return t.name;}).join(', ') : '');
     return '<div class="r-item"><div><div class="r-name">'+l.qty+'x '+escapeHtml(l.name)+'</div><div class="r-sub-line">'+escapeHtml(meta)+'</div></div><div>'+formatMoney(l.unitPrice*l.qty)+'</div></div>';
   }).join('');
   var d = new Date(o.timestamp);
@@ -1334,12 +1487,12 @@ function buildReceiptModal(){
   if(o.paymentMethod==='cash'){
     if(isForeign){
       cashRowsHtml = '' +
-      '<div class="r-row"><span>'+escapeHtml(o.currency)+' received</span><span>'+formatForeignAmount(o.displayReceived, o.currency)+'</span></div>' +
-      '<div class="r-row"><span>Change ('+escapeHtml(o.currency)+')</span><span>'+formatForeignAmount(o.displayChange, o.currency)+'</span></div>';
+      '<div class="r-row"><span>'+escapeHtml(o.currency)+' '+tr('cash_received')+'</span><span>'+formatForeignAmount(o.displayReceived, o.currency)+'</span></div>' +
+      '<div class="r-row"><span>'+tr('receipt_change')+' ('+escapeHtml(o.currency)+')</span><span>'+formatForeignAmount(o.displayChange, o.currency)+'</span></div>';
     } else {
       cashRowsHtml = '' +
-      '<div class="r-row"><span>Cash received</span><span>'+formatMoney(o.amountReceived)+'</span></div>' +
-      '<div class="r-row"><span>Change</span><span>'+formatMoney(o.change)+'</span></div>';
+      '<div class="r-row"><span>'+tr('cash_received')+'</span><span>'+formatMoney(o.amountReceived)+'</span></div>' +
+      '<div class="r-row"><span>'+tr('receipt_change')+'</span><span>'+formatMoney(o.change)+'</span></div>';
     }
   }
   return '' +
@@ -1350,22 +1503,22 @@ function buildReceiptModal(){
         '<div class="r-title">'+escapeHtml(s.shopName)+'</div>' +
         (s.address ? '<div class="r-sub">'+escapeHtml(s.address)+'</div>' : '') +
         (s.phone ? '<div class="r-sub">'+escapeHtml(s.phone)+'</div>' : '') +
-        '<div class="r-meta">Order #'+String(o.number).padStart(4,'0')+' · '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+'</div>' +
+        '<div class="r-meta">'+tr('order_number')+String(o.number).padStart(4,'0')+' · '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+'</div>' +
         '<div class="r-divider"></div>' +
         itemsHtml +
         '<div class="r-divider"></div>' +
-        '<div class="r-row"><span>Subtotal</span><span>'+formatMoney(o.subtotal)+'</span></div>' +
-        (o.discount>0 ? '<div class="r-row"><span>Discount</span><span>-'+formatMoney(o.discount)+'</span></div>' : '') +
-        (o.serviceCharge>0 ? '<div class="r-row"><span>Service charge</span><span>'+formatMoney(o.serviceCharge)+'</span></div>' : '') +
-        '<div class="r-row big"><span>Total</span><span>'+formatMoney(o.total)+'</span></div>' +
-        (isForeign ? '<div class="r-row big" style="color:var(--taro);"><span>Paid in '+escapeHtml(o.currency)+'</span><span>'+formatForeignAmount(o.displayTotal, o.currency)+'</span></div>' : '') +
-        '<div class="r-row"><span>Payment</span><span>'+escapeHtml(o.paymentMethod)+'</span></div>' +
+        '<div class="r-row"><span>'+tr('subtotal')+'</span><span>'+formatMoney(o.subtotal)+'</span></div>' +
+        (o.discount>0 ? '<div class="r-row"><span>'+tr('discount')+'</span><span>-'+formatMoney(o.discount)+'</span></div>' : '') +
+        (o.serviceCharge>0 ? '<div class="r-row"><span>'+tr('service_charge')+'</span><span>'+formatMoney(o.serviceCharge)+'</span></div>' : '') +
+        '<div class="r-row big"><span>'+tr('total')+'</span><span>'+formatMoney(o.total)+'</span></div>' +
+        (isForeign ? '<div class="r-row big" style="color:var(--taro);"><span>'+tr('paid_in')+' '+escapeHtml(o.currency)+'</span><span>'+formatForeignAmount(o.displayTotal, o.currency)+'</span></div>' : '') +
+        '<div class="r-row"><span>'+tr('receipt_payment')+'</span><span>'+escapeHtml(paymentMethodLabel(o.paymentMethod))+'</span></div>' +
         cashRowsHtml +
         '<div class="r-footer">'+escapeHtml(s.footerMessage)+'</div>' +
       '</div>' +
       '<div class="receipt-actions">' +
-        '<button class="btn btn-ghost" onclick="POS.closeReceipt()">New Order</button>' +
-        '<button class="btn btn-primary" onclick="window.print()">Print Receipt</button>' +
+        '<button class="btn btn-ghost" onclick="POS.closeReceipt()">'+tr('new_order')+'</button>' +
+        '<button class="btn btn-primary" onclick="window.print()">'+tr('print_receipt')+'</button>' +
       '</div>' +
     '</div>' +
   '</div>';
@@ -1389,15 +1542,15 @@ function buildMenuTab(){
         thumb +
         '<div class="info"><div class="t1">'+escapeHtml(m.name)+'</div>'+translationLine+'<div class="t2">'+priceStr+'</div></div>' +
         '<div class="acts">' +
-          '<button class="btn btn-outline btn-small" onclick="POS.editItem(\''+m.id+'\')">Edit</button>' +
-          '<button class="btn btn-danger btn-small" onclick="POS.deleteItem(\''+m.id+'\')">Delete</button>' +
+          '<button class="btn btn-outline btn-small" onclick="POS.editItem(\''+m.id+'\')">'+tr('edit')+'</button>' +
+          '<button class="btn btn-danger btn-small" onclick="POS.deleteItem(\''+m.id+'\')">'+tr('delete')+'</button>' +
         '</div>' +
       '</div>';
     }).join('');
     return '<div class="cat-heading">'+escapeHtml(cat)+'</div>'+rows;
   }).join('');
 
-  var newItemForm = state.newItemDraft ? buildItemEditForm(null) : '<button class="btn btn-outline" onclick="POS.startNewItem()">+ Add New Drink</button>';
+  var newItemForm = state.newItemDraft ? buildItemEditForm(null) : '<button class="btn btn-outline" onclick="POS.startNewItem()">'+tr('add_new_drink')+'</button>';
 
   var toppingsHtml = state.toppings.map(function(t){
     if(state.editingToppingId===t.id) return buildToppingEditForm(t);
@@ -1406,12 +1559,12 @@ function buildMenuTab(){
       '<span class="em">🧊</span>' +
       '<div class="info"><div class="t1">'+escapeHtml(t.name)+'</div><div class="t2">+'+formatMoney(t.price)+'</div></div>' +
       '<div class="acts">' +
-        '<button class="btn btn-outline btn-small" onclick="POS.editTopping(\''+t.id+'\')">Edit</button>' +
-        '<button class="btn btn-danger btn-small" onclick="POS.deleteTopping(\''+t.id+'\')">Delete</button>' +
+        '<button class="btn btn-outline btn-small" onclick="POS.editTopping(\''+t.id+'\')">'+tr('edit')+'</button>' +
+        '<button class="btn btn-danger btn-small" onclick="POS.deleteTopping(\''+t.id+'\')">'+tr('delete')+'</button>' +
       '</div>' +
     '</div>';
   }).join('');
-  var newToppingForm = state.newToppingDraft ? buildToppingEditForm(null) : '<button class="btn btn-outline" onclick="POS.startNewTopping()">+ Add Topping</button>';
+  var newToppingForm = state.newToppingDraft ? buildToppingEditForm(null) : '<button class="btn btn-outline" onclick="POS.startNewTopping()">'+tr('add_topping_btn')+'</button>';
 
   var allCategories = getAllCategories();
   var categoriesHtml = allCategories.map(function(cat){
@@ -1421,23 +1574,23 @@ function buildMenuTab(){
       '<div class="mgmt-row">' +
         '<input type="text" style="flex:1;min-width:0;" id="pos-cat-rename-input" value="'+escapeHtml(state.categoryRenameValue)+'" oninput="POS.updateCategoryRenameValue(this.value)"/>' +
         '<div class="acts">' +
-          '<button class="btn btn-primary btn-small" onclick="POS.saveCategoryRename()">Save</button>' +
-          '<button class="btn btn-ghost btn-small" onclick="POS.cancelCategoryRename()">Cancel</button>' +
+          '<button class="btn btn-primary btn-small" onclick="POS.saveCategoryRename()">'+tr('save')+'</button>' +
+          '<button class="btn btn-ghost btn-small" onclick="POS.cancelCategoryRename()">'+tr('cancel')+'</button>' +
         '</div>' +
       '</div>';
     }
     return '' +
     '<div class="mgmt-row">' +
-      '<div class="info"><div class="t1">'+escapeHtml(cat)+'</div><div class="t2">'+count+' item(s)</div></div>' +
+      '<div class="info"><div class="t1">'+escapeHtml(cat)+'</div><div class="t2">'+count+' '+tr('items_suffix')+'</div></div>' +
       '<div class="acts">' +
-        '<button class="btn btn-outline btn-small" onclick="POS.startRenameCategory(\''+cat.replace(/'/g,"\\'")+'\')">Rename</button>' +
+        '<button class="btn btn-outline btn-small" onclick="POS.startRenameCategory(\''+cat.replace(/'/g,"\\'")+'\')">'+tr('rename')+'</button>' +
       '</div>' +
     '</div>';
   }).join('');
   var addCategoryHtml = '' +
     '<div class="mgmt-row">' +
-      '<input type="text" style="flex:1;min-width:0;" id="pos-new-cat" placeholder="New category name" value="'+escapeHtml(state.newCategoryName)+'" oninput="POS.updateNewCategoryName(this.value)"/>' +
-      '<div class="acts"><button class="btn btn-primary btn-small" onclick="POS.addCategory()">Add Category</button></div>' +
+      '<input type="text" style="flex:1;min-width:0;" id="pos-new-cat" placeholder="'+tr('new_category_placeholder')+'" value="'+escapeHtml(state.newCategoryName)+'" oninput="POS.updateNewCategoryName(this.value)"/>' +
+      '<div class="acts"><button class="btn btn-primary btn-small" onclick="POS.addCategory()">'+tr('add_category')+'</button></div>' +
     '</div>';
 
   var categoryPhotos = state.settings.categoryPhotos || {};
@@ -1450,29 +1603,29 @@ function buildMenuTab(){
     return '' +
     '<div class="mgmt-row">' +
       preview +
-      '<div class="info"><div class="t1">'+escapeHtml(cat)+'</div><div class="t2">'+itemsInCat.length+' item(s)</div></div>' +
+      '<div class="info"><div class="t1">'+escapeHtml(cat)+'</div><div class="t2">'+itemsInCat.length+' '+tr('items_suffix')+'</div></div>' +
       '<div class="acts">' +
-        '<label class="btn btn-outline btn-small">Change Photo<input type="file" accept="image/*" style="display:none" onchange="POS.handleCategoryPhotoInput(\''+cat.replace(/'/g,"\\'")+'\',this)"/></label>' +
-        (photo ? '<button class="btn btn-ghost btn-small" onclick="POS.removeCategoryPhoto(\''+cat.replace(/'/g,"\\'")+'\')">Remove</button>' : '') +
+        '<label class="btn btn-outline btn-small">'+tr('change_photo')+'<input type="file" accept="image/*" style="display:none" onchange="POS.handleCategoryPhotoInput(\''+cat.replace(/'/g,"\\'")+'\',this)"/></label>' +
+        (photo ? '<button class="btn btn-ghost btn-small" onclick="POS.removeCategoryPhoto(\''+cat.replace(/'/g,"\\'")+'\')">'+tr('remove')+'</button>' : '') +
       '</div>' +
     '</div>';
   }).join('');
 
   return '' +
   '<div class="section-card">' +
-    '<h2>Categories & Pictures</h2><p class="hint">Rename categories or add new ones, and set the picture shown for each on the main order screen. Renaming instantly updates every drink using it, and new categories immediately appear in the drink category dropdown and on the Page Appearance section above.</p>' +
+    '<h2>'+tr('categories_pictures_title')+'</h2><p class="hint">'+tr('categories_pictures_hint')+'</p>' +
     '<div class="settings-cols">' +
-      '<div><h3 class="col-heading">Categories</h3>' + categoriesHtml + addCategoryHtml + '</div>' +
-      '<div><h3 class="col-heading">Category Pictures</h3>' + categoryPicsHtml + '</div>' +
+      '<div><h3 class="col-heading">'+tr('categories_col_heading')+'</h3>' + categoriesHtml + addCategoryHtml + '</div>' +
+      '<div><h3 class="col-heading">'+tr('category_pictures_col_heading')+'</h3>' + categoryPicsHtml + '</div>' +
     '</div>' +
   '</div>' +
   '<div class="section-card">' +
-    '<h2>Menu Items</h2><p class="hint">Edit drinks, prices per size, categories, and Lao/Thai names.</p>' +
+    '<h2>'+tr('menu_items_title')+'</h2><p class="hint">'+tr('menu_items_hint')+'</p>' +
     itemsHtml +
     '<div style="margin-top:12px;">'+newItemForm+'</div>' +
   '</div>' +
   '<div class="section-card">' +
-    '<h2>Toppings & Add-ons</h2><p class="hint">Extra charges applied on top of the drink price.</p>' +
+    '<h2>'+tr('toppings_addons_title')+'</h2><p class="hint">'+tr('toppings_addons_hint')+'</p>' +
     toppingsHtml +
     '<div style="margin-top:12px;">'+newToppingForm+'</div>' +
   '</div>';
@@ -1491,32 +1644,32 @@ function buildItemEditForm(m){
   return '' +
   '<div class="section-card" style="background:var(--cream-dark);box-shadow:none;">' +
     '<div class="field-grid">' +
-      '<div class="field"><label>Name (English)</label><input id="pos-item-name" type="text" value="'+escapeHtml(d.name)+'" oninput="POS.updateDraft('+idArg+',\'name\',this.value)"/></div>' +
-      '<div class="field"><label>Name (Lao)</label><input id="pos-item-name-lo" type="text" value="'+escapeHtml(d.nameLo||'')+'" placeholder="ຊື່ພາສາລາວ" oninput="POS.updateDraft('+idArg+',\'nameLo\',this.value)"/></div>' +
-      '<div class="field"><label>Name (Thai)</label><input id="pos-item-name-th" type="text" value="'+escapeHtml(d.nameTh||'')+'" placeholder="ชื่อภาษาไทย" oninput="POS.updateDraft('+idArg+',\'nameTh\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('name_en_label')+'</label><input id="pos-item-name" type="text" value="'+escapeHtml(d.name)+'" oninput="POS.updateDraft('+idArg+',\'name\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('name_lo_label')+'</label><input id="pos-item-name-lo" type="text" value="'+escapeHtml(d.nameLo||'')+'" placeholder="ຊື່ພາສາລາວ" oninput="POS.updateDraft('+idArg+',\'nameLo\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('name_th_label')+'</label><input id="pos-item-name-th" type="text" value="'+escapeHtml(d.nameTh||'')+'" placeholder="ชื่อภาษาไทย" oninput="POS.updateDraft('+idArg+',\'nameTh\',this.value)"/></div>' +
     '</div>' +
     '<div class="field-grid">' +
-      '<div class="field"><label>Category</label><select id="pos-item-cat" onchange="POS.updateDraft('+idArg+',\'category\',this.value)">'+catOptionsHtml+'</select></div>' +
-      '<div class="field"><label>Emoji</label><input id="pos-item-emoji" type="text" value="'+escapeHtml(d.emoji)+'" oninput="POS.updateDraft('+idArg+',\'emoji\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('category_label')+'</label><select id="pos-item-cat" onchange="POS.updateDraft('+idArg+',\'category\',this.value)">'+catOptionsHtml+'</select></div>' +
+      '<div class="field"><label>'+tr('emoji_label')+'</label><input id="pos-item-emoji" type="text" value="'+escapeHtml(d.emoji)+'" oninput="POS.updateDraft('+idArg+',\'emoji\',this.value)"/></div>' +
     '</div>' +
     '<div class="field" style="margin-bottom:12px;">' +
-      '<label>Photo</label>' +
+      '<label>'+tr('photo_label')+'</label>' +
       '<div class="photo-upload-row">' +
         photoPreview +
         '<div class="photo-upload-actions">' +
-          '<label class="btn btn-outline btn-small">Choose Photo<input type="file" accept="image/*" style="display:none" onchange="POS.handlePhotoInput('+idArg+',this)"/></label>' +
-          (d.photo ? '<button class="btn btn-ghost btn-small" onclick="POS.removePhoto('+idArg+')">Remove</button>' : '') +
+          '<label class="btn btn-outline btn-small">'+tr('choose_photo')+'<input type="file" accept="image/*" style="display:none" onchange="POS.handlePhotoInput('+idArg+',this)"/></label>' +
+          (d.photo ? '<button class="btn btn-ghost btn-small" onclick="POS.removePhoto('+idArg+')">'+tr('remove')+'</button>' : '') +
         '</div>' +
       '</div>' +
     '</div>' +
     '<div class="field-grid">' +
-      '<div class="field"><label>Small price</label><input id="pos-item-s" type="text" inputmode="numeric" value="'+(d.prices.S||'')+'" oninput="POS.updateDraftPrice('+idArg+',\'S\',this.value)"/></div>' +
-      '<div class="field"><label>Medium price</label><input id="pos-item-m" type="text" inputmode="numeric" value="'+(d.prices.M||'')+'" oninput="POS.updateDraftPrice('+idArg+',\'M\',this.value)"/></div>' +
-      '<div class="field"><label>Large price</label><input id="pos-item-l" type="text" inputmode="numeric" value="'+(d.prices.L||'')+'" oninput="POS.updateDraftPrice('+idArg+',\'L\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('small_price_label')+'</label><input id="pos-item-s" type="text" inputmode="numeric" value="'+(d.prices.S||'')+'" oninput="POS.updateDraftPrice('+idArg+',\'S\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('medium_price_label')+'</label><input id="pos-item-m" type="text" inputmode="numeric" value="'+(d.prices.M||'')+'" oninput="POS.updateDraftPrice('+idArg+',\'M\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('large_price_label')+'</label><input id="pos-item-l" type="text" inputmode="numeric" value="'+(d.prices.L||'')+'" oninput="POS.updateDraftPrice('+idArg+',\'L\',this.value)"/></div>' +
     '</div>' +
     '<div style="display:flex;gap:8px;">' +
-      '<button class="btn btn-primary" style="width:auto;margin-top:0;" onclick="POS.saveItem('+idArg+')">Save</button>' +
-      '<button class="btn btn-ghost" onclick="POS.cancelItemEdit()">Cancel</button>' +
+      '<button class="btn btn-primary" style="width:auto;margin-top:0;" onclick="POS.saveItem('+idArg+')">'+tr('save')+'</button>' +
+      '<button class="btn btn-ghost" onclick="POS.cancelItemEdit()">'+tr('cancel')+'</button>' +
     '</div>' +
   '</div>';
 }
@@ -1527,12 +1680,12 @@ function buildToppingEditForm(t){
   return '' +
   '<div class="section-card" style="background:var(--cream-dark);box-shadow:none;">' +
     '<div class="field-grid">' +
-      '<div class="field"><label>Name</label><input id="pos-top-name" type="text" value="'+escapeHtml(d.name)+'" oninput="POS.updateToppingDraft('+(isNew?'null':'\''+t.id+'\'')+',\'name\',this.value)"/></div>' +
-      '<div class="field"><label>Extra price</label><input id="pos-top-price" type="text" inputmode="numeric" value="'+(d.price||'')+'" oninput="POS.updateToppingDraft('+(isNew?'null':'\''+t.id+'\'')+',\'price\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('topping_name_label')+'</label><input id="pos-top-name" type="text" value="'+escapeHtml(d.name)+'" oninput="POS.updateToppingDraft('+(isNew?'null':'\''+t.id+'\'')+',\'name\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('extra_price_label')+'</label><input id="pos-top-price" type="text" inputmode="numeric" value="'+(d.price||'')+'" oninput="POS.updateToppingDraft('+(isNew?'null':'\''+t.id+'\'')+',\'price\',this.value)"/></div>' +
     '</div>' +
     '<div style="display:flex;gap:8px;">' +
-      '<button class="btn btn-primary" style="width:auto;margin-top:0;" onclick="POS.saveTopping('+(isNew?'null':'\''+t.id+'\'')+')">Save</button>' +
-      '<button class="btn btn-ghost" onclick="POS.cancelToppingEdit()">Cancel</button>' +
+      '<button class="btn btn-primary" style="width:auto;margin-top:0;" onclick="POS.saveTopping('+(isNew?'null':'\''+t.id+'\'')+')">'+tr('save')+'</button>' +
+      '<button class="btn btn-ghost" onclick="POS.cancelToppingEdit()">'+tr('cancel')+'</button>' +
     '</div>' +
   '</div>';
 }
@@ -1576,7 +1729,7 @@ function buildHistoryTab(){
   filtered.forEach(function(o){ o.items.forEach(function(l){ tally[l.name]=(tally[l.name]||0)+l.qty; }); });
   var topItem = Object.keys(tally).sort(function(a,b){return tally[b]-tally[a];})[0] || '—';
 
-  var rangeChips = [['today','Today'],['week','Last 7 Days'],['all','All Time'],['custom','📅 Custom']].map(function(r){
+  var rangeChips = [['today',tr('today')],['week',tr('last_7_days')],['all',tr('all_time')],['custom',tr('custom_range')]].map(function(r){
     return '<button class="chip '+(state.historyRange===r[0]?'active':'')+'" onclick="POS.setHistoryRange(\''+r[0]+'\')">'+r[1]+'</button>';
   }).join('');
 
@@ -1602,27 +1755,27 @@ function buildHistoryTab(){
     return '<div class="day-group"><div class="day-header"><span>'+prettyDate(k)+'</span><span>'+dayTotalsByCurrency(dayOrders)+'</span></div>'+rows+'</div>';
   }).join('');
 
-  if(!groupKeys.length) groupsHtml = '<div class="empty-note">No orders in this range yet.</div>';
+  if(!groupKeys.length) groupsHtml = '<div class="empty-note">'+tr('no_orders_range')+'</div>';
 
   var revenueCardsHtml = presentCurrencies.map(function(cur){
-    var label = presentCurrencies.length>1 ? 'Revenue ('+cur+')' : 'Revenue';
+    var label = presentCurrencies.length>1 ? (tr('revenue_label')+' ('+cur+')') : tr('revenue_label');
     return '<div class="stat-card"><div class="label">'+label+'</div><div class="value">'+formatForeignAmount(revenueByCurrency[cur]||0, cur)+'</div></div>';
   }).join('');
 
   return '' +
   '<div class="stat-grid">' +
     revenueCardsHtml +
-    '<div class="stat-card"><div class="label">Orders</div><div class="value">'+count+'</div></div>' +
-    '<div class="stat-card"><div class="label">Top Seller</div><div class="value" style="font-size:15px;">'+escapeHtml(topItem)+'</div></div>' +
+    '<div class="stat-card"><div class="label">'+tr('orders_label')+'</div><div class="value">'+count+'</div></div>' +
+    '<div class="stat-card"><div class="label">'+tr('top_seller')+'</div><div class="value" style="font-size:15px;">'+escapeHtml(topItem)+'</div></div>' +
   '</div>' +
-  '<div class="range-chips">'+rangeChips+'<button class="btn btn-outline btn-small" style="margin-left:auto;" onclick="POS.exportCsv()">Export CSV</button></div>' +
+  '<div class="range-chips">'+rangeChips+'<button class="btn btn-outline btn-small" style="margin-left:auto;" onclick="POS.exportCsv()">'+tr('export_csv')+'</button></div>' +
   customPickerHtml +
   '<div class="section-card">' +
-    '<h2>Revenue by Payment Method</h2><p class="hint">Daily revenue in the currency it was actually paid in — never converted.</p>' +
+    '<h2>'+tr('revenue_by_payment')+'</h2><p class="hint">'+tr('revenue_by_payment_hint')+'</p>' +
     buildRevenueChart(filtered) +
   '</div>' +
   '<div class="section-card">' +
-    '<h2>Best Sellers</h2><p class="hint">Most sold drinks in this range, by quantity.</p>' +
+    '<h2>'+tr('best_sellers')+'</h2><p class="hint">'+tr('best_sellers_hint')+'</p>' +
     buildTopItemsChart(filtered) +
   '</div>' +
   groupsHtml;
@@ -1641,7 +1794,7 @@ function formatMoneyShort(n){
 }
 function buildRevenueChart(orders){
   if(!orders.length){
-    return '<div class="chart-empty">No orders in this range yet.</div>';
+    return '<div class="chart-empty">'+tr('no_orders_range')+'</div>';
   }
   var byCurrency = {};
   orders.forEach(function(o){
@@ -1657,9 +1810,9 @@ function buildRevenueChart(orders){
 
   return sectionsHtml +
   '<div class="chart-legend">' +
-    '<span class="legend-item"><span class="legend-dot" style="background:var(--caramel)"></span>Cash</span>' +
-    '<span class="legend-item"><span class="legend-dot" style="background:var(--taro)"></span>Transfer</span>' +
-    '<span class="legend-item"><span class="legend-dot" style="background:var(--matcha)"></span>QR Pay</span>' +
+    '<span class="legend-item"><span class="legend-dot" style="background:var(--caramel)"></span>'+tr('cash')+'</span>' +
+    '<span class="legend-item"><span class="legend-dot" style="background:var(--taro)"></span>'+tr('transfer')+'</span>' +
+    '<span class="legend-item"><span class="legend-dot" style="background:var(--matcha)"></span>'+tr('qr_pay')+'</span>' +
   '</div>';
 }
 
@@ -1743,7 +1896,7 @@ function buildRevenueChartForCurrency(orders, cur){
 /* ---- Best sellers chart ---- */
 function buildTopItemsChart(orders){
   if(!orders.length){
-    return '<div class="chart-empty">No orders in this range yet.</div>';
+    return '<div class="chart-empty">'+tr('no_orders_range')+'</div>';
   }
   var tally = {};
   orders.forEach(function(o){
@@ -1848,14 +2001,14 @@ function buildOrderRow(o){
     detail = '' +
     '<div class="order-detail">' +
       lines +
-      '<div class="di"><span>Payment</span><span>'+escapeHtml(o.paymentMethod)+(cur!=='LAK'?' ('+cur+')':'')+'</span></div>' +
-      '<div class="dactions"><button class="btn btn-danger btn-small" onclick="POS.deleteOrder(\''+o.id+'\')">Delete Order</button></div>' +
+      '<div class="di"><span>'+tr('receipt_payment')+'</span><span>'+escapeHtml(paymentMethodLabel(o.paymentMethod))+(cur!=='LAK'?' ('+cur+')':'')+'</span></div>' +
+      '<div class="dactions"><button class="btn btn-danger btn-small" onclick="POS.deleteOrder(\''+o.id+'\')">'+tr('delete_order')+'</button></div>' +
     '</div>';
   }
   return '' +
   '<div class="order-row">' +
     '<div class="order-row-top" onclick="POS.toggleOrder(\''+o.id+'\')">' +
-      '<div><div class="onum">Order #'+String(o.number).padStart(4,'0')+'</div><div class="otime">'+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+'</div></div>' +
+      '<div><div class="onum">'+tr('order_number')+String(o.number).padStart(4,'0')+'</div><div class="otime">'+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+'</div></div>' +
       '<div class="ototal">'+orderPaidDisplay(o)+'</div>' +
     '</div>' +
     detail +
@@ -1873,13 +2026,13 @@ function buildDeletedOrdersTab(){
   }
   var html = '' +
   '<div class="section-card" style="background:var(--taro-light);border-color:var(--taro);">' +
-    '<h2 style="color:var(--taro);">🔒 Administrator Area</h2>' +
-    '<p class="hint">Orders deleted by a manager are archived here, not permanently erased. Only the administrator account can view or restore them.</p>' +
-    '<button class="btn btn-ghost btn-small" onclick="POS.lockAdminTab(); POS.setTab(\'deleted\')">Lock this tab now</button>' +
+    '<h2 style="color:var(--taro);">'+tr('admin_area_title')+'</h2>' +
+    '<p class="hint">'+tr('admin_area_hint')+'</p>' +
+    '<button class="btn btn-ghost btn-small" onclick="POS.lockAdminTab(); POS.setTab(\'deleted\')">'+tr('lock_tab_now')+'</button>' +
   '</div>';
 
   if(!state.deletedOrders.length){
-    html += '<div class="empty-note">No deleted orders. Anything a manager deletes will show up here.</div>';
+    html += '<div class="empty-note">'+tr('no_deleted_orders')+'</div>';
     return html;
   }
 
@@ -1892,7 +2045,7 @@ function buildDeletedOrdersTab(){
 
   html += groupKeys.map(function(k){
     var rows = groups[k].map(function(o){ return buildDeletedOrderRow(o); }).join('');
-    return '<div class="day-group"><div class="day-header"><span>Deleted '+prettyDate(k)+'</span></div>'+rows+'</div>';
+    return '<div class="day-group"><div class="day-header"><span>'+tr('deleted_prefix')+' '+prettyDate(k)+'</span></div>'+rows+'</div>';
   }).join('');
 
   return html;
@@ -1906,16 +2059,16 @@ function buildDeletedOrderRow(o){
   return '' +
   '<div class="order-row deleted-order-row">' +
     '<div class="order-row-top">' +
-      '<div><div class="onum">Order #'+String(o.number).padStart(4,'0')+'</div>' +
-        '<div class="otime">Placed '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+'</div>' +
-        (delD ? '<div class="otime">Deleted '+delD.toLocaleDateString('en-GB')+' '+delD.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+'</div>' : '') +
+      '<div><div class="onum">'+tr('order_number')+String(o.number).padStart(4,'0')+'</div>' +
+        '<div class="otime">'+tr('placed_prefix')+' '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+'</div>' +
+        (delD ? '<div class="otime">'+tr('deleted_prefix')+' '+delD.toLocaleDateString('en-GB')+' '+delD.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+'</div>' : '') +
       '</div>' +
       '<div class="ototal">'+orderPaidDisplay(o)+'</div>' +
     '</div>' +
     '<div class="order-detail">' +
       o.items.map(function(l){ return '<div class="di"><span>'+l.qty+'x '+escapeHtml(l.name)+' ('+l.size+')</span><span>'+formatForeignAmount(fromLAK(l.unitPrice*l.qty, cur), cur)+'</span></div>'; }).join('') +
       '<div class="dactions">' +
-        '<button class="btn btn-primary btn-small" style="width:auto;" '+(busy?'disabled':'')+' onclick="POS.restoreOrder(\''+o.id+'\')">'+(busy?'Restoring…':'↩ Restore Order')+'</button>' +
+        '<button class="btn btn-primary btn-small" style="width:auto;" '+(busy?'disabled':'')+' onclick="POS.restoreOrder(\''+o.id+'\')">'+(busy?tr('restoring'):tr('restore_order'))+'</button>' +
       '</div>' +
     '</div>' +
   '</div>';
@@ -1926,7 +2079,7 @@ function buildAdminPinGate(){
   for(var i=0;i<state.adminPinInput.length;i++){
     dots += '<span class="pin-dot filled'+(state.adminPinError?' error':'')+'"></span>';
   }
-  if(!dots) dots = '<span class="pin-dots-empty">Admin PIN</span>';
+  if(!dots) dots = '<span class="pin-dots-empty">'+tr('admin_pin_placeholder')+'</span>';
   var disabled = state.adminPinChecking;
   var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
   var keypadHtml = keys.map(function(k){
@@ -1938,10 +2091,10 @@ function buildAdminPinGate(){
   '<div class="admin-gate">' +
     '<div class="login-card" style="max-width:320px;margin:24px auto;">' +
       '<div class="admin-gate-icon">🔒</div>' +
-      '<h1>Administrator Only</h1>' +
-      '<p>'+(state.adminPinChecking?'Checking…':'This area is restricted. Enter the admin PIN to view and restore deleted orders.')+'</p>' +
+      '<h1>'+tr('administrator_only')+'</h1>' +
+      '<p>'+(state.adminPinChecking?tr('checking'):tr('admin_gate_hint'))+'</p>' +
       '<div class="pin-dots">'+dots+'</div>' +
-      '<div class="pin-error-msg">'+(state.adminPinError?'Incorrect admin PIN':'&nbsp;')+'</div>' +
+      '<div class="pin-error-msg">'+(state.adminPinError?tr('incorrect_admin_pin'):'&nbsp;')+'</div>' +
       '<div class="pin-keypad">'+keypadHtml+'</div>' +
     '</div>' +
   '</div>';
@@ -1967,10 +2120,10 @@ function buildSettingsTab(){
     return '' +
     '<div class="mgmt-row">' +
       preview +
-      '<div class="info"><div class="t1">'+escapeHtml(cat)+'</div><div class="t2">Background for this category page</div></div>' +
+      '<div class="info"><div class="t1">'+escapeHtml(cat)+'</div><div class="t2">'+tr('category_bg_row_hint')+'</div></div>' +
       '<div class="acts">' +
-        '<label class="btn btn-outline btn-small">Change Photo<input type="file" accept="image/*" style="display:none" onchange="POS.handleCategoryBackgroundInput(\''+cat.replace(/'/g,"\\'")+'\',this)"/></label>' +
-        (photo ? '<button class="btn btn-ghost btn-small" onclick="POS.removeCategoryBackgroundPhoto(\''+cat.replace(/'/g,"\\'")+'\')">Remove</button>' : '') +
+        '<label class="btn btn-outline btn-small">'+tr('change_photo')+'<input type="file" accept="image/*" style="display:none" onchange="POS.handleCategoryBackgroundInput(\''+cat.replace(/'/g,"\\'")+'\',this)"/></label>' +
+        (photo ? '<button class="btn btn-ghost btn-small" onclick="POS.removeCategoryBackgroundPhoto(\''+cat.replace(/'/g,"\\'")+'\')">'+tr('remove')+'</button>' : '') +
       '</div>' +
     '</div>';
   }).join('');
@@ -1984,70 +2137,70 @@ function buildSettingsTab(){
 
   return '' +
   '<div class="section-card" style="background:var(--taro-light);border-color:var(--taro);">' +
-    '<h2 style="color:var(--taro);">🔒 Manager / Admin Area</h2>' +
-    '<p class="hint">Settings can only be viewed or changed with a manager or administrator PIN.</p>' +
-    '<button class="btn btn-ghost btn-small" onclick="POS.lockSettingsTab()">Lock this tab now</button>' +
+    '<h2 style="color:var(--taro);">'+tr('manager_admin_area_title')+'</h2>' +
+    '<p class="hint">'+tr('settings_restricted_hint')+'</p>' +
+    '<button class="btn btn-ghost btn-small" onclick="POS.lockSettingsTab()">'+tr('lock_tab_now')+'</button>' +
   '</div>' +
   '<div class="section-card">' +
-    '<h2>Shop Details</h2><p class="hint">Shown on the header and printed receipts.</p>' +
+    '<h2>'+tr('shop_details')+'</h2><p class="hint">'+tr('shop_details_hint')+'</p>' +
     '<div class="field-grid">' +
-      '<div class="field"><label>Shop name</label><input id="pos-set-name" type="text" value="'+escapeHtml(f.shopName)+'" oninput="POS.updateSettingsForm(\'shopName\',this.value)"/></div>' +
-      '<div class="field"><label>Tagline</label><input id="pos-set-tagline" type="text" value="'+escapeHtml(f.tagline)+'" oninput="POS.updateSettingsForm(\'tagline\',this.value)"/></div>' +
-      '<div class="field"><label>Phone</label><input id="pos-set-phone" type="text" value="'+escapeHtml(f.phone)+'" oninput="POS.updateSettingsForm(\'phone\',this.value)"/></div>' +
-      '<div class="field"><label>Address</label><input id="pos-set-address" type="text" value="'+escapeHtml(f.address)+'" oninput="POS.updateSettingsForm(\'address\',this.value)"/></div>' +
-      '<div class="field"><label>Currency symbol</label><input id="pos-set-currency" type="text" value="'+escapeHtml(f.currency)+'" oninput="POS.updateSettingsForm(\'currency\',this.value)"/></div>' +
-      '<div class="field"><label>Service charge %</label><input id="pos-set-service" type="text" inputmode="numeric" value="'+f.serviceChargePercent+'" oninput="POS.updateSettingsForm(\'serviceChargePercent\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('shop_name_label')+'</label><input id="pos-set-name" type="text" value="'+escapeHtml(f.shopName)+'" oninput="POS.updateSettingsForm(\'shopName\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('tagline_label')+'</label><input id="pos-set-tagline" type="text" value="'+escapeHtml(f.tagline)+'" oninput="POS.updateSettingsForm(\'tagline\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('phone_label')+'</label><input id="pos-set-phone" type="text" value="'+escapeHtml(f.phone)+'" oninput="POS.updateSettingsForm(\'phone\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('address_label')+'</label><input id="pos-set-address" type="text" value="'+escapeHtml(f.address)+'" oninput="POS.updateSettingsForm(\'address\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('currency_symbol_label')+'</label><input id="pos-set-currency" type="text" value="'+escapeHtml(f.currency)+'" oninput="POS.updateSettingsForm(\'currency\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('service_charge_pct_label')+'</label><input id="pos-set-service" type="text" inputmode="numeric" value="'+f.serviceChargePercent+'" oninput="POS.updateSettingsForm(\'serviceChargePercent\',this.value)"/></div>' +
     '</div>' +
-    '<div class="field"><label>Receipt footer message</label><input id="pos-set-footer" type="text" value="'+escapeHtml(f.footerMessage)+'" oninput="POS.updateSettingsForm(\'footerMessage\',this.value)"/></div>' +
-    '<button class="btn btn-primary" style="width:auto;margin-top:14px;" onclick="POS.saveSettings()">Save Settings</button>' +
+    '<div class="field"><label>'+tr('receipt_footer_label')+'</label><input id="pos-set-footer" type="text" value="'+escapeHtml(f.footerMessage)+'" oninput="POS.updateSettingsForm(\'footerMessage\',this.value)"/></div>' +
+    '<button class="btn btn-primary" style="width:auto;margin-top:14px;" onclick="POS.saveSettings()">'+tr('save_settings')+'</button>' +
   '</div>' +
   '<div class="section-card">' +
-    '<h2>Page Appearance</h2><p class="hint">Set background photos for the app. Each product category page can also have its own unique background — it overrides the page background only while that category is being browsed.</p>' +
+    '<h2>'+tr('page_appearance')+'</h2><p class="hint">'+tr('page_appearance_hint')+'</p>' +
     '<div class="settings-cols">' +
       '<div class="field">' +
-        '<label>Page background photo</label>' +
+        '<label>'+tr('page_bg_label')+'</label>' +
         '<div class="photo-upload-row">' +
           pagePreview +
           '<div class="photo-upload-actions">' +
-            '<label class="btn btn-outline btn-small">Choose Photo<input type="file" accept="image/*" style="display:none" onchange="POS.handlePageBackgroundInput(this)"/></label>' +
-            (f.pageBackgroundPhoto ? '<button class="btn btn-ghost btn-small" onclick="POS.removePageBackgroundPhoto()">Remove</button>' : '') +
+            '<label class="btn btn-outline btn-small">'+tr('choose_photo')+'<input type="file" accept="image/*" style="display:none" onchange="POS.handlePageBackgroundInput(this)"/></label>' +
+            (f.pageBackgroundPhoto ? '<button class="btn btn-ghost btn-small" onclick="POS.removePageBackgroundPhoto()">'+tr('remove')+'</button>' : '') +
           '</div>' +
         '</div>' +
       '</div>' +
       '<div class="field">' +
-        '<label>Header background photo</label>' +
+        '<label>'+tr('header_bg_label')+'</label>' +
         '<div class="photo-upload-row">' +
           headerPreview +
           '<div class="photo-upload-actions">' +
-            '<label class="btn btn-outline btn-small">Choose Photo<input type="file" accept="image/*" style="display:none" onchange="POS.handleHeaderBackgroundInput(this)"/></label>' +
-            (f.headerBackgroundPhoto ? '<button class="btn btn-ghost btn-small" onclick="POS.removeHeaderBackgroundPhoto()">Remove</button>' : '') +
+            '<label class="btn btn-outline btn-small">'+tr('choose_photo')+'<input type="file" accept="image/*" style="display:none" onchange="POS.handleHeaderBackgroundInput(this)"/></label>' +
+            (f.headerBackgroundPhoto ? '<button class="btn btn-ghost btn-small" onclick="POS.removeHeaderBackgroundPhoto()">'+tr('remove')+'</button>' : '') +
           '</div>' +
         '</div>' +
       '</div>' +
     '</div>' +
     '<div class="field" style="margin-top:16px;">' +
-      '<label>Category page backgrounds</label>' +
-      (categoryBgRows || '<p class="hint" style="margin-top:0;">Add drinks to your menu first to set per-category backgrounds.</p>') +
+      '<label>'+tr('category_bg_label')+'</label>' +
+      (categoryBgRows || '<p class="hint" style="margin-top:0;">'+tr('category_bg_empty_hint')+'</p>') +
     '</div>' +
   '</div>' +
   buildMenuTab() +
   '<div class="section-card">' +
-    '<h2>Currency Exchange Rates</h2><p class="hint">All prices are stored in Kip (₭). These rates convert to USD and THB on the Order tab — update them whenever the exchange rate moves.</p>' +
+    '<h2>'+tr('currency_rates')+'</h2><p class="hint">'+tr('currency_rates_hint')+'</p>' +
     '<div class="field-grid">' +
-      '<div class="field"><label>₭ per 1 USD</label><input id="pos-set-usd" type="text" inputmode="decimal" value="'+f.usdRate+'" oninput="POS.updateSettingsForm(\'usdRate\',this.value)"/></div>' +
-      '<div class="field"><label>₭ per 1 THB</label><input id="pos-set-thb" type="text" inputmode="decimal" value="'+f.thbRate+'" oninput="POS.updateSettingsForm(\'thbRate\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('usd_rate_label')+'</label><input id="pos-set-usd" type="text" inputmode="decimal" value="'+f.usdRate+'" oninput="POS.updateSettingsForm(\'usdRate\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('thb_rate_label')+'</label><input id="pos-set-thb" type="text" inputmode="decimal" value="'+f.thbRate+'" oninput="POS.updateSettingsForm(\'thbRate\',this.value)"/></div>' +
     '</div>' +
-    '<button class="btn btn-primary" style="width:auto;margin-top:14px;" onclick="POS.saveSettings()">Save Settings</button>' +
+    '<button class="btn btn-primary" style="width:auto;margin-top:14px;" onclick="POS.saveSettings()">'+tr('save_settings')+'</button>' +
   '</div>' +
   '<div class="section-card">' +
-    '<h2>Security</h2><p class="hint">Lock the screen when you step away from the counter — staff will need the PIN to get back in.</p>' +
-    '<button class="btn btn-secondary" onclick="POS.lockApp()">Lock Screen Now</button>' +
+    '<h2>'+tr('security_heading')+'</h2><p class="hint">'+tr('security_hint')+'</p>' +
+    '<button class="btn btn-secondary" onclick="POS.lockApp()">'+tr('lock_screen_now')+'</button>' +
   '</div>' +
   '<div class="section-card danger-zone">' +
-    '<h2>Danger Zone</h2><p class="hint">These actions cannot be undone.</p>' +
+    '<h2>'+tr('danger_zone')+'</h2><p class="hint">'+tr('danger_zone_hint')+'</p>' +
     '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
-      '<button class="btn btn-danger" onclick="POS.resetMenu()">Reset Menu to Default</button>' +
-      '<button class="btn btn-danger" onclick="POS.clearHistory()">Clear All Order History</button>' +
+      '<button class="btn btn-danger" onclick="POS.resetMenu()">'+tr('reset_menu')+'</button>' +
+      '<button class="btn btn-danger" onclick="POS.clearHistory()">'+tr('clear_all_history')+'</button>' +
     '</div>' +
   '</div>';
 }
@@ -2057,7 +2210,7 @@ function buildSettingsPinGate(){
   for(var i=0;i<state.settingsPinInput.length;i++){
     dots += '<span class="pin-dot filled'+(state.settingsPinError?' error':'')+'"></span>';
   }
-  if(!dots) dots = '<span class="pin-dots-empty">Manager / Admin PIN</span>';
+  if(!dots) dots = '<span class="pin-dots-empty">'+tr('manager_admin_pin_placeholder')+'</span>';
   var disabled = state.settingsPinChecking;
   var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
   var keypadHtml = keys.map(function(k){
@@ -2069,10 +2222,10 @@ function buildSettingsPinGate(){
   '<div class="admin-gate">' +
     '<div class="login-card" style="max-width:320px;margin:24px auto;">' +
       '<div class="admin-gate-icon">🔒</div>' +
-      '<h1>Manager / Admin Only</h1>' +
-      '<p>'+(state.settingsPinChecking?'Checking…':'This area is restricted. Enter the manager or admin PIN to view and change settings.')+'</p>' +
+      '<h1>'+tr('manager_admin_only')+'</h1>' +
+      '<p>'+(state.settingsPinChecking?tr('checking'):tr('settings_gate_hint'))+'</p>' +
       '<div class="pin-dots">'+dots+'</div>' +
-      '<div class="pin-error-msg">'+(state.settingsPinError?'Incorrect PIN':'&nbsp;')+'</div>' +
+      '<div class="pin-error-msg">'+(state.settingsPinError?tr('incorrect_manager_admin_pin'):'&nbsp;')+'</div>' +
       '<div class="pin-keypad">'+keypadHtml+'</div>' +
     '</div>' +
   '</div>';
