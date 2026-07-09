@@ -421,6 +421,9 @@
 /* ---------- Settings ---------- */
 .danger-zone{border-color:var(--danger-light);background:#FFFBF9;}
 .danger-zone h2{color:var(--danger);}
+.recipe-size-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:10px;}
+.recipe-size-box{border:1.5px solid var(--border);border-radius:10px;padding:10px;background:var(--cream-dark);}
+.recipe-size-label{font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--espresso-soft);margin-bottom:8px;}
 
 @media print{
   @page{ margin:6mm; }
@@ -537,6 +540,9 @@ var DEFAULT_TOPPINGS = [
   {id:'top-7', name:'Lychee Jelly', price:4000}
 ];
 
+var DEFAULT_INGREDIENTS = [];
+var DEFAULT_RECIPES = {};
+
 var SUGAR_LEVELS = [0,25,50,75,100];
 var ICE_LEVELS = [
   {id:'none', label:'No Ice'},
@@ -620,7 +626,24 @@ var TRANSLATIONS = {
     delete_order_title:'Delete this order?', delete_order_sub:'This permanently removes the order for every device. Enter the manager PIN to confirm.',
     manager_pin_placeholder:'Manager PIN', incorrect_manager_pin:'Incorrect manager PIN',
     sugar_word:'sugar',
-    topping_name_label:'Name', extra_price_label:'Extra price'
+    topping_name_label:'Name', extra_price_label:'Extra price',
+    tab_stock:'📦 Stock',
+    stock_raw_materials:'Raw Materials', stock_deposit:'Deposit Stock', stock_recipes:'Recipes',
+    raw_materials_hint:'Every ingredient and how much is currently in stock.',
+    add_ingredient:'+ Add Ingredient',
+    ingredient_name_label:'Ingredient name', unit_label:'Unit', unit_grams:'Grams (g)', unit_ml:'Milliliters (ml)',
+    current_stock_label:'Current stock',
+    deposit_hint:'Enter how much stock you\'re adding, then tap Deposit — it will be added on top of the current amount.',
+    deposit_amount_placeholder:'Amount to add', deposit_btn:'Deposit',
+    recipes_hint:'Set how much of each ingredient goes into one drink. This powers automatic stock deduction whenever an order is completed.',
+    edit_recipe:'Edit Recipe', close_recipe:'Close', no_recipe_set:'No recipe set yet.',
+    select_ingredient:'Select ingredient…', amount_label:'Amount', add_line:'+ Add',
+    no_ingredients_yet:'No ingredients yet. Add your first ingredient to get started.',
+    stock_restricted_hint:'Stock can only be viewed or changed with a manager or administrator PIN.',
+    stock_gate_hint:'This area is restricted. Enter the manager or admin PIN to view and manage stock.',
+    stock_sync_error_title:'⚠️ Stock data unavailable',
+    stock_sync_error_hint:'Could not load ingredients or recipes — this Firebase project likely needs its security rules updated to allow access to the pos_ingredients and pos_recipes collections. The rest of the app is unaffected.',
+    size_label:'Size', recipe_admin_only_hint:'Only an administrator can edit recipes.'
   },
   lo: {
     tab_order:'🧋 ສັ່ງເຄື່ອງດື່ມ', tab_menu:'📋 ເມນູ', tab_history:'🧾 ປະຫວັດ', tab_deleted:'🔒 ລຶບແລ້ວ', tab_settings:'⚙️ ຕັ້ງຄ່າ',
@@ -691,7 +714,24 @@ var TRANSLATIONS = {
     delete_order_title:'ລຶບອໍເດີນີ້?', delete_order_sub:'ນີ້ຈະລຶບອໍເດີນີ້ຖາວອນສຳລັບທຸກອຸປະກອນ. ໃສ່ລະຫັດຜູ້ຈັດການເພື່ອຢືນຢັນ.',
     manager_pin_placeholder:'ລະຫັດຜູ້ຈັດການ', incorrect_manager_pin:'ລະຫັດຜູ້ຈັດການຜິດ',
     sugar_word:'ນ້ຳຕານ',
-    topping_name_label:'ຊື່', extra_price_label:'ລາຄາເພີ່ມ'
+    topping_name_label:'ຊື່', extra_price_label:'ລາຄາເພີ່ມ',
+    tab_stock:'📦 ສະຕັອກ',
+    stock_raw_materials:'ວັດຖຸດິບ', stock_deposit:'ຝາກສະຕັອກ', stock_recipes:'ສູດສ່ວນປະສົມ',
+    raw_materials_hint:'ວັດຖຸດິບທັງໝົດ ແລະ ຈຳນວນທີ່ຍັງເຫຼືອຢູ່ໃນສະຕັອກ.',
+    add_ingredient:'+ ເພີ່ມວັດຖຸດິບ',
+    ingredient_name_label:'ຊື່ວັດຖຸດິບ', unit_label:'ຫົວໜ່ວຍ', unit_grams:'ກຣາມ (g)', unit_ml:'ມິນລິລິດ (ml)',
+    current_stock_label:'ສະຕັອກປັດຈຸບັນ',
+    deposit_hint:'ໃສ່ຈຳນວນສະຕັອກທີ່ຈະເພີ່ມ, ແລ້ວກົດຝາກ — ມັນຈະຖືກບວກເພີ່ມໃສ່ຈຳນວນປັດຈຸບັນ.',
+    deposit_amount_placeholder:'ຈຳນວນທີ່ຈະເພີ່ມ', deposit_btn:'ຝາກ',
+    recipes_hint:'ຕັ້ງຄ່າວ່າແຕ່ລະວັດຖຸດິບໃຊ້ເທົ່າໃດຕໍ່ເຄື່ອງດື່ມໜຶ່ງແກ້ວ. ນີ້ຄືສິ່ງທີ່ຄວບຄຸມການຫັກສະຕັອກອັດຕະໂນມັດເມື່ອອໍເດີສຳເລັດ.',
+    edit_recipe:'ແກ້ໄຂສູດ', close_recipe:'ປິດ', no_recipe_set:'ຍັງບໍ່ໄດ້ຕັ້ງສູດ.',
+    select_ingredient:'ເລືອກວັດຖຸດິບ…', amount_label:'ຈຳນວນ', add_line:'+ ເພີ່ມ',
+    no_ingredients_yet:'ຍັງບໍ່ມີວັດຖຸດິບ. ເພີ່ມວັດຖຸດິບທຳອິດຂອງທ່ານເພື່ອເລີ່ມຕົ້ນ.',
+    stock_restricted_hint:'ສະຕັອກສາມາດເບິ່ງ ຫຼື ປ່ຽນໄດ້ດ້ວຍລະຫັດຜູ້ຈັດການ ຫຼື ຜູ້ດູແລລະບົບເທົ່ານັ້ນ.',
+    stock_gate_hint:'ພື້ນທີ່ນີ້ຖືກຈຳກັດ. ໃສ່ລະຫັດຜູ້ຈັດການ ຫຼື ຜູ້ດູແລລະບົບເພື່ອເບິ່ງ ແລະ ຈັດການສະຕັອກ.',
+    stock_sync_error_title:'⚠️ ຂໍ້ມູນສະຕັອກບໍ່ພ້ອມໃຊ້ງານ',
+    stock_sync_error_hint:'ບໍ່ສາມາດໂຫຼດວັດຖຸດິບ ຫຼື ສູດໄດ້ — ໂປຣເຈັກ Firebase ນີ້ອາດຈະຕ້ອງອັບເດດກົດຄວາມປອດໄພເພື່ອອະນຸຍາດການເຂົ້າເຖິງ pos_ingredients ແລະ pos_recipes. ສ່ວນອື່ນຂອງແອັບບໍ່ໄດ້ຮັບຜົນກະທົບ.',
+    size_label:'ຂະໜາດ', recipe_admin_only_hint:'ມີແຕ່ຜູ້ດູແລລະບົບເທົ່ານັ້ນທີ່ສາມາດແກ້ໄຂສູດໄດ້.'
   },
   th: {
     tab_order:'🧋 สั่งเครื่องดื่ม', tab_menu:'📋 เมนู', tab_history:'🧾 ประวัติ', tab_deleted:'🔒 ที่ลบแล้ว', tab_settings:'⚙️ ตั้งค่า',
@@ -762,7 +802,24 @@ var TRANSLATIONS = {
     delete_order_title:'ลบออเดอร์นี้?', delete_order_sub:'การดำเนินการนี้จะลบออเดอร์นี้อย่างถาวรสำหรับทุกอุปกรณ์ ป้อนรหัส PIN ผู้จัดการเพื่อยืนยัน',
     manager_pin_placeholder:'รหัส PIN ผู้จัดการ', incorrect_manager_pin:'รหัส PIN ผู้จัดการไม่ถูกต้อง',
     sugar_word:'น้ำตาล',
-    topping_name_label:'ชื่อ', extra_price_label:'ราคาเพิ่ม'
+    topping_name_label:'ชื่อ', extra_price_label:'ราคาเพิ่ม',
+    tab_stock:'📦 สต็อก',
+    stock_raw_materials:'วัตถุดิบ', stock_deposit:'ฝากสต็อก', stock_recipes:'สูตรส่วนผสม',
+    raw_materials_hint:'วัตถุดิบทั้งหมดและจำนวนที่เหลืออยู่ในสต็อก',
+    add_ingredient:'+ เพิ่มวัตถุดิบ',
+    ingredient_name_label:'ชื่อวัตถุดิบ', unit_label:'หน่วย', unit_grams:'กรัม (g)', unit_ml:'มิลลิลิตร (ml)',
+    current_stock_label:'สต็อกปัจจุบัน',
+    deposit_hint:'ป้อนจำนวนสต็อกที่จะเพิ่ม แล้วกดฝาก — จำนวนนี้จะถูกบวกเพิ่มเข้ากับจำนวนปัจจุบัน',
+    deposit_amount_placeholder:'จำนวนที่จะเพิ่ม', deposit_btn:'ฝาก',
+    recipes_hint:'ตั้งค่าว่าแต่ละวัตถุดิบใช้เท่าไรต่อเครื่องดื่มหนึ่งแก้ว นี่คือสิ่งที่ควบคุมการหักสต็อกอัตโนมัติเมื่อออเดอร์เสร็จสมบูรณ์',
+    edit_recipe:'แก้ไขสูตร', close_recipe:'ปิด', no_recipe_set:'ยังไม่ได้ตั้งสูตร',
+    select_ingredient:'เลือกวัตถุดิบ…', amount_label:'จำนวน', add_line:'+ เพิ่ม',
+    no_ingredients_yet:'ยังไม่มีวัตถุดิบ เพิ่มวัตถุดิบแรกของคุณเพื่อเริ่มต้น',
+    stock_restricted_hint:'สต็อกสามารถดูหรือเปลี่ยนแปลงได้ด้วยรหัส PIN ผู้จัดการหรือผู้ดูแลระบบเท่านั้น',
+    stock_gate_hint:'พื้นที่นี้ถูกจำกัด ป้อนรหัส PIN ผู้จัดการหรือผู้ดูแลระบบเพื่อดูและจัดการสต็อก',
+    stock_sync_error_title:'⚠️ ข้อมูลสต็อกไม่พร้อมใช้งาน',
+    stock_sync_error_hint:'ไม่สามารถโหลดวัตถุดิบหรือสูตรได้ — โปรเจกต์ Firebase นี้อาจต้องอัปเดตกฎความปลอดภัยเพื่ออนุญาตการเข้าถึงคอลเลกชัน pos_ingredients และ pos_recipes ส่วนอื่นของแอปไม่ได้รับผลกระทบ',
+    size_label:'ขนาด', recipe_admin_only_hint:'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถแก้ไขสูตรได้'
   }
 };
 function tr(key){
@@ -801,7 +858,8 @@ var state = {
   deletedOrdersLoaded:false,
   restoringOrderId:null,
   loaded:false,
-  settingsLoaded:false, menuLoaded:false, toppingsLoaded:false, ordersLoaded:false,
+  settingsLoaded:false, menuLoaded:false, toppingsLoaded:false, ordersLoaded:false, ingredientsLoaded:false, recipesLoaded:false,
+  stockSyncError:false,
   language:'en',
   syncStatus:'connecting', // connecting | synced | error
   syncErrorLabel:'',
@@ -834,7 +892,20 @@ var state = {
   editingCategoryName:null,
   categoryRenameValue:'',
   newCategoryName:'',
-  settingsForm:null
+  settingsForm:null,
+  ingredients:null,
+  recipes:null,
+  stockSubTab:'raw',
+  stockUnlocked:false,
+  stockUnlockedRole:null,
+  stockPinInput:'',
+  stockPinError:false,
+  stockPinChecking:false,
+  editingIngredientId:null,
+  newIngredientDraft:null,
+  depositDrafts:{},
+  recipeEditingItemId:null,
+  recipeLineDrafts:{}
 };
 
 /* ================= FIREBASE (multi-device sync + auth) ================= */
@@ -874,6 +945,16 @@ function handleSyncError(label){
     state.listenerStatus[baseLabel] = 'error';
     state.syncErrorMessage = (err && err.message) || String(err);
     recomputeSyncStatus();
+    render();
+  };
+}
+/* Stock (ingredients/recipes) sync errors are tracked separately so a missing
+   Firestore permission for these newer collections can never block the core
+   ordering app from loading — it only shows a notice inside the Stock tab. */
+function handleStockSyncError(label){
+  return function(err){
+    console.error('Stock sync error ('+label+')', err);
+    state.stockSyncError = true;
     render();
   };
 }
@@ -942,6 +1023,30 @@ function init(){
     render();
   }, handleSyncError('orders'));
 
+  db.collection('pos_ingredients').doc('main').onSnapshot(function(doc){
+    if(doc.exists && doc.data().items){
+      state.ingredients = doc.data().items;
+    } else {
+      state.ingredients = JSON.parse(JSON.stringify(DEFAULT_INGREDIENTS));
+      db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(handleStockSyncError('ingredients-init'));
+    }
+    state.ingredientsLoaded = true;
+    state.stockSyncError = false;
+    render();
+  }, handleStockSyncError('ingredients'));
+
+  db.collection('pos_recipes').doc('main').onSnapshot(function(doc){
+    if(doc.exists && doc.data().items){
+      state.recipes = doc.data().items;
+    } else {
+      state.recipes = JSON.parse(JSON.stringify(DEFAULT_RECIPES));
+      db.collection('pos_recipes').doc('main').set({items: state.recipes}).catch(handleStockSyncError('recipes-init'));
+    }
+    state.recipesLoaded = true;
+    state.stockSyncError = false;
+    render();
+  }, handleStockSyncError('recipes'));
+
   setInterval(tickClock, 30000);
 }
 
@@ -955,6 +1060,29 @@ function escapeHtml(s){
 function formatMoney(n){
   n = Math.round(Number(n)||0);
   return state.settings.currency + n.toLocaleString('en-US');
+}
+/* ---- Stock deduction: subtract recipe ingredients for every item sold ---- */
+function deductStockForOrder(cartLines){
+  if(!state.ingredients || !state.recipes || !cartLines || !cartLines.length) return;
+  var changed = false;
+  cartLines.forEach(function(line){
+    var itemRecipes = state.recipes[line.menuItemId];
+    if(!itemRecipes) return;
+    var recipeLines = itemRecipes[line.size];
+    if(!recipeLines || !recipeLines.length) return;
+    recipeLines.forEach(function(rl){
+      var ing = state.ingredients.filter(function(i){ return i.id===rl.ingredientId; })[0];
+      if(!ing) return;
+      var used = (Number(rl.amount)||0) * line.qty;
+      ing.stock = Math.round(((Number(ing.stock)||0) - used) * 1000) / 1000;
+      changed = true;
+    });
+  });
+  if(changed){
+    db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(function(e){
+      console.error('Could not update stock after sale', e);
+    });
+  }
 }
 function sanitizeDecimal(v){
   v = v.replace(/[^0-9.]/g,'');
@@ -1121,6 +1249,7 @@ function buildAppHTML(){
   html += '<div class="pos-main">';
   if(state.tab==='order') html += buildOrderTab();
   else if(state.tab==='history') html += buildHistoryTab();
+  else if(state.tab==='stock') html += buildStockTab();
   else if(state.tab==='deleted') html += buildDeletedOrdersTab();
   else if(state.tab==='settings') html += buildSettingsTab();
   html += '</div>';
@@ -1132,7 +1261,7 @@ function buildAppHTML(){
 
 function buildHeader(){
   var s = state.settings;
-  var tabDefs = [['order','tab_order'],['history','tab_history'],['deleted','tab_deleted'],['settings','tab_settings']];
+  var tabDefs = [['order','tab_order'],['history','tab_history'],['stock','tab_stock'],['deleted','tab_deleted'],['settings','tab_settings']];
   var navHtml = tabDefs.map(function(td){
     return '<button class="'+(state.tab===td[0]?'active':'')+'" onclick="POS.setTab(\''+td[0]+'\')">'+tr(td[1])+'</button>';
   }).join('');
@@ -2051,6 +2180,209 @@ function buildOrderRow(o){
   '</div>';
 }
 
+/* ================= STOCK TAB ================= */
+function formatIngredientAmount(n){
+  n = Number(n)||0;
+  return (Math.round(n*100)/100).toLocaleString('en-US');
+}
+function buildStockTab(){
+  if(!state.stockUnlocked){
+    return buildStockPinGate();
+  }
+  var subTabs = [['raw','stock_raw_materials'],['deposit','stock_deposit'],['recipes','stock_recipes']];
+  var subTabHtml = subTabs.map(function(s){
+    return '<button class="chip '+(state.stockSubTab===s[0]?'active':'')+'" onclick="POS.setStockSubTab(\''+s[0]+'\')">'+tr(s[1])+'</button>';
+  }).join('');
+  var content = '';
+  if(state.stockSubTab==='deposit') content = buildDepositStockSubTab();
+  else if(state.stockSubTab==='recipes') content = buildRecipesSubTab();
+  else content = buildRawMaterialsSubTab();
+  var errorBanner = state.stockSyncError ? (
+    '<div class="section-card" style="background:#FFFBF9;border-color:var(--danger-light);">' +
+      '<h2 style="color:var(--danger);">'+tr('stock_sync_error_title')+'</h2>' +
+      '<p class="hint">'+tr('stock_sync_error_hint')+'</p>' +
+    '</div>'
+  ) : '';
+  return '' +
+  '<div class="section-card" style="background:var(--taro-light);border-color:var(--taro);">' +
+    '<h2 style="color:var(--taro);">'+tr('manager_admin_area_title')+'</h2>' +
+    '<p class="hint">'+tr('stock_restricted_hint')+'</p>' +
+    '<button class="btn btn-ghost btn-small" onclick="POS.lockStockTab(); POS.setTab(\'stock\')">'+tr('lock_tab_now')+'</button>' +
+  '</div>' +
+  errorBanner +
+  '<div class="chip-row" style="margin-bottom:16px;">'+subTabHtml+'</div>' +
+  content;
+}
+
+function buildStockPinGate(){
+  var dots = '';
+  for(var i=0;i<state.stockPinInput.length;i++){
+    dots += '<span class="pin-dot filled'+(state.stockPinError?' error':'')+'"></span>';
+  }
+  if(!dots) dots = '<span class="pin-dots-empty">'+tr('manager_admin_pin_placeholder')+'</span>';
+  var disabled = state.stockPinChecking;
+  var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
+  var keypadHtml = keys.map(function(k){
+    if(k==='back') return '<button class="pin-key-back" '+(disabled?'disabled':'')+' onclick="POS.stockPinBackspace()">⌫</button>';
+    if(k==='enter') return '<button class="pin-key-enter" '+(disabled?'disabled':'')+' onclick="POS.stockPinSubmit()">✓</button>';
+    return '<button '+(disabled?'disabled':'')+' onclick="POS.stockPinPress(\''+k+'\')">'+k+'</button>';
+  }).join('');
+  return '' +
+  '<div class="admin-gate">' +
+    '<div class="login-card" style="max-width:320px;margin:24px auto;">' +
+      '<div class="admin-gate-icon">🔒</div>' +
+      '<h1>'+tr('manager_admin_only')+'</h1>' +
+      '<p>'+(state.stockPinChecking?tr('checking'):tr('stock_gate_hint'))+'</p>' +
+      '<div class="pin-dots">'+dots+'</div>' +
+      '<div class="pin-error-msg">'+(state.stockPinError?tr('incorrect_manager_admin_pin'):'&nbsp;')+'</div>' +
+      '<div class="pin-keypad">'+keypadHtml+'</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function buildIngredientEditForm(ing){
+  var d = ing || state.newIngredientDraft;
+  var isNew = !ing;
+  var idArg = isNew ? 'null' : '\''+ing.id+'\'';
+  return '' +
+  '<div class="section-card" style="background:var(--cream-dark);box-shadow:none;">' +
+    '<div class="field-grid">' +
+      '<div class="field"><label>'+tr('ingredient_name_label')+'</label><input type="text" value="'+escapeHtml(d.name)+'" oninput="POS.updateIngredientDraft('+idArg+',\'name\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('unit_label')+'</label><select onchange="POS.updateIngredientDraft('+idArg+',\'unit\',this.value)">' +
+        '<option value="g" '+(d.unit==='g'?'selected':'')+'>'+tr('unit_grams')+'</option>' +
+        '<option value="ml" '+(d.unit==='ml'?'selected':'')+'>'+tr('unit_ml')+'</option>' +
+      '</select></div>' +
+      '<div class="field"><label>'+tr('current_stock_label')+'</label><input type="text" inputmode="decimal" value="'+(d.stock!=null?d.stock:0)+'" oninput="POS.updateIngredientDraft('+idArg+',\'stock\',this.value)"/></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<button class="btn btn-primary" style="width:auto;margin-top:0;" onclick="POS.saveIngredient('+idArg+')">'+tr('save')+'</button>' +
+      '<button class="btn btn-ghost" onclick="POS.cancelIngredientEdit()">'+tr('cancel')+'</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function buildRawMaterialsSubTab(){
+  var ingredients = state.ingredients || [];
+  var rows = ingredients.map(function(ing){
+    if(state.editingIngredientId===ing.id) return buildIngredientEditForm(ing);
+    return '' +
+    '<div class="mgmt-row">' +
+      '<span class="em">'+(ing.unit==='ml'?'💧':'🧂')+'</span>' +
+      '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+tr('current_stock_label')+': '+formatIngredientAmount(ing.stock)+' '+escapeHtml(ing.unit)+'</div></div>' +
+      '<div class="acts">' +
+        '<button class="btn btn-outline btn-small" onclick="POS.editIngredient(\''+ing.id+'\')">'+tr('edit')+'</button>' +
+        '<button class="btn btn-danger btn-small" onclick="POS.deleteIngredient(\''+ing.id+'\')">'+tr('delete')+'</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  var newForm = state.newIngredientDraft ? buildIngredientEditForm(null) : '<button class="btn btn-outline" onclick="POS.startNewIngredient()">'+tr('add_ingredient')+'</button>';
+  return '' +
+  '<div class="section-card">' +
+    '<h2>'+tr('stock_raw_materials')+'</h2><p class="hint">'+tr('raw_materials_hint')+'</p>' +
+    (rows || '<p class="hint" style="margin-top:0;">'+tr('no_ingredients_yet')+'</p>') +
+    '<div style="margin-top:12px;">'+newForm+'</div>' +
+  '</div>';
+}
+
+function buildDepositStockSubTab(){
+  var ingredients = state.ingredients || [];
+  var rows = ingredients.map(function(ing){
+    var draftVal = state.depositDrafts[ing.id]!=null ? state.depositDrafts[ing.id] : '';
+    return '' +
+    '<div class="mgmt-row">' +
+      '<span class="em">'+(ing.unit==='ml'?'💧':'🧂')+'</span>' +
+      '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+tr('current_stock_label')+': '+formatIngredientAmount(ing.stock)+' '+escapeHtml(ing.unit)+'</div></div>' +
+      '<div class="acts">' +
+        '<input type="text" inputmode="decimal" style="width:90px;" placeholder="'+tr('deposit_amount_placeholder')+'" value="'+escapeHtml(draftVal)+'" oninput="POS.updateDepositDraft(\''+ing.id+'\',this.value)"/>' +
+        '<button class="btn btn-primary btn-small" onclick="POS.depositStock(\''+ing.id+'\')">'+tr('deposit_btn')+'</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  return '' +
+  '<div class="section-card">' +
+    '<h2>'+tr('stock_deposit')+'</h2><p class="hint">'+tr('deposit_hint')+'</p>' +
+    (rows || '<p class="hint" style="margin-top:0;">'+tr('no_ingredients_yet')+'</p>') +
+  '</div>';
+}
+
+function buildRecipesSubTab(){
+  var ingredients = state.ingredients || [];
+  var canEdit = state.stockUnlockedRole === 'admin';
+  if(!ingredients.length){
+    return '' +
+    '<div class="section-card">' +
+      '<h2>'+tr('stock_recipes')+'</h2><p class="hint">'+tr('recipes_hint')+'</p>' +
+      '<p class="hint" style="margin-top:0;">'+tr('no_ingredients_yet')+'</p>' +
+    '</div>';
+  }
+  var rows = state.menu.map(function(m){
+    var sizes = ['S','M','L'].filter(function(sz){ return m.prices && Number(m.prices[sz])>0; });
+    var itemRecipes = (state.recipes && state.recipes[m.id]) || {};
+    var summaryParts = sizes.map(function(sz){
+      var lines = itemRecipes[sz] || [];
+      if(!lines.length) return null;
+      var txt = lines.map(function(rl){
+        var ing = ingredients.filter(function(i){return i.id===rl.ingredientId;})[0];
+        return ing ? (ing.name+' '+rl.amount+ing.unit) : null;
+      }).filter(Boolean).join(', ');
+      return txt ? (sz+': '+txt) : null;
+    }).filter(Boolean);
+    var summary = summaryParts.join('   ·   ');
+    var isOpen = state.recipeEditingItemId===m.id;
+    var editorHtml = '';
+    if(isOpen){
+      var sizeBoxes = sizes.map(function(sz){
+        var lines = itemRecipes[sz] || [];
+        var lineRows = lines.map(function(rl){
+          var ing = ingredients.filter(function(i){return i.id===rl.ingredientId;})[0];
+          if(!ing) return '';
+          return '' +
+          '<div class="mgmt-row">' +
+            '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+rl.amount+' '+escapeHtml(ing.unit)+'</div></div>' +
+            (canEdit ? '<div class="acts"><button class="btn btn-ghost btn-small" onclick="POS.removeRecipeLine(\''+m.id+'\',\''+sz+'\',\''+rl.ingredientId+'\')">'+tr('remove')+'</button></div>' : '') +
+          '</div>';
+        }).join('');
+        var draft = (state.recipeLineDrafts[sz]) || {ingredientId:'', amount:''};
+        var ingOptions = ingredients.map(function(ing){
+          return '<option value="'+ing.id+'" '+(draft.ingredientId===ing.id?'selected':'')+'>'+escapeHtml(ing.name)+' ('+escapeHtml(ing.unit)+')</option>';
+        }).join('');
+        var addFormHtml = canEdit ? ('' +
+          '<div class="field-grid" style="margin-top:8px;">' +
+            '<div class="field"><label>'+tr('select_ingredient')+'</label><select onchange="POS.updateRecipeLineDraft(\''+sz+'\',\'ingredientId\',this.value)"><option value="">'+tr('select_ingredient')+'</option>'+ingOptions+'</select></div>' +
+            '<div class="field"><label>'+tr('amount_label')+'</label><input type="text" inputmode="decimal" value="'+escapeHtml(draft.amount)+'" oninput="POS.updateRecipeLineDraft(\''+sz+'\',\'amount\',this.value)"/></div>' +
+          '</div>' +
+          '<button class="btn btn-outline btn-small" style="margin-top:8px;" onclick="POS.addRecipeLine(\''+m.id+'\',\''+sz+'\')">'+tr('add_line')+'</button>'
+        ) : '';
+        return '' +
+        '<div class="recipe-size-box">' +
+          '<div class="recipe-size-label">'+tr('size_label')+' '+sz+'</div>' +
+          (lineRows || '<p class="hint" style="margin:0 0 8px;">'+tr('no_recipe_set')+'</p>') +
+          addFormHtml +
+        '</div>';
+      }).join('');
+      editorHtml = '<div class="recipe-size-grid">' + sizeBoxes + '</div>';
+    }
+    var thumb = m.photo ? '<img class="em-photo" src="'+m.photo+'" alt=""/>' : '<span class="em">'+m.emoji+'</span>';
+    var actionBtn = canEdit
+      ? '<button class="btn btn-outline btn-small" onclick="POS.toggleRecipeEditor(\''+m.id+'\')">'+(isOpen?tr('close_recipe'):tr('edit_recipe'))+'</button>'
+      : '';
+    return '' +
+    '<div class="mgmt-row" style="flex-direction:column;align-items:stretch;">' +
+      '<div style="display:flex;align-items:center;gap:12px;">' +
+        thumb +
+        '<div class="info"><div class="t1">'+escapeHtml(itemDisplayName(m))+'</div><div class="t2">'+(summary||tr('no_recipe_set'))+'</div></div>' +
+        '<div class="acts">'+actionBtn+'</div>' +
+      '</div>' +
+      editorHtml +
+    '</div>';
+  }).join('');
+  return '' +
+  '<div class="section-card">' +
+    '<h2>'+tr('stock_recipes')+'</h2><p class="hint">'+tr('recipes_hint')+(canEdit?'':' '+tr('recipe_admin_only_hint'))+'</p>' +
+    rows +
+  '</div>';
+}
+
 /* ================= SETTINGS TAB ================= */
 /* ================= DELETED ORDERS TAB (admin-only) ================= */
 function buildDeletedOrdersTab(){
@@ -2495,6 +2827,64 @@ var POS = {
     state.settingsPinInput = '';
     state.settingsPinError = false;
   },
+
+  /* ---- Stock: manager OR admin PIN gate (role is remembered so recipe
+     editing can be further restricted to admin only) ---- */
+  stockPinPress: function(digit){
+    if(state.stockPinChecking) return;
+    if(state.stockPinInput.length >= 12) return;
+    state.stockPinInput += digit;
+    state.stockPinError = false;
+    render();
+  },
+  stockPinBackspace: function(){
+    if(state.stockPinChecking) return;
+    state.stockPinInput = state.stockPinInput.slice(0,-1);
+    state.stockPinError = false;
+    render();
+  },
+  stockPinSubmit: function(){
+    if(state.stockPinChecking || !state.stockPinInput) return;
+    state.stockPinChecking = true;
+    state.stockPinError = false;
+    render();
+    var pin = state.stockPinInput;
+    var onUnlocked = function(role){
+      return function(){
+        state.stockPinChecking = false;
+        state.stockPinInput = '';
+        state.stockUnlocked = true;
+        state.stockUnlockedRole = role;
+        render();
+      };
+    };
+    var onFailed = function(e){
+      console.error('Stock PIN check failed', e);
+      state.stockPinChecking = false;
+      state.stockPinError = true;
+      state.stockPinInput = '';
+      render();
+    };
+    var mgrAuth = managerApp.auth();
+    mgrAuth.signInWithEmailAndPassword(MANAGER_EMAIL, pin).then(function(){
+      return mgrAuth.signOut();
+    }).then(onUnlocked('manager')).catch(function(){
+      var admAuth = adminApp.auth();
+      admAuth.signInWithEmailAndPassword(ADMIN_EMAIL, pin).then(function(){
+        return admAuth.signOut();
+      }).then(onUnlocked('admin')).catch(onFailed);
+    });
+  },
+  lockStockTab: function(){
+    state.stockUnlocked = false;
+    state.stockUnlockedRole = null;
+    state.stockPinInput = '';
+    state.stockPinError = false;
+    state.recipeEditingItemId = null;
+    state.editingIngredientId = null;
+    state.newIngredientDraft = null;
+  },
+
   restoreOrder: function(orderId){
     if(state.restoringOrderId) return;
     if(!window.confirm('Restore this order back into Order History?')) return;
@@ -2528,6 +2918,9 @@ var POS = {
     if(state.tab==='settings' && t!=='settings'){
       POS.lockSettingsTab();
     }
+    if(state.tab==='stock' && t!=='stock'){
+      POS.lockStockTab();
+    }
     state.tab = t;
     state.editingItemId=null; state.newItemDraft=null; state.editingToppingId=null; state.newToppingDraft=null;
     render();
@@ -2538,6 +2931,7 @@ var POS = {
   goToCart: function(){
     if(state.tab==='deleted'){ POS.lockAdminTab(); }
     if(state.tab==='settings'){ POS.lockSettingsTab(); }
+    if(state.tab==='stock'){ POS.lockStockTab(); }
     state.tab = 'order';
     state.orderView = 'items';
     if(!state.activeCategory) state.activeCategory = 'All';
@@ -2655,6 +3049,7 @@ var POS = {
       };
       return db.collection('pos_orders').doc(order.id).set(order).then(function(){ return order; });
     }).then(function(order){
+      deductStockForOrder(order.items);
       state.receiptOrder = order;
       state.cart = [];
       state.discount = 0;
@@ -2669,6 +3064,109 @@ var POS = {
     });
   },
   closeReceipt: function(){ state.receiptOrder=null; render(); },
+
+  /* ---- Stock: sub-tab navigation ---- */
+  setStockSubTab: function(t){
+    state.stockSubTab = t;
+    state.editingIngredientId = null;
+    state.newIngredientDraft = null;
+    state.recipeEditingItemId = null;
+    render();
+  },
+
+  /* ---- Stock: raw materials ---- */
+  startNewIngredient: function(){
+    state.newIngredientDraft = {name:'New Ingredient', unit:'g', stock:0};
+    render();
+  },
+  editIngredient: function(id){ state.editingIngredientId=id; render(); },
+  cancelIngredientEdit: function(){ state.editingIngredientId=null; state.newIngredientDraft=null; render(); },
+  updateIngredientDraft: function(id, field, value){
+    var target = id ? state.ingredients.filter(function(i){return i.id===id;})[0] : state.newIngredientDraft;
+    if(!target) return;
+    if(field==='stock') value = sanitizeDecimal(value);
+    target[field] = value;
+    render();
+  },
+  saveIngredient: function(id){
+    if(id){
+      var target = state.ingredients.filter(function(i){return i.id===id;})[0];
+      if(!target) return;
+      if(!target.name || !String(target.name).trim()){ window.alert('Please enter an ingredient name.'); return; }
+      target.stock = Number(target.stock)||0;
+      state.editingIngredientId = null;
+    } else {
+      var d = state.newIngredientDraft;
+      if(!d.name || !String(d.name).trim()){ window.alert('Please enter an ingredient name.'); return; }
+      d.id = uid('ing');
+      d.stock = Number(d.stock)||0;
+      if(!state.ingredients) state.ingredients = [];
+      state.ingredients.push(d);
+      state.newIngredientDraft = null;
+    }
+    db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(function(e){ window.alert('Could not save ingredient: '+e.message); });
+    render();
+  },
+  deleteIngredient: function(id){
+    if(!window.confirm('Delete this ingredient? This cannot be undone.')) return;
+    state.ingredients = state.ingredients.filter(function(i){ return i.id!==id; });
+    db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(function(e){ window.alert('Could not delete ingredient: '+e.message); });
+    render();
+  },
+
+  /* ---- Stock: deposit ---- */
+  updateDepositDraft: function(id, value){
+    state.depositDrafts[id] = sanitizeDecimal(value);
+    render();
+  },
+  depositStock: function(id){
+    var amt = Number(state.depositDrafts[id]||0);
+    if(!amt || amt<=0){ window.alert('Enter an amount greater than 0 to deposit.'); return; }
+    var ing = state.ingredients.filter(function(i){return i.id===id;})[0];
+    if(!ing) return;
+    ing.stock = Math.round(((Number(ing.stock)||0) + amt) * 1000) / 1000;
+    delete state.depositDrafts[id];
+    db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(function(e){ window.alert('Could not deposit stock: '+e.message); });
+    render();
+  },
+
+  /* ---- Stock: recipes (per size, admin-only editing) ---- */
+  toggleRecipeEditor: function(itemId){
+    if(state.stockUnlockedRole!=='admin') return;
+    state.recipeEditingItemId = state.recipeEditingItemId===itemId ? null : itemId;
+    state.recipeLineDrafts = {S:{ingredientId:'',amount:''}, M:{ingredientId:'',amount:''}, L:{ingredientId:'',amount:''}};
+    render();
+  },
+  updateRecipeLineDraft: function(size, field, value){
+    if(state.stockUnlockedRole!=='admin') return;
+    if(field==='amount') value = sanitizeDecimal(value);
+    if(!state.recipeLineDrafts[size]) state.recipeLineDrafts[size] = {ingredientId:'', amount:''};
+    state.recipeLineDrafts[size][field] = value;
+    render();
+  },
+  addRecipeLine: function(itemId, size){
+    if(state.stockUnlockedRole!=='admin') return;
+    var d = state.recipeLineDrafts[size] || {};
+    var amt = Number(d.amount);
+    if(!d.ingredientId){ window.alert('Please choose an ingredient.'); return; }
+    if(!amt || amt<=0){ window.alert('Enter an amount greater than 0.'); return; }
+    if(!state.recipes) state.recipes = {};
+    if(!state.recipes[itemId]) state.recipes[itemId] = {};
+    if(!state.recipes[itemId][size]) state.recipes[itemId][size] = [];
+    var existing = state.recipes[itemId][size].filter(function(rl){return rl.ingredientId===d.ingredientId;})[0];
+    if(existing){ existing.amount = amt; }
+    else { state.recipes[itemId][size].push({ingredientId:d.ingredientId, amount:amt}); }
+    state.recipeLineDrafts[size] = {ingredientId:'', amount:''};
+    db.collection('pos_recipes').doc('main').set({items: state.recipes}).catch(function(e){ window.alert('Could not save recipe: '+e.message); });
+    render();
+  },
+  removeRecipeLine: function(itemId, size, ingredientId){
+    if(state.stockUnlockedRole!=='admin') return;
+    if(!state.recipes || !state.recipes[itemId] || !state.recipes[itemId][size]) return;
+    state.recipes[itemId][size] = state.recipes[itemId][size].filter(function(rl){ return rl.ingredientId!==ingredientId; });
+    db.collection('pos_recipes').doc('main').set({items: state.recipes}).catch(function(e){ window.alert('Could not update recipe: '+e.message); });
+    render();
+  },
 
   /* ---- Menu management ---- */
   startNewItem: function(){
@@ -3053,6 +3551,8 @@ document.addEventListener('keydown', function(e){
     press = POS.adminPinPress; backspace = POS.adminPinBackspace; submit = POS.adminPinSubmit;
   } else if(state.tab==='settings' && !state.settingsUnlocked){
     press = POS.settingsPinPress; backspace = POS.settingsPinBackspace; submit = POS.settingsPinSubmit;
+  } else if(state.tab==='stock' && !state.stockUnlocked){
+    press = POS.stockPinPress; backspace = POS.stockPinBackspace; submit = POS.stockPinSubmit;
   } else {
     return;
   }
