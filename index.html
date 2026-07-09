@@ -152,6 +152,13 @@
 .pin-dot.filled{background:var(--caramel);border-color:var(--caramel);}
 .pin-dot.error{background:var(--danger);border-color:var(--danger);}
 .pin-error-msg{color:var(--danger);font-size:12px;font-weight:700;margin:0 0 16px;min-height:15px;}
+.pin-lockout-notice{
+  background:#FCEAEA;border:1.5px solid #E8A0A0;border-radius:12px;
+  padding:16px 14px;margin:6px 0 16px;text-align:center;
+}
+.pin-lockout-icon{font-size:26px;margin-bottom:6px;}
+.pin-lockout-title{font-weight:800;font-size:14px;color:#B33A3A;margin-bottom:4px;}
+.pin-lockout-detail{font-size:12.5px;color:#8A3030;}
 .pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 .pin-keypad button{
   aspect-ratio:1;border-radius:14px;border:1.5px solid var(--border);background:#fff;
@@ -403,13 +410,14 @@
 .currency-chart-label{font-size:12.5px;font-weight:700;color:var(--caramel-dark);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
 .revenue-chart-row{display:flex;gap:18px;align-items:stretch;flex-wrap:wrap;}
 .revenue-total-callout{
-  flex:none;width:168px;background:linear-gradient(160deg,var(--caramel),var(--caramel-dark));
-  border-radius:14px;padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:center;
+  flex:1;min-width:150px;background:linear-gradient(160deg,var(--caramel),var(--caramel-dark));
+  border-radius:14px;padding:20px 16px;color:#fff;display:flex;flex-direction:column;justify-content:center;
   box-shadow:var(--shadow);
 }
+.revenue-callout-transfer{background:linear-gradient(160deg,var(--taro),#5B4F96);}
 .rtc-icon{font-size:22px;opacity:.9;margin-bottom:6px;}
 .rtc-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;opacity:.85;font-weight:700;margin-bottom:4px;}
-.rtc-value{font-size:24px;font-weight:800;font-family:'Fredoka';line-height:1.15;word-break:break-word;}
+.rtc-value{font-size:26px;font-weight:800;font-family:'Fredoka';line-height:1.15;word-break:break-word;}
 .revenue-chart-row .chart-scroll{flex:1;min-width:0;}
 @media (max-width:560px){
   .revenue-chart-row{flex-direction:column;}
@@ -424,6 +432,37 @@
 .recipe-size-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:10px;}
 .recipe-size-box{border:1.5px solid var(--border);border-radius:10px;padding:10px;background:var(--cream-dark);}
 .recipe-size-label{font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--espresso-soft);margin-bottom:8px;}
+.deposit-inputs{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;}
+.deposit-field{display:flex;flex-direction:column;gap:2px;}
+.deposit-field label{font-size:9.5px;color:var(--espresso-soft);text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;}
+.deposit-field input{width:92px;}
+.deposit-preview{width:100%;font-size:11.5px;color:var(--taro);font-weight:700;padding-left:46px;}
+
+.stock-target-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;width:100%;}
+.stock-target-box{border-radius:10px;padding:9px 11px;border:1.5px solid var(--border);background:var(--cream-dark);transition:background .15s, border-color .15s, color .15s;}
+.stock-target-box.status-neutral{background:var(--cream-dark);}
+.stock-target-box.status-config{background:var(--paper);border-style:dashed;border-color:var(--caramel-light);}
+.stock-target-box.status-config .stock-target-label{color:var(--caramel-dark);}
+.stock-target-box.status-red{background:#E5484D;border-color:#C4373C;color:#fff;box-shadow:0 2px 8px rgba(229,72,77,0.35);}
+.stock-target-box.status-yellow{background:#F5C518;border-color:#D9AC0A;color:#1A1A1A;box-shadow:0 2px 8px rgba(245,197,24,0.35);}
+.stock-target-box.status-green{background:#2FAE60;border-color:#218F4C;color:#fff;box-shadow:0 2px 8px rgba(47,174,96,0.35);}
+.stock-target-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.3px;color:var(--espresso-soft);font-weight:700;margin-bottom:5px;}
+.stock-target-box.status-red .stock-target-label{color:rgba(255,255,255,0.88);}
+.stock-target-box.status-yellow .stock-target-label{color:rgba(26,26,26,0.72);}
+.stock-target-box.status-green .stock-target-label{color:rgba(255,255,255,0.88);}
+.stock-target-box input{width:100%;margin-bottom:5px;}
+.stock-target-box.status-red input,
+.stock-target-box.status-yellow input,
+.stock-target-box.status-green input{background:rgba(255,255,255,0.94);color:#1A1A1A;border-color:rgba(255,255,255,0.6);}
+.stock-target-status{font-size:11.5px;font-weight:800;color:var(--espresso-soft);}
+.stock-target-box.status-red .stock-target-status{color:#fff;}
+.stock-target-box.status-yellow .stock-target-status{color:#1A1A1A;}
+.stock-target-box.status-green .stock-target-status{color:#fff;}
+.stock-target-status.status-none{color:var(--espresso-soft);font-weight:600;}
+.sets-needed-badge{
+  display:inline-block;background:rgba(255,255,255,0.92);color:#1A1A1A;
+  border-radius:999px;padding:1px 8px;font-size:10.5px;font-weight:800;margin-left:2px;white-space:nowrap;
+}
 
 @media print{
   @page{ margin:6mm; }
@@ -631,10 +670,11 @@ var TRANSLATIONS = {
     stock_raw_materials:'Raw Materials', stock_deposit:'Deposit Stock', stock_recipes:'Recipes',
     raw_materials_hint:'Every ingredient and how much is currently in stock.',
     add_ingredient:'+ Add Ingredient',
-    ingredient_name_label:'Ingredient name', unit_label:'Unit', unit_grams:'Grams (g)', unit_ml:'Milliliters (ml)',
+    ingredient_name_label:'Ingredient name', unit_label:'Unit', unit_grams:'Grams (g)', unit_ml:'Milliliters (ml)', unit_pcs:'Piece',
     current_stock_label:'Current stock',
-    deposit_hint:'Enter how much stock you\'re adding, then tap Deposit — it will be added on top of the current amount.',
+    deposit_hint:'Enter the amount in one unit (e.g. one bag or bottle) and how many of those you\'re adding — the total is added on top of the current stock automatically.',
     deposit_amount_placeholder:'Amount to add', deposit_btn:'Deposit',
+    deposit_per_unit_label:'Amount Per Set', deposit_set_label:'Set', deposit_preview_suffix:'will be added',
     recipes_hint:'Set how much of each ingredient goes into one drink. This powers automatic stock deduction whenever an order is completed.',
     edit_recipe:'Edit Recipe', close_recipe:'Close', no_recipe_set:'No recipe set yet.',
     select_ingredient:'Select ingredient…', amount_label:'Amount', add_line:'+ Add',
@@ -643,7 +683,13 @@ var TRANSLATIONS = {
     stock_gate_hint:'This area is restricted. Enter the manager or admin PIN to view and manage stock.',
     stock_sync_error_title:'⚠️ Stock data unavailable',
     stock_sync_error_hint:'Could not load ingredients or recipes — this Firebase project likely needs its security rules updated to allow access to the pos_ingredients and pos_recipes collections. The rest of the app is unaffected.',
-    size_label:'Size', recipe_admin_only_hint:'Only an administrator can edit recipes.'
+    size_label:'Size', recipe_admin_only_hint:'Only an administrator can edit recipes.',
+    weekly_target_label:'Weekly Target', monthly_target_label:'Monthly Target',
+    deposit_needed_prefix:'Need', fully_stocked_label:'Fully stocked', no_target_set:'No target set',
+    sets_needed_suffix:'sets needed',
+    amount_per_set_label:'Amount Per Set', amount_per_set_hint:'Used to calculate sets needed',
+    privileged_session_hint:'You are signed in with full access to this area for your whole session — no PIN needed again until you log out.',
+    pin_locked_title:'Too many incorrect attempts', pin_locked_prefix:'For security, PIN entry is suspended. Try again in', pin_locked_suffix:'minute(s).'
   },
   lo: {
     tab_order:'🧋 ສັ່ງເຄື່ອງດື່ມ', tab_menu:'📋 ເມນູ', tab_history:'🧾 ປະຫວັດ', tab_deleted:'🔒 ລຶບແລ້ວ', tab_settings:'⚙️ ຕັ້ງຄ່າ',
@@ -719,10 +765,11 @@ var TRANSLATIONS = {
     stock_raw_materials:'ວັດຖຸດິບ', stock_deposit:'ຝາກສະຕັອກ', stock_recipes:'ສູດສ່ວນປະສົມ',
     raw_materials_hint:'ວັດຖຸດິບທັງໝົດ ແລະ ຈຳນວນທີ່ຍັງເຫຼືອຢູ່ໃນສະຕັອກ.',
     add_ingredient:'+ ເພີ່ມວັດຖຸດິບ',
-    ingredient_name_label:'ຊື່ວັດຖຸດິບ', unit_label:'ຫົວໜ່ວຍ', unit_grams:'ກຣາມ (g)', unit_ml:'ມິນລິລິດ (ml)',
+    ingredient_name_label:'ຊື່ວັດຖຸດິບ', unit_label:'ຫົວໜ່ວຍ', unit_grams:'ກຣາມ (g)', unit_ml:'ມິນລິລິດ (ml)', unit_pcs:'ອັນ',
     current_stock_label:'ສະຕັອກປັດຈຸບັນ',
-    deposit_hint:'ໃສ່ຈຳນວນສະຕັອກທີ່ຈະເພີ່ມ, ແລ້ວກົດຝາກ — ມັນຈະຖືກບວກເພີ່ມໃສ່ຈຳນວນປັດຈຸບັນ.',
+    deposit_hint:'ໃສ່ຈຳນວນຕໍ່ 1 ໜ່ວຍ (ເຊັ່ນ: 1 ຖົງ ຫຼື 1 ແກ້ວ) ແລະ ຈຳນວນຊຸດທີ່ຈະເພີ່ມ — ຍອດລວມຈະຖືກບວກເຂົ້າສະຕັອກປັດຈຸບັນອັດຕະໂນມັດ.',
     deposit_amount_placeholder:'ຈຳນວນທີ່ຈະເພີ່ມ', deposit_btn:'ຝາກ',
+    deposit_per_unit_label:'ຈຳນວນຕໍ່ຊຸດ', deposit_set_label:'ຊຸດ', deposit_preview_suffix:'ຈະຖືກເພີ່ມ',
     recipes_hint:'ຕັ້ງຄ່າວ່າແຕ່ລະວັດຖຸດິບໃຊ້ເທົ່າໃດຕໍ່ເຄື່ອງດື່ມໜຶ່ງແກ້ວ. ນີ້ຄືສິ່ງທີ່ຄວບຄຸມການຫັກສະຕັອກອັດຕະໂນມັດເມື່ອອໍເດີສຳເລັດ.',
     edit_recipe:'ແກ້ໄຂສູດ', close_recipe:'ປິດ', no_recipe_set:'ຍັງບໍ່ໄດ້ຕັ້ງສູດ.',
     select_ingredient:'ເລືອກວັດຖຸດິບ…', amount_label:'ຈຳນວນ', add_line:'+ ເພີ່ມ',
@@ -731,7 +778,13 @@ var TRANSLATIONS = {
     stock_gate_hint:'ພື້ນທີ່ນີ້ຖືກຈຳກັດ. ໃສ່ລະຫັດຜູ້ຈັດການ ຫຼື ຜູ້ດູແລລະບົບເພື່ອເບິ່ງ ແລະ ຈັດການສະຕັອກ.',
     stock_sync_error_title:'⚠️ ຂໍ້ມູນສະຕັອກບໍ່ພ້ອມໃຊ້ງານ',
     stock_sync_error_hint:'ບໍ່ສາມາດໂຫຼດວັດຖຸດິບ ຫຼື ສູດໄດ້ — ໂປຣເຈັກ Firebase ນີ້ອາດຈະຕ້ອງອັບເດດກົດຄວາມປອດໄພເພື່ອອະນຸຍາດການເຂົ້າເຖິງ pos_ingredients ແລະ pos_recipes. ສ່ວນອື່ນຂອງແອັບບໍ່ໄດ້ຮັບຜົນກະທົບ.',
-    size_label:'ຂະໜາດ', recipe_admin_only_hint:'ມີແຕ່ຜູ້ດູແລລະບົບເທົ່ານັ້ນທີ່ສາມາດແກ້ໄຂສູດໄດ້.'
+    size_label:'ຂະໜາດ', recipe_admin_only_hint:'ມີແຕ່ຜູ້ດູແລລະບົບເທົ່ານັ້ນທີ່ສາມາດແກ້ໄຂສູດໄດ້.',
+    weekly_target_label:'ເປົ້າໝາຍລາຍອາທິດ', monthly_target_label:'ເປົ້າໝາຍລາຍເດືອນ',
+    deposit_needed_prefix:'ຕ້ອງການ', fully_stocked_label:'ສະຕັອກພຽງພໍ', no_target_set:'ຍັງບໍ່ໄດ້ຕັ້ງເປົ້າໝາຍ',
+    sets_needed_suffix:'ຊຸດທີ່ຕ້ອງການ',
+    amount_per_set_label:'ຈຳນວນຕໍ່ຊຸດ', amount_per_set_hint:'ໃຊ້ຄິດໄລ່ຈຳນວນຊຸດທີ່ຕ້ອງການ',
+    privileged_session_hint:'ທ່ານໄດ້ເຂົ້າສູ່ລະບົບດ້ວຍສິດເຂົ້າເຖິງເຕັມສ່ວນນີ້ຕະຫຼອດການນຳໃຊ້ — ບໍ່ຕ້ອງໃສ່ລະຫັດອີກຈົນກວ່າຈະອອກຈາກລະບົບ.',
+    pin_locked_title:'ພະຍາຍາມຜິດຫຼາຍເກີນໄປ', pin_locked_prefix:'ເພື່ອຄວາມປອດໄພ, ການໃສ່ລະຫັດຖືກລະງັບຊົ່ວຄາວ. ລອງໃໝ່ອີກຄັ້ງໃນ', pin_locked_suffix:'ນາທີ.'
   },
   th: {
     tab_order:'🧋 สั่งเครื่องดื่ม', tab_menu:'📋 เมนู', tab_history:'🧾 ประวัติ', tab_deleted:'🔒 ที่ลบแล้ว', tab_settings:'⚙️ ตั้งค่า',
@@ -807,10 +860,11 @@ var TRANSLATIONS = {
     stock_raw_materials:'วัตถุดิบ', stock_deposit:'ฝากสต็อก', stock_recipes:'สูตรส่วนผสม',
     raw_materials_hint:'วัตถุดิบทั้งหมดและจำนวนที่เหลืออยู่ในสต็อก',
     add_ingredient:'+ เพิ่มวัตถุดิบ',
-    ingredient_name_label:'ชื่อวัตถุดิบ', unit_label:'หน่วย', unit_grams:'กรัม (g)', unit_ml:'มิลลิลิตร (ml)',
+    ingredient_name_label:'ชื่อวัตถุดิบ', unit_label:'หน่วย', unit_grams:'กรัม (g)', unit_ml:'มิลลิลิตร (ml)', unit_pcs:'ชิ้น',
     current_stock_label:'สต็อกปัจจุบัน',
-    deposit_hint:'ป้อนจำนวนสต็อกที่จะเพิ่ม แล้วกดฝาก — จำนวนนี้จะถูกบวกเพิ่มเข้ากับจำนวนปัจจุบัน',
+    deposit_hint:'ป้อนจำนวนต่อ 1 หน่วย (เช่น 1 ถุง หรือ 1 ขวด) และจำนวนชุดที่จะเพิ่ม — ยอดรวมจะถูกบวกเข้าสต็อกปัจจุบันโดยอัตโนมัติ',
     deposit_amount_placeholder:'จำนวนที่จะเพิ่ม', deposit_btn:'ฝาก',
+    deposit_per_unit_label:'จำนวนต่อชุด', deposit_set_label:'ชุด', deposit_preview_suffix:'จะถูกเพิ่ม',
     recipes_hint:'ตั้งค่าว่าแต่ละวัตถุดิบใช้เท่าไรต่อเครื่องดื่มหนึ่งแก้ว นี่คือสิ่งที่ควบคุมการหักสต็อกอัตโนมัติเมื่อออเดอร์เสร็จสมบูรณ์',
     edit_recipe:'แก้ไขสูตร', close_recipe:'ปิด', no_recipe_set:'ยังไม่ได้ตั้งสูตร',
     select_ingredient:'เลือกวัตถุดิบ…', amount_label:'จำนวน', add_line:'+ เพิ่ม',
@@ -819,7 +873,13 @@ var TRANSLATIONS = {
     stock_gate_hint:'พื้นที่นี้ถูกจำกัด ป้อนรหัส PIN ผู้จัดการหรือผู้ดูแลระบบเพื่อดูและจัดการสต็อก',
     stock_sync_error_title:'⚠️ ข้อมูลสต็อกไม่พร้อมใช้งาน',
     stock_sync_error_hint:'ไม่สามารถโหลดวัตถุดิบหรือสูตรได้ — โปรเจกต์ Firebase นี้อาจต้องอัปเดตกฎความปลอดภัยเพื่ออนุญาตการเข้าถึงคอลเลกชัน pos_ingredients และ pos_recipes ส่วนอื่นของแอปไม่ได้รับผลกระทบ',
-    size_label:'ขนาด', recipe_admin_only_hint:'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถแก้ไขสูตรได้'
+    size_label:'ขนาด', recipe_admin_only_hint:'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถแก้ไขสูตรได้',
+    weekly_target_label:'เป้าหมายรายสัปดาห์', monthly_target_label:'เป้าหมายรายเดือน',
+    deposit_needed_prefix:'ต้องการ', fully_stocked_label:'สต็อกเพียงพอ', no_target_set:'ยังไม่ได้ตั้งเป้าหมาย',
+    sets_needed_suffix:'ชุดที่ต้องการ',
+    amount_per_set_label:'จำนวนต่อชุด', amount_per_set_hint:'ใช้คำนวณจำนวนชุดที่ต้องการ',
+    privileged_session_hint:'คุณเข้าสู่ระบบด้วยสิทธิ์เข้าถึงส่วนนี้เต็มรูปแบบตลอดเซสชัน — ไม่ต้องใส่รหัส PIN อีกจนกว่าจะออกจากระบบ',
+    pin_locked_title:'พยายามผิดหลายครั้งเกินไป', pin_locked_prefix:'เพื่อความปลอดภัย การป้อนรหัส PIN ถูกระงับชั่วคราว ลองใหม่อีกครั้งใน', pin_locked_suffix:'นาที'
   }
 };
 function tr(key){
@@ -839,6 +899,10 @@ var ADMIN_EMAIL = "admin@memetea-pos.com";
 /* ================= STATE ================= */
 var state = {
   unlocked:false,
+  loggedInRole:null, // 'staff' | 'manager' | 'admin' — set at login, grants that
+                      // role's reserved tabs persistent access for the session
+  pinFailCount:0,
+  pinLockedUntil:null,
   pinInput:'',
   pinError:false,
   pinChecking:false,
@@ -1092,6 +1156,60 @@ function sanitizeDecimal(v){
   }
   return v;
 }
+/* ================= PIN BRUTE-FORCE LOCKOUT =================
+   Shared across every PIN screen in the app (login, manager approval,
+   admin/settings/stock gates) — trying a wrong PIN anywhere counts toward
+   the same limit, and a lockout blocks every PIN entry point at once.
+   More than 8 wrong attempts in a row suspends PIN entry for 10 minutes.
+   Persisted to localStorage so refreshing the page can't be used to get
+   around it. */
+var PIN_MAX_ATTEMPTS = 8;
+var PIN_LOCKOUT_MS = 10*60*1000;
+function loadPinLockState(){
+  try{
+    var raw = window.localStorage.getItem('pos_pin_lock');
+    if(!raw) return;
+    var parsed = JSON.parse(raw);
+    state.pinFailCount = parsed.failCount || 0;
+    state.pinLockedUntil = parsed.lockedUntil || null;
+  }catch(e){ /* localStorage unavailable — fail open, in-memory only */ }
+}
+function savePinLockState(){
+  try{
+    window.localStorage.setItem('pos_pin_lock', JSON.stringify({
+      failCount: state.pinFailCount,
+      lockedUntil: state.pinLockedUntil
+    }));
+  }catch(e){}
+}
+function isPinLocked(){
+  return !!(state.pinLockedUntil && Date.now() < state.pinLockedUntil);
+}
+function pinLockoutMinutesLeft(){
+  if(!state.pinLockedUntil) return 0;
+  return Math.max(1, Math.ceil((state.pinLockedUntil - Date.now()) / 60000));
+}
+function registerPinFailure(){
+  state.pinFailCount = (state.pinFailCount||0) + 1;
+  if(state.pinFailCount > PIN_MAX_ATTEMPTS){
+    state.pinLockedUntil = Date.now() + PIN_LOCKOUT_MS;
+    state.pinFailCount = 0;
+  }
+  savePinLockState();
+}
+function registerPinSuccess(){
+  state.pinFailCount = 0;
+  state.pinLockedUntil = null;
+  savePinLockState();
+}
+function buildPinLockoutNotice(){
+  return '' +
+  '<div class="pin-lockout-notice">' +
+    '<div class="pin-lockout-icon">⏳</div>' +
+    '<div class="pin-lockout-title">'+tr('pin_locked_title')+'</div>' +
+    '<div class="pin-lockout-detail">'+tr('pin_locked_prefix')+' '+pinLockoutMinutesLeft()+' '+tr('pin_locked_suffix')+'</div>' +
+  '</div>';
+}
 /* ---- Multi-currency support (LAK is always the base/stored currency) ---- */
 function rateForCurrency(cur){
   if(cur==='USD') return Number(state.settings.usdRate)||1;
@@ -1154,6 +1272,7 @@ function formatClock(){
 function tickClock(){
   var el = document.getElementById('live-clock');
   if(el) el.textContent = formatClock();
+  if(state.pinLockedUntil) render();
 }
 function dateKey(iso){
   var d = new Date(iso);
@@ -1297,12 +1416,13 @@ function buildHeader(){
 
 /* ================= LOGIN SCREEN ================= */
 function buildLoginScreen(){
+  var locked = isPinLocked();
   var dots = '';
   for(var i=0;i<state.pinInput.length;i++){
     dots += '<span class="pin-dot filled'+(state.pinError?' error':'')+'"></span>';
   }
   if(!dots) dots = '<span class="pin-dots-empty">'+tr('enter_pin_prompt').split(',')[0]+'</span>';
-  var disabled = state.pinChecking;
+  var disabled = state.pinChecking || locked;
   var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
   var keypadHtml = keys.map(function(k){
     if(k==='back') return '<button class="pin-key-back" '+(disabled?'disabled':'')+' onclick="POS.pinBackspace()">⌫</button>';
@@ -1319,9 +1439,11 @@ function buildLoginScreen(){
       '<div class="lang-row" style="justify-content:center;margin-bottom:10px;">'+langHtml+'</div>' +
       logoImg('cup-mark') +
       '<h1>'+tr('staff_access')+'</h1>' +
-      '<p>'+(state.pinChecking?tr('checking'):tr('enter_pin_prompt'))+'</p>' +
-      '<div class="pin-dots">'+dots+'</div>' +
-      '<div class="pin-error-msg">'+(state.pinError?tr('incorrect_pin'):'&nbsp;')+'</div>' +
+      (locked ? buildPinLockoutNotice() : (
+        '<p>'+(state.pinChecking?tr('checking'):tr('enter_pin_prompt'))+'</p>' +
+        '<div class="pin-dots">'+dots+'</div>' +
+        '<div class="pin-error-msg">'+(state.pinError?tr('incorrect_pin'):'&nbsp;')+'</div>'
+      )) +
       '<div class="pin-keypad">'+keypadHtml+'</div>' +
     '</div>' +
   '</div>';
@@ -1335,12 +1457,13 @@ function buildManagerPinModal(){
   var sub = isClearAll
     ? tr('clear_all_history_sub')
     : tr('delete_order_sub');
+  var locked = isPinLocked();
   var dots = '';
   for(var i=0;i<state.managerPinInput.length;i++){
     dots += '<span class="pin-dot filled'+(state.managerPinError?' error':'')+'"></span>';
   }
   if(!dots) dots = '<span class="pin-dots-empty">'+tr('manager_pin_placeholder')+'</span>';
-  var disabled = state.managerPinChecking;
+  var disabled = state.managerPinChecking || locked;
   var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
   var keypadHtml = keys.map(function(k){
     if(k==='back') return '<button class="pin-key-back" '+(disabled?'disabled':'')+' onclick="POS.managerPinBackspace()">⌫</button>';
@@ -1352,9 +1475,11 @@ function buildManagerPinModal(){
     '<div class="pos-modal" style="max-width:320px;text-align:center;">' +
       '<button class="modal-close-x" '+(disabled?'disabled':'')+' onclick="POS.cancelManagerPrompt()">✕</button>' +
       '<h2 style="font-size:17px;">🔒 '+escapeHtml(title)+'</h2>' +
-      '<p style="font-size:12.5px;color:var(--espresso-soft);margin:4px 0 16px;">'+escapeHtml(state.managerPinChecking?tr('checking'):sub)+'</p>' +
-      '<div class="pin-dots">'+dots+'</div>' +
-      '<div class="pin-error-msg">'+(state.managerPinError?tr('incorrect_manager_pin'):'&nbsp;')+'</div>' +
+      (locked ? buildPinLockoutNotice() : (
+        '<p style="font-size:12.5px;color:var(--espresso-soft);margin:4px 0 16px;">'+escapeHtml(state.managerPinChecking?tr('checking'):sub)+'</p>' +
+        '<div class="pin-dots">'+dots+'</div>' +
+        '<div class="pin-error-msg">'+(state.managerPinError?tr('incorrect_manager_pin'):'&nbsp;')+'</div>'
+      )) +
       '<div class="pin-keypad">'+keypadHtml+'</div>' +
     '</div>' +
   '</div>';
@@ -1549,7 +1674,7 @@ function buildCartPanel(){
     }).join('');
   }
 
-  var payBtns = [['cash',tr('cash')],['transfer',tr('transfer')],['qr',tr('qr_pay')]].map(function(p){
+  var payBtns = [['cash',tr('cash')],['transfer',tr('transfer')]].map(function(p){
     return '<button class="'+(state.paymentMethod===p[0]?'active':'')+'" onclick="POS.setPayment(\''+p[0]+'\')">'+p[1]+'</button>';
   }).join('');
 
@@ -1970,91 +2095,36 @@ function buildRevenueChart(orders){
   var presentCurrencies = currencyOrder.filter(function(c){ return byCurrency[c]; });
 
   var sectionsHtml = presentCurrencies.map(function(cur, idx){
-    return (idx>0 ? '<div style="height:20px;"></div>' : '') + buildRevenueChartForCurrency(byCurrency[cur], cur);
+    return (idx>0 ? '<div style="height:18px;"></div>' : '') + buildRevenueBigNumbersForCurrency(byCurrency[cur], cur);
   }).join('');
 
-  return sectionsHtml +
-  '<div class="chart-legend">' +
-    '<span class="legend-item"><span class="legend-dot" style="background:var(--caramel)"></span>'+tr('cash')+'</span>' +
-    '<span class="legend-item"><span class="legend-dot" style="background:var(--taro)"></span>'+tr('transfer')+'</span>' +
-    '<span class="legend-item"><span class="legend-dot" style="background:var(--matcha)"></span>'+tr('qr_pay')+'</span>' +
-  '</div>';
+  return sectionsHtml;
 }
 
-function buildRevenueChartForCurrency(orders, cur){
-  var totalForCurrency = orders.reduce(function(sum,o){
-    var amt = cur==='LAK' ? o.total : (o.displayTotal!=null ? o.displayTotal : fromLAK(o.total, cur));
-    return sum + amt;
-  }, 0);
-
-  var byDate = {};
+/* Legacy 'qr' orders are folded into Transfer — QR Pay was removed as a
+   payment option since it's the same payment rail as Transfer. */
+function buildRevenueBigNumbersForCurrency(orders, cur){
+  var cashTotal = 0, transferTotal = 0;
   orders.forEach(function(o){
-    var k = dateKey(o.timestamp);
-    if(!byDate[k]) byDate[k] = {cash:0, transfer:0, qr:0};
-    var pm = o.paymentMethod==='cash' ? 'cash' : (o.paymentMethod==='qr' ? 'qr' : 'transfer');
     var amt = cur==='LAK' ? o.total : (o.displayTotal!=null ? o.displayTotal : fromLAK(o.total, cur));
-    byDate[k][pm] += amt;
+    if(o.paymentMethod==='cash') cashTotal += amt;
+    else transferTotal += amt;
   });
-  var dateKeys = Object.keys(byDate).sort();
-  var truncated = false;
-  if(dateKeys.length > 31){ dateKeys = dateKeys.slice(dateKeys.length-31); truncated = true; }
-
-  var maxTotal = cur==='LAK' ? 1 : 0.01;
-  dateKeys.forEach(function(k){
-    var d = byDate[k];
-    var tot = d.cash + d.transfer + d.qr;
-    if(tot > maxTotal) maxTotal = tot;
-  });
-
-  var chartH = 200, chartTop = 14, chartBottom = chartH - 34;
-  var plotH = chartBottom - chartTop;
-  var barW = 28, gap = 16;
-  var leftPad = 58;
-  var W = leftPad + dateKeys.length * (barW+gap) + gap;
-
-  var gridHtml = '';
-  var yTicks = 4;
-  for(var i=0;i<=yTicks;i++){
-    var val = maxTotal * i / yTicks;
-    var y = chartBottom - (plotH * i/yTicks);
-    var lbl = cur==='LAK' ? formatMoneyShort(val) : val.toFixed(2);
-    gridHtml += '<line x1="'+leftPad+'" y1="'+y.toFixed(1)+'" x2="'+(W-6)+'" y2="'+y.toFixed(1)+'" stroke="var(--border)" stroke-width="1"/>';
-    gridHtml += '<text x="'+(leftPad-8)+'" y="'+(y+4).toFixed(1)+'" font-size="10" fill="var(--espresso-soft)" text-anchor="end">'+lbl+'</text>';
-  }
-
-  var barsHtml = dateKeys.map(function(k, idx){
-    var d = byDate[k];
-    var x = leftPad + gap + idx*(barW+gap);
-    var cashH = plotH * (d.cash / maxTotal);
-    var transferH = plotH * (d.transfer / maxTotal);
-    var qrH = plotH * (d.qr / maxTotal);
-    var yCash = chartBottom - cashH;
-    var yTransfer = yCash - transferH;
-    var yQr = yTransfer - qrH;
-    var segs = '';
-    if(d.cash>0) segs += '<rect x="'+x+'" y="'+yCash.toFixed(1)+'" width="'+barW+'" height="'+cashH.toFixed(1)+'" fill="var(--caramel)" rx="2"><title>Cash: '+formatForeignAmount(d.cash,cur)+'</title></rect>';
-    if(d.transfer>0) segs += '<rect x="'+x+'" y="'+yTransfer.toFixed(1)+'" width="'+barW+'" height="'+transferH.toFixed(1)+'" fill="var(--taro)" rx="2"><title>Transfer: '+formatForeignAmount(d.transfer,cur)+'</title></rect>';
-    if(d.qr>0) segs += '<rect x="'+x+'" y="'+yQr.toFixed(1)+'" width="'+barW+'" height="'+qrH.toFixed(1)+'" fill="var(--matcha)" rx="2"><title>QR Pay: '+formatForeignAmount(d.qr,cur)+'</title></rect>';
-    var lbl = shortDateLabel(k);
-    segs += '<text x="'+(x+barW/2)+'" y="'+(chartBottom+16)+'" font-size="9.5" fill="var(--espresso-soft)" text-anchor="middle">'+lbl+'</text>';
-    return segs;
-  }).join('');
-
   var currencyLabel = cur==='LAK' ? '₭ Lao Kip' : (cur==='USD' ? '$ US Dollar' : '฿ Thai Baht');
-  var currencyIcon = currencySymbolFor(cur);
 
   return '' +
   '<div class="currency-chart-label">'+currencyLabel+'</div>' +
-  (truncated ? '<p class="hint" style="margin-top:-4px;">Showing the most recent 31 days.</p>' : '') +
   '<div class="revenue-chart-row">' +
     '<div class="revenue-total-callout">' +
-      '<div class="rtc-icon">'+currencyIcon+'</div>' +
-      '<div class="rtc-label">Total Revenue</div>' +
-      '<div class="rtc-value">'+formatForeignAmount(totalForCurrency, cur)+'</div>' +
+      '<div class="rtc-icon">💵</div>' +
+      '<div class="rtc-label">'+tr('cash')+'</div>' +
+      '<div class="rtc-value">'+formatForeignAmount(cashTotal, cur)+'</div>' +
     '</div>' +
-    '<div class="chart-scroll"><svg viewBox="0 0 '+W+' '+chartH+'" width="'+W+'" height="'+chartH+'" style="min-width:'+Math.min(W,760)+'px;">' +
-      gridHtml + barsHtml +
-    '</svg></div>' +
+    '<div class="revenue-total-callout revenue-callout-transfer">' +
+      '<div class="rtc-icon">🏦</div>' +
+      '<div class="rtc-label">'+tr('transfer')+'</div>' +
+      '<div class="rtc-value">'+formatForeignAmount(transferTotal, cur)+'</div>' +
+    '</div>' +
   '</div>';
 }
 
@@ -2185,10 +2255,16 @@ function formatIngredientAmount(n){
   n = Number(n)||0;
   return (Math.round(n*100)/100).toLocaleString('en-US');
 }
+function ingredientEmoji(unit){
+  if(unit==='ml') return '💧';
+  if(unit==='pcs') return '📦';
+  return '🧂';
+}
 function buildStockTab(){
-  if(!state.stockUnlocked){
+  if(!hasStockAccess()){
     return buildStockPinGate();
   }
+  var privileged = state.loggedInRole==='manager' || state.loggedInRole==='admin';
   var subTabs = [['raw','stock_raw_materials'],['deposit','stock_deposit'],['recipes','stock_recipes']];
   var subTabHtml = subTabs.map(function(s){
     return '<button class="chip '+(state.stockSubTab===s[0]?'active':'')+'" onclick="POS.setStockSubTab(\''+s[0]+'\')">'+tr(s[1])+'</button>';
@@ -2206,8 +2282,8 @@ function buildStockTab(){
   return '' +
   '<div class="section-card" style="background:var(--taro-light);border-color:var(--taro);">' +
     '<h2 style="color:var(--taro);">'+tr('manager_admin_area_title')+'</h2>' +
-    '<p class="hint">'+tr('stock_restricted_hint')+'</p>' +
-    '<button class="btn btn-ghost btn-small" onclick="POS.lockStockTab(); POS.setTab(\'stock\')">'+tr('lock_tab_now')+'</button>' +
+    '<p class="hint">'+(privileged ? tr('privileged_session_hint') : tr('stock_restricted_hint'))+'</p>' +
+    (privileged ? '' : '<button class="btn btn-ghost btn-small" onclick="POS.lockStockTab(); POS.setTab(\'stock\')">'+tr('lock_tab_now')+'</button>') +
   '</div>' +
   errorBanner +
   '<div class="chip-row" style="margin-bottom:16px;">'+subTabHtml+'</div>' +
@@ -2215,12 +2291,13 @@ function buildStockTab(){
 }
 
 function buildStockPinGate(){
+  var locked = isPinLocked();
   var dots = '';
   for(var i=0;i<state.stockPinInput.length;i++){
     dots += '<span class="pin-dot filled'+(state.stockPinError?' error':'')+'"></span>';
   }
   if(!dots) dots = '<span class="pin-dots-empty">'+tr('manager_admin_pin_placeholder')+'</span>';
-  var disabled = state.stockPinChecking;
+  var disabled = state.stockPinChecking || locked;
   var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
   var keypadHtml = keys.map(function(k){
     if(k==='back') return '<button class="pin-key-back" '+(disabled?'disabled':'')+' onclick="POS.stockPinBackspace()">⌫</button>';
@@ -2232,9 +2309,11 @@ function buildStockPinGate(){
     '<div class="login-card" style="max-width:320px;margin:24px auto;">' +
       '<div class="admin-gate-icon">🔒</div>' +
       '<h1>'+tr('manager_admin_only')+'</h1>' +
-      '<p>'+(state.stockPinChecking?tr('checking'):tr('stock_gate_hint'))+'</p>' +
-      '<div class="pin-dots">'+dots+'</div>' +
-      '<div class="pin-error-msg">'+(state.stockPinError?tr('incorrect_manager_admin_pin'):'&nbsp;')+'</div>' +
+      (locked ? buildPinLockoutNotice() : (
+        '<p>'+(state.stockPinChecking?tr('checking'):tr('stock_gate_hint'))+'</p>' +
+        '<div class="pin-dots">'+dots+'</div>' +
+        '<div class="pin-error-msg">'+(state.stockPinError?tr('incorrect_manager_admin_pin'):'&nbsp;')+'</div>'
+      )) +
       '<div class="pin-keypad">'+keypadHtml+'</div>' +
     '</div>' +
   '</div>';
@@ -2244,15 +2323,17 @@ function buildIngredientEditForm(ing){
   var d = ing || state.newIngredientDraft;
   var isNew = !ing;
   var idArg = isNew ? 'null' : '\''+ing.id+'\'';
+  var idBase = 'pos-ing-'+(isNew?'new':ing.id);
   return '' +
   '<div class="section-card" style="background:var(--cream-dark);box-shadow:none;">' +
     '<div class="field-grid">' +
-      '<div class="field"><label>'+tr('ingredient_name_label')+'</label><input type="text" value="'+escapeHtml(d.name)+'" oninput="POS.updateIngredientDraft('+idArg+',\'name\',this.value)"/></div>' +
-      '<div class="field"><label>'+tr('unit_label')+'</label><select onchange="POS.updateIngredientDraft('+idArg+',\'unit\',this.value)">' +
+      '<div class="field"><label>'+tr('ingredient_name_label')+'</label><input id="'+idBase+'-name" type="text" value="'+escapeHtml(d.name)+'" oninput="POS.updateIngredientDraft('+idArg+',\'name\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('unit_label')+'</label><select id="'+idBase+'-unit" onchange="POS.updateIngredientDraft('+idArg+',\'unit\',this.value)">' +
         '<option value="g" '+(d.unit==='g'?'selected':'')+'>'+tr('unit_grams')+'</option>' +
         '<option value="ml" '+(d.unit==='ml'?'selected':'')+'>'+tr('unit_ml')+'</option>' +
+        '<option value="pcs" '+(d.unit==='pcs'?'selected':'')+'>'+tr('unit_pcs')+'</option>' +
       '</select></div>' +
-      '<div class="field"><label>'+tr('current_stock_label')+'</label><input type="text" inputmode="decimal" value="'+(d.stock!=null?d.stock:0)+'" oninput="POS.updateIngredientDraft('+idArg+',\'stock\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('current_stock_label')+'</label><input id="'+idBase+'-stock" type="text" inputmode="decimal" value="'+(d.stock!=null?d.stock:0)+'" oninput="POS.updateIngredientDraft('+idArg+',\'stock\',this.value)"/></div>' +
     '</div>' +
     '<div style="display:flex;gap:8px;">' +
       '<button class="btn btn-primary" style="width:auto;margin-top:0;" onclick="POS.saveIngredient('+idArg+')">'+tr('save')+'</button>' +
@@ -2261,17 +2342,101 @@ function buildIngredientEditForm(ing){
   '</div>';
 }
 
+/* ---- Weekly/monthly stock targets: color-coded status ----
+   green  = stock is above 50% of the target (healthy)
+   yellow = stock is between 20% and 50% of the target (getting low)
+   red    = stock is at or below 20% of the target (critical) */
+/* ---- Privileged-login access: once someone signs in AS manager/admin at
+   the login screen, their reserved tabs stay open for the rest of the
+   session — no repeated PIN prompts until they fully log out. A one-off PIN
+   typed by a staff session (state.loggedInRole==='staff') still only
+   unlocks for that visit and re-locks on leaving, as before. */
+function hasSettingsAccess(){
+  return state.settingsUnlocked || state.loggedInRole==='manager' || state.loggedInRole==='admin';
+}
+function hasStockAccess(){
+  return state.stockUnlocked || state.loggedInRole==='manager' || state.loggedInRole==='admin';
+}
+function hasAdminAccess(){
+  return state.adminUnlocked || state.loggedInRole==='admin';
+}
+function effectiveStockRole(){
+  if(state.loggedInRole==='manager' || state.loggedInRole==='admin') return state.loggedInRole;
+  return state.stockUnlockedRole;
+}
+function stockStatusFor(stock, target){
+  target = Number(target)||0;
+  if(target<=0) return null;
+  stock = Number(stock)||0;
+  var pct = stock / target;
+  if(pct <= 0.2) return 'red';
+  if(pct <= 0.5) return 'yellow';
+  return 'green';
+}
+function buildStockTargetBox(ing, field, labelKey){
+  var target = ing[field];
+  var status = stockStatusFor(ing.stock, target);
+  var needed = Math.max(0, (Number(target)||0) - (Number(ing.stock)||0));
+  var statusHtml;
+  if(status===null){
+    statusHtml = '<div class="stock-target-status status-none">'+tr('no_target_set')+'</div>';
+  } else if(needed<=0){
+    statusHtml = '<div class="stock-target-status">✓ '+tr('fully_stocked_label')+'</div>';
+  } else {
+    var setsBadge = '';
+    if((status==='red' || status==='yellow') && Number(ing.amountPerSet)>0){
+      var setsNeeded = Math.ceil(needed / Number(ing.amountPerSet));
+      setsBadge = ' <span class="sets-needed-badge">'+setsNeeded+' '+tr('sets_needed_suffix')+'</span>';
+    }
+    statusHtml = '<div class="stock-target-status">'+tr('deposit_needed_prefix')+' '+formatIngredientAmount(needed)+' '+escapeHtml(ing.unit)+setsBadge+'</div>';
+  }
+  return '' +
+  '<div class="stock-target-box'+(status?' status-'+status:' status-neutral')+'">' +
+    '<div class="stock-target-label">'+tr(labelKey)+'</div>' +
+    '<input id="pos-target-'+field+'-'+ing.id+'" type="text" inputmode="decimal" placeholder="0" value="'+(target?escapeHtml(String(target)):'')+'" ' +
+      'oninput="POS.updateIngredientTarget(\''+ing.id+'\',\''+field+'\',this.value)" ' +
+      'onblur="POS.persistIngredientTarget(\''+ing.id+'\')"/>' +
+    statusHtml +
+  '</div>';
+}
+function buildAmountPerSetBox(ing){
+  return '' +
+  '<div class="stock-target-box status-config">' +
+    '<div class="stock-target-label">'+tr('amount_per_set_label')+'</div>' +
+    '<input id="pos-target-amountPerSet-'+ing.id+'" type="text" inputmode="decimal" placeholder="0" value="'+(ing.amountPerSet?escapeHtml(String(ing.amountPerSet)):'')+'" ' +
+      'oninput="POS.updateIngredientAmountPerSet(\''+ing.id+'\',this.value)" ' +
+      'onblur="POS.persistIngredientAmountPerSet(\''+ing.id+'\')"/>' +
+    '<div class="stock-target-status status-none">'+tr('amount_per_set_hint')+'</div>' +
+  '</div>';
+}
+/* Sorts Raw Materials so anything needing attention (red, then yellow) on
+   its WEEKLY target always floats to the top, ahead of anything green or
+   with no weekly target set — makes a quick stock take much faster since
+   the urgent items are never buried in the list. Monthly target status does
+   not affect this ordering. */
+var STOCK_SEVERITY_RANK = {red:0, yellow:1, green:2};
+function ingredientSeverity(ing){
+  var wStatus = stockStatusFor(ing.stock, ing.weeklyTarget);
+  return wStatus!=null ? STOCK_SEVERITY_RANK[wStatus] : 3;
+}
 function buildRawMaterialsSubTab(){
-  var ingredients = state.ingredients || [];
+  var ingredients = (state.ingredients || []).slice().sort(function(a,b){
+    return ingredientSeverity(a) - ingredientSeverity(b);
+  });
   var rows = ingredients.map(function(ing){
     if(state.editingIngredientId===ing.id) return buildIngredientEditForm(ing);
     return '' +
-    '<div class="mgmt-row">' +
-      '<span class="em">'+(ing.unit==='ml'?'💧':'🧂')+'</span>' +
+    '<div class="mgmt-row" style="flex-wrap:wrap;row-gap:10px;">' +
+      '<span class="em">'+ingredientEmoji(ing.unit)+'</span>' +
       '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+tr('current_stock_label')+': '+formatIngredientAmount(ing.stock)+' '+escapeHtml(ing.unit)+'</div></div>' +
       '<div class="acts">' +
         '<button class="btn btn-outline btn-small" onclick="POS.editIngredient(\''+ing.id+'\')">'+tr('edit')+'</button>' +
         '<button class="btn btn-danger btn-small" onclick="POS.deleteIngredient(\''+ing.id+'\')">'+tr('delete')+'</button>' +
+      '</div>' +
+      '<div class="stock-target-grid">' +
+        buildStockTargetBox(ing, 'weeklyTarget', 'weekly_target_label') +
+        buildStockTargetBox(ing, 'monthlyTarget', 'monthly_target_label') +
+        buildAmountPerSetBox(ing) +
       '</div>' +
     '</div>';
   }).join('');
@@ -2287,15 +2452,23 @@ function buildRawMaterialsSubTab(){
 function buildDepositStockSubTab(){
   var ingredients = state.ingredients || [];
   var rows = ingredients.map(function(ing){
-    var draftVal = state.depositDrafts[ing.id]!=null ? state.depositDrafts[ing.id] : '';
+    var perUnit = Number(ing.amountPerUnit)||0;
+    var setsDraft = state.depositDrafts[ing.id]!=null ? state.depositDrafts[ing.id] : '';
+    var sets = Number(setsDraft)||0;
+    var total = perUnit * sets;
+    var previewHtml = total>0
+      ? '<div class="deposit-preview">= '+formatIngredientAmount(total)+' '+escapeHtml(ing.unit)+' '+tr('deposit_preview_suffix')+'</div>'
+      : '';
     return '' +
-    '<div class="mgmt-row">' +
-      '<span class="em">'+(ing.unit==='ml'?'💧':'🧂')+'</span>' +
+    '<div class="mgmt-row" style="flex-wrap:wrap;row-gap:10px;">' +
+      '<span class="em">'+ingredientEmoji(ing.unit)+'</span>' +
       '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+tr('current_stock_label')+': '+formatIngredientAmount(ing.stock)+' '+escapeHtml(ing.unit)+'</div></div>' +
-      '<div class="acts">' +
-        '<input type="text" inputmode="decimal" style="width:90px;" placeholder="'+tr('deposit_amount_placeholder')+'" value="'+escapeHtml(draftVal)+'" oninput="POS.updateDepositDraft(\''+ing.id+'\',this.value)"/>' +
+      '<div class="deposit-inputs">' +
+        '<div class="deposit-field"><label>'+tr('deposit_per_unit_label')+'</label><input id="pos-ing-perunit-'+ing.id+'" type="text" inputmode="decimal" placeholder="0" value="'+(ing.amountPerUnit?escapeHtml(String(ing.amountPerUnit)):'')+'" oninput="POS.updateIngredientAmountPerUnit(\''+ing.id+'\',this.value)"/></div>' +
+        '<div class="deposit-field"><label>'+tr('deposit_set_label')+'</label><input id="pos-deposit-sets-'+ing.id+'" type="text" inputmode="decimal" placeholder="0" value="'+escapeHtml(setsDraft)+'" oninput="POS.updateDepositSets(\''+ing.id+'\',this.value)"/></div>' +
         '<button class="btn btn-primary btn-small" onclick="POS.depositStock(\''+ing.id+'\')">'+tr('deposit_btn')+'</button>' +
       '</div>' +
+      previewHtml +
     '</div>';
   }).join('');
   return '' +
@@ -2307,7 +2480,7 @@ function buildDepositStockSubTab(){
 
 function buildRecipesSubTab(){
   var ingredients = state.ingredients || [];
-  var canEdit = state.stockUnlockedRole === 'admin';
+  var canEdit = effectiveStockRole() === 'admin';
   if(!ingredients.length){
     return '' +
     '<div class="section-card">' +
@@ -2348,8 +2521,8 @@ function buildRecipesSubTab(){
         }).join('');
         var addFormHtml = canEdit ? ('' +
           '<div class="field-grid" style="margin-top:8px;">' +
-            '<div class="field"><label>'+tr('select_ingredient')+'</label><select onchange="POS.updateRecipeLineDraft(\''+sz+'\',\'ingredientId\',this.value)"><option value="">'+tr('select_ingredient')+'</option>'+ingOptions+'</select></div>' +
-            '<div class="field"><label>'+tr('amount_label')+'</label><input type="text" inputmode="decimal" value="'+escapeHtml(draft.amount)+'" oninput="POS.updateRecipeLineDraft(\''+sz+'\',\'amount\',this.value)"/></div>' +
+            '<div class="field"><label>'+tr('select_ingredient')+'</label><select id="pos-recipe-'+m.id+'-'+sz+'-ing" onchange="POS.updateRecipeLineDraft(\''+sz+'\',\'ingredientId\',this.value)"><option value="">'+tr('select_ingredient')+'</option>'+ingOptions+'</select></div>' +
+            '<div class="field"><label>'+tr('amount_label')+'</label><input id="pos-recipe-'+m.id+'-'+sz+'-amt" type="text" inputmode="decimal" value="'+escapeHtml(draft.amount)+'" oninput="POS.updateRecipeLineDraft(\''+sz+'\',\'amount\',this.value)"/></div>' +
           '</div>' +
           '<button class="btn btn-outline btn-small" style="margin-top:8px;" onclick="POS.addRecipeLine(\''+m.id+'\',\''+sz+'\')">'+tr('add_line')+'</button>'
         ) : '';
@@ -2386,17 +2559,18 @@ function buildRecipesSubTab(){
 /* ================= SETTINGS TAB ================= */
 /* ================= DELETED ORDERS TAB (admin-only) ================= */
 function buildDeletedOrdersTab(){
-  if(!state.adminUnlocked){
+  if(!hasAdminAccess()){
     return buildAdminPinGate();
   }
   if(!state.deletedOrdersLoaded){
     return '<div class="pos-loading" style="min-height:30vh;">🔒 Loading deleted orders…</div>';
   }
+  var privileged = state.loggedInRole==='admin';
   var html = '' +
   '<div class="section-card" style="background:var(--taro-light);border-color:var(--taro);">' +
     '<h2 style="color:var(--taro);">'+tr('admin_area_title')+'</h2>' +
-    '<p class="hint">'+tr('admin_area_hint')+'</p>' +
-    '<button class="btn btn-ghost btn-small" onclick="POS.lockAdminTab(); POS.setTab(\'deleted\')">'+tr('lock_tab_now')+'</button>' +
+    '<p class="hint">'+(privileged ? tr('privileged_session_hint') : tr('admin_area_hint'))+'</p>' +
+    (privileged ? '' : '<button class="btn btn-ghost btn-small" onclick="POS.lockAdminTab(); POS.setTab(\'deleted\')">'+tr('lock_tab_now')+'</button>') +
   '</div>';
 
   if(!state.deletedOrders.length){
@@ -2443,12 +2617,13 @@ function buildDeletedOrderRow(o){
 }
 
 function buildAdminPinGate(){
+  var locked = isPinLocked();
   var dots = '';
   for(var i=0;i<state.adminPinInput.length;i++){
     dots += '<span class="pin-dot filled'+(state.adminPinError?' error':'')+'"></span>';
   }
   if(!dots) dots = '<span class="pin-dots-empty">'+tr('admin_pin_placeholder')+'</span>';
-  var disabled = state.adminPinChecking;
+  var disabled = state.adminPinChecking || locked;
   var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
   var keypadHtml = keys.map(function(k){
     if(k==='back') return '<button class="pin-key-back" '+(disabled?'disabled':'')+' onclick="POS.adminPinBackspace()">⌫</button>';
@@ -2460,18 +2635,21 @@ function buildAdminPinGate(){
     '<div class="login-card" style="max-width:320px;margin:24px auto;">' +
       '<div class="admin-gate-icon">🔒</div>' +
       '<h1>'+tr('administrator_only')+'</h1>' +
-      '<p>'+(state.adminPinChecking?tr('checking'):tr('admin_gate_hint'))+'</p>' +
-      '<div class="pin-dots">'+dots+'</div>' +
-      '<div class="pin-error-msg">'+(state.adminPinError?tr('incorrect_admin_pin'):'&nbsp;')+'</div>' +
+      (locked ? buildPinLockoutNotice() : (
+        '<p>'+(state.adminPinChecking?tr('checking'):tr('admin_gate_hint'))+'</p>' +
+        '<div class="pin-dots">'+dots+'</div>' +
+        '<div class="pin-error-msg">'+(state.adminPinError?tr('incorrect_admin_pin'):'&nbsp;')+'</div>'
+      )) +
       '<div class="pin-keypad">'+keypadHtml+'</div>' +
     '</div>' +
   '</div>';
 }
 
 function buildSettingsTab(){
-  if(!state.settingsUnlocked){
+  if(!hasSettingsAccess()){
     return buildSettingsPinGate();
   }
+  var privileged = state.loggedInRole==='manager' || state.loggedInRole==='admin';
   var f = state.settingsForm || state.settings;
   var byCat = {};
   state.menu.forEach(function(m){
@@ -2506,8 +2684,8 @@ function buildSettingsTab(){
   return '' +
   '<div class="section-card" style="background:var(--taro-light);border-color:var(--taro);">' +
     '<h2 style="color:var(--taro);">'+tr('manager_admin_area_title')+'</h2>' +
-    '<p class="hint">'+tr('settings_restricted_hint')+'</p>' +
-    '<button class="btn btn-ghost btn-small" onclick="POS.lockSettingsTab()">'+tr('lock_tab_now')+'</button>' +
+    '<p class="hint">'+(privileged ? tr('privileged_session_hint') : tr('settings_restricted_hint'))+'</p>' +
+    (privileged ? '' : '<button class="btn btn-ghost btn-small" onclick="POS.lockSettingsTab()">'+tr('lock_tab_now')+'</button>') +
   '</div>' +
   '<div class="section-card">' +
     '<h2>'+tr('shop_details')+'</h2><p class="hint">'+tr('shop_details_hint')+'</p>' +
@@ -2574,12 +2752,13 @@ function buildSettingsTab(){
 }
 
 function buildSettingsPinGate(){
+  var locked = isPinLocked();
   var dots = '';
   for(var i=0;i<state.settingsPinInput.length;i++){
     dots += '<span class="pin-dot filled'+(state.settingsPinError?' error':'')+'"></span>';
   }
   if(!dots) dots = '<span class="pin-dots-empty">'+tr('manager_admin_pin_placeholder')+'</span>';
-  var disabled = state.settingsPinChecking;
+  var disabled = state.settingsPinChecking || locked;
   var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
   var keypadHtml = keys.map(function(k){
     if(k==='back') return '<button class="pin-key-back" '+(disabled?'disabled':'')+' onclick="POS.settingsPinBackspace()">⌫</button>';
@@ -2591,9 +2770,11 @@ function buildSettingsPinGate(){
     '<div class="login-card" style="max-width:320px;margin:24px auto;">' +
       '<div class="admin-gate-icon">🔒</div>' +
       '<h1>'+tr('manager_admin_only')+'</h1>' +
-      '<p>'+(state.settingsPinChecking?tr('checking'):tr('settings_gate_hint'))+'</p>' +
-      '<div class="pin-dots">'+dots+'</div>' +
-      '<div class="pin-error-msg">'+(state.settingsPinError?tr('incorrect_manager_admin_pin'):'&nbsp;')+'</div>' +
+      (locked ? buildPinLockoutNotice() : (
+        '<p>'+(state.settingsPinChecking?tr('checking'):tr('settings_gate_hint'))+'</p>' +
+        '<div class="pin-dots">'+dots+'</div>' +
+        '<div class="pin-error-msg">'+(state.settingsPinError?tr('incorrect_manager_admin_pin'):'&nbsp;')+'</div>'
+      )) +
       '<div class="pin-keypad">'+keypadHtml+'</div>' +
     '</div>' +
   '</div>';
@@ -2602,45 +2783,59 @@ function buildSettingsPinGate(){
 /* ================= ACTIONS ================= */
 var POS = {
   pinPress: function(digit){
-    if(state.pinChecking) return;
+    if(state.pinChecking || isPinLocked()) return;
     if(state.pinInput.length >= 12) return;
     state.pinInput += digit;
     state.pinError = false;
     render();
   },
   pinBackspace: function(){
-    if(state.pinChecking) return;
+    if(state.pinChecking || isPinLocked()) return;
     state.pinInput = state.pinInput.slice(0,-1);
     state.pinError = false;
     render();
   },
   pinSubmit: function(){
-    if(state.pinChecking || !state.pinInput) return;
+    if(state.pinChecking || !state.pinInput || isPinLocked()) return;
     state.pinChecking = true;
     state.pinError = false;
     render();
     var pin = state.pinInput;
     var auth = firebase.auth();
-    var onSuccess = function(){
-      state.pinInput = '';
-      state.pinChecking = false;
-      // onAuthStateChanged below will flip state.unlocked and start init()
+    var onSuccess = function(role){
+      return function(){
+        state.pinInput = '';
+        state.pinChecking = false;
+        state.loggedInRole = role;
+        registerPinSuccess();
+        // onAuthStateChanged below will flip state.unlocked and start init()
+      };
     };
     var onFail = function(e){
       console.error('Sign-in failed', e);
       state.pinChecking = false;
       state.pinError = true;
       state.pinInput = '';
+      registerPinFailure();
       render();
     };
-    auth.signInWithEmailAndPassword(STAFF_EMAIL, pin).then(onSuccess).catch(function(){
-      auth.signInWithEmailAndPassword(MANAGER_EMAIL, pin).then(onSuccess).catch(function(){
-        auth.signInWithEmailAndPassword(ADMIN_EMAIL, pin).then(onSuccess).catch(onFail);
+    auth.signInWithEmailAndPassword(STAFF_EMAIL, pin).then(onSuccess('staff')).catch(function(){
+      auth.signInWithEmailAndPassword(MANAGER_EMAIL, pin).then(onSuccess('manager')).catch(function(){
+        auth.signInWithEmailAndPassword(ADMIN_EMAIL, pin).then(onSuccess('admin')).catch(onFail);
       });
     });
   },
   lockApp: function(){
     firebase.auth().signOut().catch(function(e){ console.error(e); });
+    // Full logout always resets every elevated-access flag — the next
+    // person to unlock the app starts from a clean slate regardless of
+    // who was signed in before.
+    state.loggedInRole = null;
+    state.settingsUnlocked = false;
+    state.settingsForm = null;
+    state.stockUnlocked = false;
+    state.stockUnlockedRole = null;
+    state.adminUnlocked = false;
   },
 
   /* ---- Manager approval (order deletion / clearing history) ---- */
@@ -2658,20 +2853,20 @@ var POS = {
     render();
   },
   managerPinPress: function(digit){
-    if(state.managerPinChecking) return;
+    if(state.managerPinChecking || isPinLocked()) return;
     if(state.managerPinInput.length >= 12) return;
     state.managerPinInput += digit;
     state.managerPinError = false;
     render();
   },
   managerPinBackspace: function(){
-    if(state.managerPinChecking) return;
+    if(state.managerPinChecking || isPinLocked()) return;
     state.managerPinInput = state.managerPinInput.slice(0,-1);
     state.managerPinError = false;
     render();
   },
   managerPinSubmit: function(){
-    if(state.managerPinChecking || !state.managerPinInput) return;
+    if(state.managerPinChecking || !state.managerPinInput || isPinLocked()) return;
     state.managerPinChecking = true;
     state.managerPinError = false;
     render();
@@ -2713,12 +2908,14 @@ var POS = {
       state.managerPinChecking = false;
       state.managerPrompt = null;
       state.managerPinInput = '';
+      registerPinSuccess();
       render();
     }).catch(function(e){
       console.error('Manager approval failed', e);
       state.managerPinChecking = false;
       state.managerPinError = true;
       state.managerPinInput = '';
+      registerPinFailure();
       render();
       managerAuth.signOut().catch(function(){});
     });
@@ -2726,20 +2923,20 @@ var POS = {
 
   /* ---- Administrator: view + restore deleted orders ---- */
   adminPinPress: function(digit){
-    if(state.adminPinChecking) return;
+    if(state.adminPinChecking || isPinLocked()) return;
     if(state.adminPinInput.length >= 12) return;
     state.adminPinInput += digit;
     state.adminPinError = false;
     render();
   },
   adminPinBackspace: function(){
-    if(state.adminPinChecking) return;
+    if(state.adminPinChecking || isPinLocked()) return;
     state.adminPinInput = state.adminPinInput.slice(0,-1);
     state.adminPinError = false;
     render();
   },
   adminPinSubmit: function(){
-    if(state.adminPinChecking || !state.adminPinInput) return;
+    if(state.adminPinChecking || !state.adminPinInput || isPinLocked()) return;
     state.adminPinChecking = true;
     state.adminPinError = false;
     render();
@@ -2748,6 +2945,7 @@ var POS = {
       state.adminPinInput = '';
       state.adminUnlocked = true;
       state.deletedOrdersLoaded = false;
+      registerPinSuccess();
       render();
       if(deletedOrdersUnsub){ deletedOrdersUnsub(); deletedOrdersUnsub = null; }
       deletedOrdersUnsub = adminDb.collection('pos_deleted_orders').onSnapshot(function(snap){
@@ -2764,6 +2962,7 @@ var POS = {
       state.adminPinChecking = false;
       state.adminPinError = true;
       state.adminPinInput = '';
+      registerPinFailure();
       render();
     });
   },
@@ -2776,23 +2975,42 @@ var POS = {
     state.adminPinInput = '';
     state.adminPinError = false;
   },
+  /* Deleted orders are normally fetched through the isolated adminApp (see
+     adminPinSubmit) so a staff/manager session can peek in with a one-off
+     admin PIN without switching their whole session identity. But someone
+     who logged in AS admin at the main screen already has an admin-level
+     auth token on the MAIN session, so we can read pos_deleted_orders
+     directly through it — no PIN re-entry, no second sign-in needed. */
+  ensureDeletedOrdersLoaded: function(){
+    if(deletedOrdersUnsub) return;
+    state.deletedOrdersLoaded = false;
+    deletedOrdersUnsub = db.collection('pos_deleted_orders').onSnapshot(function(snap){
+      state.deletedOrders = snap.docs.map(function(d){ return d.data(); });
+      state.deletedOrdersLoaded = true;
+      render();
+    }, function(e){
+      console.error('Could not load deleted orders', e);
+      state.deletedOrdersLoaded = true;
+      render();
+    });
+  },
 
   /* ---- Settings: manager OR admin PIN gate ---- */
   settingsPinPress: function(digit){
-    if(state.settingsPinChecking) return;
+    if(state.settingsPinChecking || isPinLocked()) return;
     if(state.settingsPinInput.length >= 12) return;
     state.settingsPinInput += digit;
     state.settingsPinError = false;
     render();
   },
   settingsPinBackspace: function(){
-    if(state.settingsPinChecking) return;
+    if(state.settingsPinChecking || isPinLocked()) return;
     state.settingsPinInput = state.settingsPinInput.slice(0,-1);
     state.settingsPinError = false;
     render();
   },
   settingsPinSubmit: function(){
-    if(state.settingsPinChecking || !state.settingsPinInput) return;
+    if(state.settingsPinChecking || !state.settingsPinInput || isPinLocked()) return;
     state.settingsPinChecking = true;
     state.settingsPinError = false;
     render();
@@ -2802,6 +3020,7 @@ var POS = {
       state.settingsPinInput = '';
       state.settingsUnlocked = true;
       state.settingsForm = JSON.parse(JSON.stringify(state.settings));
+      registerPinSuccess();
       render();
     };
     var onFailed = function(e){
@@ -2809,6 +3028,7 @@ var POS = {
       state.settingsPinChecking = false;
       state.settingsPinError = true;
       state.settingsPinInput = '';
+      registerPinFailure();
       render();
     };
     var mgrAuth = managerApp.auth();
@@ -2831,20 +3051,20 @@ var POS = {
   /* ---- Stock: manager OR admin PIN gate (role is remembered so recipe
      editing can be further restricted to admin only) ---- */
   stockPinPress: function(digit){
-    if(state.stockPinChecking) return;
+    if(state.stockPinChecking || isPinLocked()) return;
     if(state.stockPinInput.length >= 12) return;
     state.stockPinInput += digit;
     state.stockPinError = false;
     render();
   },
   stockPinBackspace: function(){
-    if(state.stockPinChecking) return;
+    if(state.stockPinChecking || isPinLocked()) return;
     state.stockPinInput = state.stockPinInput.slice(0,-1);
     state.stockPinError = false;
     render();
   },
   stockPinSubmit: function(){
-    if(state.stockPinChecking || !state.stockPinInput) return;
+    if(state.stockPinChecking || !state.stockPinInput || isPinLocked()) return;
     state.stockPinChecking = true;
     state.stockPinError = false;
     render();
@@ -2855,6 +3075,7 @@ var POS = {
         state.stockPinInput = '';
         state.stockUnlocked = true;
         state.stockUnlockedRole = role;
+        registerPinSuccess();
         render();
       };
     };
@@ -2863,6 +3084,7 @@ var POS = {
       state.stockPinChecking = false;
       state.stockPinError = true;
       state.stockPinInput = '';
+      registerPinFailure();
       render();
     };
     var mgrAuth = managerApp.auth();
@@ -2912,16 +3134,25 @@ var POS = {
     render();
   },
   setTab: function(t){
-    if(state.tab==='deleted' && t!=='deleted'){
+    var settingsPrivileged = state.loggedInRole==='manager' || state.loggedInRole==='admin';
+    var stockPrivileged = state.loggedInRole==='manager' || state.loggedInRole==='admin';
+    var adminPrivileged = state.loggedInRole==='admin';
+    if(state.tab==='deleted' && t!=='deleted' && !adminPrivileged){
       POS.lockAdminTab();
     }
-    if(state.tab==='settings' && t!=='settings'){
+    if(state.tab==='settings' && t!=='settings' && !settingsPrivileged){
       POS.lockSettingsTab();
     }
-    if(state.tab==='stock' && t!=='stock'){
+    if(state.tab==='stock' && t!=='stock' && !stockPrivileged){
       POS.lockStockTab();
     }
     state.tab = t;
+    if(t==='settings' && !state.settingsForm){
+      state.settingsForm = JSON.parse(JSON.stringify(state.settings));
+    }
+    if(t==='deleted' && adminPrivileged){
+      POS.ensureDeletedOrdersLoaded();
+    }
     state.editingItemId=null; state.newItemDraft=null; state.editingToppingId=null; state.newToppingDraft=null;
     render();
   },
@@ -2929,9 +3160,9 @@ var POS = {
   selectCategory: function(c){ state.activeCategory=c; state.orderView='items'; state.search=''; render(); },
   backToCategories: function(){ state.orderView='categories'; render(); },
   goToCart: function(){
-    if(state.tab==='deleted'){ POS.lockAdminTab(); }
-    if(state.tab==='settings'){ POS.lockSettingsTab(); }
-    if(state.tab==='stock'){ POS.lockStockTab(); }
+    if(state.tab==='deleted' && state.loggedInRole!=='admin'){ POS.lockAdminTab(); }
+    if(state.tab==='settings' && !(state.loggedInRole==='manager'||state.loggedInRole==='admin')){ POS.lockSettingsTab(); }
+    if(state.tab==='stock' && !(state.loggedInRole==='manager'||state.loggedInRole==='admin')){ POS.lockStockTab(); }
     state.tab = 'order';
     state.orderView = 'items';
     if(!state.activeCategory) state.activeCategory = 'All';
@@ -3076,7 +3307,7 @@ var POS = {
 
   /* ---- Stock: raw materials ---- */
   startNewIngredient: function(){
-    state.newIngredientDraft = {name:'New Ingredient', unit:'g', stock:0};
+    state.newIngredientDraft = {name:'New Ingredient', unit:'g', stock:0, weeklyTarget:0, monthlyTarget:0, amountPerSet:0};
     render();
   },
   editIngredient: function(id){ state.editingIngredientId=id; render(); },
@@ -3086,6 +3317,33 @@ var POS = {
     if(!target) return;
     if(field==='stock') value = sanitizeDecimal(value);
     target[field] = value;
+    render();
+  },
+  updateIngredientTarget: function(id, field, value){
+    var ing = state.ingredients.filter(function(i){return i.id===id;})[0];
+    if(!ing) return;
+    ing[field] = sanitizeDecimal(value);
+    render(); // live recompute of the color-coded status as you type
+  },
+  persistIngredientTarget: function(id){
+    var ing = state.ingredients.filter(function(i){return i.id===id;})[0];
+    if(!ing) return;
+    ing.weeklyTarget = Number(ing.weeklyTarget)||0;
+    ing.monthlyTarget = Number(ing.monthlyTarget)||0;
+    db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(function(e){ console.error('Could not save target', e); });
+    render();
+  },
+  updateIngredientAmountPerSet: function(id, value){
+    var ing = state.ingredients.filter(function(i){return i.id===id;})[0];
+    if(!ing) return;
+    ing.amountPerSet = sanitizeDecimal(value);
+    render(); // live recompute of the sets-needed badge as you type
+  },
+  persistIngredientAmountPerSet: function(id){
+    var ing = state.ingredients.filter(function(i){return i.id===id;})[0];
+    if(!ing) return;
+    ing.amountPerSet = Number(ing.amountPerSet)||0;
+    db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(function(e){ console.error('Could not save amount per set', e); });
     render();
   },
   saveIngredient: function(id){
@@ -3114,17 +3372,32 @@ var POS = {
     render();
   },
 
-  /* ---- Stock: deposit ---- */
-  updateDepositDraft: function(id, value){
+  /* ---- Stock: deposit (Amount Per Unit varies deposit to deposit — package
+     sizes for the same raw material aren't always the same, so this is a
+     freely-editable value each time, never saved to the database, and it
+     resets after every deposit along with Set. Total added = Per Unit x Set.
+     While a value is entered, it also feeds the "sets needed" figure on the
+     Raw Materials red/yellow status boxes for that session.) ---- */
+  updateIngredientAmountPerUnit: function(id, value){
+    var ing = state.ingredients.filter(function(i){return i.id===id;})[0];
+    if(!ing) return;
+    ing.amountPerUnit = sanitizeDecimal(value);
+    render();
+  },
+  updateDepositSets: function(id, value){
     state.depositDrafts[id] = sanitizeDecimal(value);
     render();
   },
   depositStock: function(id){
-    var amt = Number(state.depositDrafts[id]||0);
-    if(!amt || amt<=0){ window.alert('Enter an amount greater than 0 to deposit.'); return; }
     var ing = state.ingredients.filter(function(i){return i.id===id;})[0];
     if(!ing) return;
-    ing.stock = Math.round(((Number(ing.stock)||0) + amt) * 1000) / 1000;
+    var perUnit = Number(ing.amountPerUnit)||0;
+    var sets = Number(state.depositDrafts[id]||0);
+    if(!perUnit || perUnit<=0){ window.alert('Please enter the amount per unit for this deposit first.'); return; }
+    if(!sets || sets<=0){ window.alert('Enter the number of sets (must be greater than 0).'); return; }
+    var total = perUnit * sets;
+    ing.stock = Math.round(((Number(ing.stock)||0) + total) * 1000) / 1000;
+    ing.amountPerUnit = 0;
     delete state.depositDrafts[id];
     db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(function(e){ window.alert('Could not deposit stock: '+e.message); });
     render();
@@ -3132,20 +3405,20 @@ var POS = {
 
   /* ---- Stock: recipes (per size, admin-only editing) ---- */
   toggleRecipeEditor: function(itemId){
-    if(state.stockUnlockedRole!=='admin') return;
+    if(effectiveStockRole()!=='admin') return;
     state.recipeEditingItemId = state.recipeEditingItemId===itemId ? null : itemId;
     state.recipeLineDrafts = {S:{ingredientId:'',amount:''}, M:{ingredientId:'',amount:''}, L:{ingredientId:'',amount:''}};
     render();
   },
   updateRecipeLineDraft: function(size, field, value){
-    if(state.stockUnlockedRole!=='admin') return;
+    if(effectiveStockRole()!=='admin') return;
     if(field==='amount') value = sanitizeDecimal(value);
     if(!state.recipeLineDrafts[size]) state.recipeLineDrafts[size] = {ingredientId:'', amount:''};
     state.recipeLineDrafts[size][field] = value;
     render();
   },
   addRecipeLine: function(itemId, size){
-    if(state.stockUnlockedRole!=='admin') return;
+    if(effectiveStockRole()!=='admin') return;
     var d = state.recipeLineDrafts[size] || {};
     var amt = Number(d.amount);
     if(!d.ingredientId){ window.alert('Please choose an ingredient.'); return; }
@@ -3161,7 +3434,7 @@ var POS = {
     render();
   },
   removeRecipeLine: function(itemId, size, ingredientId){
-    if(state.stockUnlockedRole!=='admin') return;
+    if(effectiveStockRole()!=='admin') return;
     if(!state.recipes || !state.recipes[itemId] || !state.recipes[itemId][size]) return;
     state.recipes[itemId][size] = state.recipes[itemId][size].filter(function(rl){ return rl.ingredientId!==ingredientId; });
     db.collection('pos_recipes').doc('main').set({items: state.recipes}).catch(function(e){ window.alert('Could not update recipe: '+e.message); });
@@ -3530,13 +3803,16 @@ window.POS = POS;
 
 /* ================= KEYBOARD SUPPORT FOR PIN SCREENS =================
    Lets staff/manager/admin type PIN digits, Backspace, and Enter on a
-   physical keyboard instead of only tapping the on-screen keypad. Only
-   intervenes while a PIN screen is actually the thing being shown, and
-   never hijacks typing inside real form fields (item names, prices, etc). */
+   physical keyboard instead of only tapping the on-screen keypad.
+   PIN screens (login, manager approval, admin/settings/stock gates) never
+   contain real <input>/<select>/<textarea> fields, so once we've determined
+   we're actually showing one of them, it's always safe to capture the
+   keystroke — no need to inspect document.activeElement to decide (that
+   was unreliable and is why keyboard PIN entry worked on the login page
+   but not on the other gates). Any screen that isn't one of these PIN
+   screens falls through to "return" below and normal typing is completely
+   unaffected. */
 document.addEventListener('keydown', function(e){
-  var tag = (document.activeElement && document.activeElement.tagName) || '';
-  if(tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT') return;
-
   var isDigit = /^[0-9]$/.test(e.key);
   var isBackspace = e.key==='Backspace';
   var isEnter = e.key==='Enter';
@@ -3547,11 +3823,11 @@ document.addEventListener('keydown', function(e){
     press = POS.managerPinPress; backspace = POS.managerPinBackspace; submit = POS.managerPinSubmit;
   } else if(!state.unlocked){
     press = POS.pinPress; backspace = POS.pinBackspace; submit = POS.pinSubmit;
-  } else if(state.tab==='deleted' && !state.adminUnlocked){
+  } else if(state.tab==='deleted' && !hasAdminAccess()){
     press = POS.adminPinPress; backspace = POS.adminPinBackspace; submit = POS.adminPinSubmit;
-  } else if(state.tab==='settings' && !state.settingsUnlocked){
+  } else if(state.tab==='settings' && !hasSettingsAccess()){
     press = POS.settingsPinPress; backspace = POS.settingsPinBackspace; submit = POS.settingsPinSubmit;
-  } else if(state.tab==='stock' && !state.stockUnlocked){
+  } else if(state.tab==='stock' && !hasStockAccess()){
     press = POS.stockPinPress; backspace = POS.stockPinBackspace; submit = POS.stockPinSubmit;
   } else {
     return;
@@ -3563,6 +3839,7 @@ document.addEventListener('keydown', function(e){
 });
 
 /* ================= BOOTSTRAP ================= */
+loadPinLockState();
 try{
   firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
 }catch(e){ console.error('Could not set auth persistence', e); }
@@ -3574,6 +3851,12 @@ firebase.auth().onAuthStateChanged(function(user){
     ensureInitialized();
   } else {
     state.unlocked = false;
+    state.loggedInRole = null;
+    state.settingsUnlocked = false;
+    state.settingsForm = null;
+    state.stockUnlocked = false;
+    state.stockUnlockedRole = null;
+    state.adminUnlocked = false;
     render();
   }
 });
