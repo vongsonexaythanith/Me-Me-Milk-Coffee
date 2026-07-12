@@ -796,6 +796,7 @@ var TRANSLATIONS = {
     daily_income_title:'Daily Income', select_date_label:'Date',
     operational_expenses_title:'Operational Expenses', operational_expenses_hint:'Cash paid out for things like ice, daily supplies, or cash held back to fund tomorrow\'s float. This is deducted from Cash income only.',
     expense_amount_label:'Amount (₭)', expense_note_label:'Note', expense_note_placeholder:'e.g. Ice cubes',
+    expense_date_label:'Date', expense_date_hint:'Choose which day this expense counts against — it doesn\'t have to be today.',
     submit_expense_btn:'Submit', no_expenses_yet:'No expenses logged for this day yet.', total_expenses_label:'Total expenses',
     net_income_title:'Net Income', gross_cash_label:'Gross cash', net_cash_label:'Net cash',
     other_income_label:'Other income', grand_total_net_label:'Grand total net income',
@@ -929,6 +930,7 @@ var TRANSLATIONS = {
     daily_income_title:'ລາຍຮັບປະຈຳວັນ', select_date_label:'ວັນທີ',
     operational_expenses_title:'ລາຍຈ່າຍດຳເນີນງານ', operational_expenses_hint:'ເງິນສົດທີ່ຈ່າຍອອກ ເຊັ່ນ: ນ້ຳກ້ອນ, ອຸປະກອນປະຈຳວັນ, ຫຼື ເງິນສົດທີ່ເກັບໄວ້ສຳລັບມື້ຕໍ່ໄປ. ຈະຖືກຫັກອອກຈາກລາຍຮັບເງິນສົດເທົ່ານັ້ນ.',
     expense_amount_label:'ຈຳນວນ (₭)', expense_note_label:'ໝາຍເຫດ', expense_note_placeholder:'ຕົວຢ່າງ: ນ້ຳກ້ອນ',
+    expense_date_label:'ວັນທີ', expense_date_hint:'ເລືອກວ່າລາຍຈ່າຍນີ້ນັບເຂົ້າວັນໃດ — ບໍ່ຈຳເປັນຕ້ອງເປັນມື້ນີ້.',
     submit_expense_btn:'ບັນທຶກ', no_expenses_yet:'ຍັງບໍ່ມີລາຍຈ່າຍສຳລັບມື້ນີ້.', total_expenses_label:'ລາຍຈ່າຍລວມ',
     net_income_title:'ລາຍຮັບສຸດທິ', gross_cash_label:'ເງິນສົດລວມ', net_cash_label:'ເງິນສົດສຸດທິ',
     other_income_label:'ລາຍຮັບອື່ນ', grand_total_net_label:'ລາຍຮັບສຸດທິລວມທັງໝົດ',
@@ -1062,6 +1064,7 @@ var TRANSLATIONS = {
     daily_income_title:'รายได้รายวัน', select_date_label:'วันที่',
     operational_expenses_title:'ค่าใช้จ่ายในการดำเนินงาน', operational_expenses_hint:'เงินสดที่จ่ายออกไป เช่น น้ำแข็ง อุปกรณ์ประจำวัน หรือเงินสดที่เก็บไว้สำหรับวันถัดไป จะถูกหักออกจากรายได้เงินสดเท่านั้น',
     expense_amount_label:'จำนวนเงิน (₭)', expense_note_label:'บันทึกช่วยจำ', expense_note_placeholder:'เช่น น้ำแข็ง',
+    expense_date_label:'วันที่', expense_date_hint:'เลือกว่าค่าใช้จ่ายนี้นับเข้าวันไหน — ไม่จำเป็นต้องเป็นวันนี้',
     submit_expense_btn:'บันทึก', no_expenses_yet:'ยังไม่มีรายจ่ายสำหรับวันนี้', total_expenses_label:'รายจ่ายรวม',
     net_income_title:'รายได้สุทธิ', gross_cash_label:'เงินสดรวม', net_cash_label:'เงินสดสุทธิ',
     other_income_label:'รายได้อื่น', grand_total_net_label:'รายได้สุทธิรวมทั้งหมด',
@@ -3216,10 +3219,12 @@ function buildDailyIncomeSection(selectedDate, todayKey){
   '<div class="section-card">' +
     '<h2>'+tr('operational_expenses_title')+'</h2><p class="hint">'+tr('operational_expenses_hint')+'</p>' +
     '<div class="deposit-inputs">' +
+      '<div class="deposit-field"><label>'+tr('expense_date_label')+'</label><input id="pos-expense-date" type="date" max="'+todayKey+'" value="'+selectedDate+'" oninput="POS.setRevenueSummaryDate(this.value)"/></div>' +
       '<div class="deposit-field"><label>'+tr('expense_amount_label')+'</label><input id="pos-expense-amount" type="text" inputmode="decimal" placeholder="0" value="'+escapeHtml(state.expenseAmountInput)+'" oninput="POS.updateExpenseAmount(this.value)"/></div>' +
       '<div class="deposit-field"><label>'+tr('expense_note_label')+' ('+tr('optional_label')+')</label><input id="pos-expense-note" type="text" placeholder="'+tr('expense_note_placeholder')+'" value="'+escapeHtml(state.expenseNoteInput)+'" oninput="POS.updateExpenseNote(this.value)"/></div>' +
       '<button class="btn btn-primary btn-small" onclick="POS.submitExpense()">'+tr('submit_expense_btn')+'</button>' +
     '</div>' +
+    '<p class="hint" style="margin:6px 0 0;">'+tr('expense_date_hint')+'</p>' +
     '<div style="margin-top:12px;">'+entriesHtml+'</div>' +
     '<div class="summary-row total" style="margin-top:10px;"><span>'+tr('total_expenses_label')+'</span><span>-'+formatMoney(expenseTotal)+'</span></div>' +
   '</div>' +
