@@ -108,6 +108,14 @@
 }
 .lock-btn:hover{background:var(--taro-light);border-color:var(--taro);}
 .lock-btn:active{transform:scale(0.94);}
+.training-banner{
+  display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;
+  background:repeating-linear-gradient(135deg, #F6B11A, #F6B11A 14px, #FFC94D 14px, #FFC94D 28px);
+  color:#4A3300;font-weight:800;font-size:13px;padding:10px 16px;
+  position:sticky;top:0;z-index:50;box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+.training-banner .btn{width:auto;padding:6px 16px;background:#4A3300;color:#fff;border:none;}
+.training-banner .btn:hover{background:#2E2000;}
 .cart-btn{
   position:relative;flex:none;width:38px;height:38px;border-radius:50%;
   background:var(--cream-dark);border:1.5px solid var(--border);
@@ -218,6 +226,15 @@
 .item-card .name{font-weight:700;font-size:14.5px;margin:0 0 3px;color:var(--espresso);}
 .item-card .cat{font-size:11px;color:var(--espresso-soft);margin:0 0 8px;text-transform:uppercase;letter-spacing:.4px;}
 .item-card .price{font-weight:700;font-size:14px;color:var(--caramel-dark);}
+.item-card-unavailable{
+  position:relative;opacity:.55;filter:grayscale(0.85);cursor:not-allowed;box-shadow:none;
+}
+.item-card-unavailable:hover{border-color:var(--border);box-shadow:none;}
+.unavailable-badge{
+  position:absolute;top:10px;right:10px;background:var(--danger);color:#fff;
+  font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;
+  padding:3px 9px;border-radius:999px;z-index:2;
+}
 .empty-note{color:var(--espresso-soft);font-size:13.5px;padding:30px 10px;text-align:center;}
 
 /* ---------- Category picker (first layer) ---------- */
@@ -387,13 +404,30 @@
 .order-row{
   background:var(--paper);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;
 }
+.order-row-refunded{background:#FFFBF9;border-color:var(--danger-light);}
 .order-row-top{display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:10px;}
 .order-row-top .onum{font-weight:700;font-size:13.5px;}
 .order-row-top .otime{font-size:11.5px;color:var(--espresso-soft);}
 .order-row-top .ototal{font-weight:700;color:var(--caramel-dark);}
+.refunded-badge{
+  display:inline-block;background:var(--danger);color:#fff;font-size:9.5px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.4px;padding:2px 7px;border-radius:999px;margin-left:6px;vertical-align:middle;
+}
 .order-detail{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:12.5px;}
 .order-detail .di{display:flex;justify-content:space-between;margin-bottom:4px;color:var(--espresso-soft);}
-.order-detail .dactions{margin-top:8px;text-align:right;}
+.order-detail .dactions{margin-top:8px;text-align:right;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.refund-detail{
+  margin:10px 0;padding:10px 12px;background:#FFFBF9;border:1.5px solid var(--danger-light);border-radius:10px;
+}
+.refund-detail-title{font-weight:800;font-size:11.5px;color:var(--danger);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.refund-photo{margin-top:8px;}
+.refund-photo img{max-width:100%;border-radius:8px;display:block;}
+.refund-photo-preview{margin:8px 0;}
+.refund-photo-preview img{max-width:100%;max-height:220px;border-radius:10px;display:block;margin:0 auto;object-fit:contain;}
+.refund-photo-placeholder{
+  width:100%;height:120px;border-radius:10px;background:var(--cream-dark);border:1.5px dashed var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:32px;margin:8px 0;
+}
 .range-chips{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
 .date-picker-row{display:flex;gap:14px;flex-wrap:wrap;margin:-6px 0 16px;padding:12px 14px;background:var(--cream-dark);border-radius:12px;}
 .date-picker-row .field{min-width:150px;}
@@ -450,6 +484,22 @@
 .deposit-field label{font-size:9.5px;color:var(--espresso-soft);text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;}
 .deposit-field input{width:92px;}
 .deposit-preview{width:100%;font-size:11.5px;color:var(--taro);font-weight:700;padding-left:46px;}
+.rev-table-wrap{overflow-x:auto;margin-top:10px;}
+.rev-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.rev-table th, .rev-table td{padding:7px 12px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;}
+.rev-table th:first-child, .rev-table td:first-child{text-align:left;font-weight:600;}
+.rev-table thead th{color:var(--espresso-soft);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.3px;}
+.rev-total-row td{font-weight:800;border-top:2px solid var(--border);border-bottom:none;color:var(--caramel-dark);}
+.cost-entry-grid{display:flex;gap:8px;flex-wrap:wrap;}
+.cost-entry-grid .deposit-field input{width:100px;}
+.cost-derived-line{width:100%;font-size:11.5px;color:var(--taro);font-weight:700;padding-left:46px;}
+.cost-status-badge{
+  display:inline-block;padding:3px 10px;border-radius:999px;font-weight:800;font-size:11.5px;
+}
+.cost-status-badge.status-green{background:#2FAE60;color:#fff;}
+.cost-status-badge.status-yellow{background:#F5C518;color:#1A1A1A;}
+.cost-status-badge.status-red{background:#E5484D;color:#fff;}
+.cost-status-badge.status-neutral{background:var(--cream-dark);color:var(--espresso-soft);}
 
 .stock-target-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;width:100%;}
 .stock-target-box{border-radius:10px;padding:9px 11px;border:1.5px solid var(--border);background:var(--cream-dark);transition:background .15s, border-color .15s, color .15s;}
@@ -476,6 +526,11 @@
   display:inline-block;background:rgba(255,255,255,0.92);color:#1A1A1A;
   border-radius:999px;padding:1px 8px;font-size:10.5px;font-weight:800;margin-left:2px;white-space:nowrap;
 }
+/* Kitchen copy only exists for printing — never shown while reviewing the
+   receipt on screen. The customer-copy label is print-only too, since on
+   screen there's only ever one copy visible and a label would be noise. */
+.print-only{display:none;}
+.receipt-copy-label{text-align:center;font-weight:800;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--espresso-soft);margin-bottom:8px;}
 
 @media print{
   @page{ margin:6mm; }
@@ -500,6 +555,11 @@
     overflow:visible !important;
   }
   #receipt-content{width:280px;margin:0 auto;}
+  .print-only{display:block !important;}
+  .receipt-copy-kitchen{
+    margin-top:22px;padding-top:18px;border-top:2px dashed #999;
+    page-break-before:always;
+  }
 }
 </style>
 
@@ -560,8 +620,13 @@ var DEFAULT_SETTINGS = {
   categories: ["Milk Tea","Specialty","Fruit Tea","Coffee"],
   receiptQrCode: QR_CODE_DATA_URI,
   pageBackgroundOpacity: 20,
-  headerBackgroundOpacity: 20
+  headerBackgroundOpacity: 20,
+  staffNames: {}
 };
+/* Fallback labels shown for any account key not yet given a custom name in
+   Settings — e.g. before the shop owner has typed in each team member's
+   actual name. */
+var DEFAULT_STAFF_LABELS = {staff1:'Staff 1', staff2:'Staff 2', staff3:'Staff 3', manager:'Manager', admin:'Admin'};
 
 var FIREBASE_CONFIG = {
   apiKey: "AIzaSyA47Pgz9Q0gRm2Fe9fTmN0THkYV_Ureq-M",
@@ -711,7 +776,40 @@ var TRANSLATIONS = {
     pin_locked_title:'Too many incorrect attempts', pin_locked_prefix:'For security, PIN entry is suspended. Try again in', pin_locked_suffix:'minute(s).',
     receipt_qr_label:'Receipt QR code', receipt_qr_hint:'Shown at the bottom of every printed receipt — great for a TikTok, Facebook, or loyalty program link.',
     photo_visibility_label:'Photo visibility',
-    preview_receipt:'Preview Receipt', preview_label:'🧾 Preview — not yet saved', back_to_cart:'← Back to Cart', confirm_order:'Confirm & Complete Order'
+    preview_receipt:'Preview Receipt', preview_label:'🧾 Preview — not yet saved', back_to_cart:'← Back to Cart', confirm_order:'Confirm & Complete Order',
+    reset_menu_title:'Reset menu to default?', reset_menu_sub:'This permanently replaces your menu and toppings with the default list. Enter the admin PIN to confirm.',
+    reprint_receipt:'🖨 Reprint Receipt', customer_copy_label:'🧾 Customer Copy', kitchen_copy_label:'🍳 Kitchen Copy',
+    refund_order:'↩ Refund', refunded_label:'Refunded', refunded_at_label:'Refunded at', refunded_by_label:'Refunded by',
+    refunded_by_admin:'Administrator', refunded_by_manager:'Manager', refund_reason_label:'Reason',
+    refund_evidence_hint:'Take a photo as evidence before this refund can be processed.',
+    take_photo:'📷 Take Photo', retake_photo:'📷 Retake Photo', optional_label:'optional', continue_label:'Continue',
+    refund_order_title:'Refund this order?', refund_order_sub:'This marks the order as refunded and removes it from your revenue totals. Enter the manager PIN to confirm.',
+    training_mode_title:'Training Mode', training_mode_hint:'Practice using the app without affecting any real orders, stock, or sales. Enter your PIN to continue.',
+    training_mode_active:'Training Mode — nothing here affects real data', quit_training:'Quit Training', training_mode_setting_up:'Setting up training mode…',
+    export_csv_title:'Export order history?', export_csv_sub:'This downloads all order data as a CSV file. Enter the admin PIN to confirm.',
+    staff_names_title:'Staff Names', staff_names_hint:'Give each account a real name — it will show on every order in History and on receipts, so you always know who rang up a sale.',
+    staff1_label:'Staff 1', staff2_label:'Staff 2', staff3_label:'Staff 3', manager_name_label:'Manager', admin_name_label:'Administrator',
+    placed_by_label:'Placed by', served_by_label:'Served by',
+    tab_revenue:'📊 Revenue', revenue_restricted_hint:'Revenue Summary can only be viewed with a manager or administrator PIN.',
+    revenue_gate_hint:'This area is restricted. Enter the manager or admin PIN to view income and expenses.',
+    expense_sync_error_hint:'Could not load expense data — this Firebase project likely needs its security rules updated to allow access to the pos_expenses collection. The rest of the app is unaffected.',
+    daily_income_title:'Daily Income', select_date_label:'Date',
+    operational_expenses_title:'Operational Expenses', operational_expenses_hint:'Cash paid out for things like ice, daily supplies, or cash held back to fund tomorrow\'s float. This is deducted from Cash income only.',
+    expense_amount_label:'Amount (₭)', expense_note_label:'Note', expense_note_placeholder:'e.g. Ice cubes',
+    submit_expense_btn:'Submit', no_expenses_yet:'No expenses logged for this day yet.', total_expenses_label:'Total expenses',
+    net_income_title:'Net Income', gross_cash_label:'Gross cash', net_cash_label:'Net cash',
+    other_income_label:'Other income', grand_total_net_label:'Grand total net income',
+    income_analytics_title:'Income Analytics', income_analytics_hint:'Cumulative net income for the current period so far, in each currency. USD/THB are shown as gross — expenses are only tracked in Kip.',
+    period_day:'Today', period_week:'This Week', period_month:'This Month', period_quarter:'This Quarter', period_half:'This Half-Year', period_year:'This Year',
+    tab_cost:'💰 Cost & Expense', cost_restricted_hint:'Cost and Expense can only be viewed with a manager or administrator PIN.',
+    cost_gate_hint:'This area is restricted. Enter the manager or admin PIN to view product costs and margins.',
+    product_cost_title:'Product Cost & Net Income', product_cost_hint:'Capital cost is pulled live from each drink\'s recipe and the raw material costs below — edit either one and this updates automatically.',
+    product_label:'Product', capital_cost_label:'Capital Cost', retail_price_label:'Retail Price', net_income_label:'Net Income', margin_label:'Margin',
+    no_cost_data:'No cost data', no_priced_items_yet:'No priced menu items yet.',
+    raw_material_costs_title:'Raw Material Costs', raw_material_costs_hint:'Enter what you actually paid: the price of a full set and how many units it contains, then how much (g/ml/pieces) is in one unit. The cost per unit and per gram/ml/piece are calculated automatically.',
+    set_price_label:'Set price (₭)', units_per_set_label:'Units per set', unit_size_label:'Amount per unit',
+    cost_per_unit_label:'Cost per unit', cost_per_base_unit_label:'Cost per base unit',
+    unavailable_label:'Unavailable', mark_unavailable:'Mark Unavailable', mark_available:'Mark Available'
   },
   lo: {
     tab_order:'🧋 ສັ່ງເຄື່ອງດື່ມ', tab_menu:'📋 ເມນູ', tab_history:'🧾 ປະຫວັດ', tab_deleted:'🔒 ລຶບແລ້ວ', tab_settings:'⚙️ ຕັ້ງຄ່າ',
@@ -811,7 +909,40 @@ var TRANSLATIONS = {
     pin_locked_title:'ພະຍາຍາມຜິດຫຼາຍເກີນໄປ', pin_locked_prefix:'ເພື່ອຄວາມປອດໄພ, ການໃສ່ລະຫັດຖືກລະງັບຊົ່ວຄາວ. ລອງໃໝ່ອີກຄັ້ງໃນ', pin_locked_suffix:'ນາທີ.',
     receipt_qr_label:'ລະຫັດ QR ໃນໃບບິນ', receipt_qr_hint:'ສະແດງຢູ່ລຸ່ມສຸດຂອງທຸກໃບບິນທີ່ພິມ — ເໝາະສຳລັບລິ້ງ TikTok, Facebook, ຫຼື ໂປຣແກຣມສະສົມແຕ້ມ.',
     photo_visibility_label:'ຄວາມຊັດເຈນຂອງຮູບ',
-    preview_receipt:'ເບິ່ງຕົວຢ່າງໃບບິນ', preview_label:'🧾 ຕົວຢ່າງ — ຍັງບໍ່ໄດ້ບັນທຶກ', back_to_cart:'← ກັບຄືນກະຕ່າ', confirm_order:'ຢືນຢັນ ແລະ ສຳເລັດອໍເດີ'
+    preview_receipt:'ເບິ່ງຕົວຢ່າງໃບບິນ', preview_label:'🧾 ຕົວຢ່າງ — ຍັງບໍ່ໄດ້ບັນທຶກ', back_to_cart:'← ກັບຄືນກະຕ່າ', confirm_order:'ຢືນຢັນ ແລະ ສຳເລັດອໍເດີ',
+    reset_menu_title:'ຣີເຊັດເມນູກັບຄືນຄ່າເລີ່ມຕົ້ນ?', reset_menu_sub:'ນີ້ຈະປ່ຽນແທນເມນູ ແລະ ທັອບປິ້ງຂອງທ່ານດ້ວຍລາຍການເລີ່ມຕົ້ນຖາວອນ. ໃສ່ລະຫັດຜູ້ດູແລລະບົບເພື່ອຢືນຢັນ.',
+    reprint_receipt:'🖨 ພິມໃບບິນຄືນ', customer_copy_label:'🧾 ສຳເນົາລູກຄ້າ', kitchen_copy_label:'🍳 ສຳເນົາຄົວ',
+    refund_order:'↩ ຄືນເງິນ', refunded_label:'ຄືນເງິນແລ້ວ', refunded_at_label:'ຄືນເງິນເມື່ອ', refunded_by_label:'ຄືນເງິນໂດຍ',
+    refunded_by_admin:'ຜູ້ດູແລລະບົບ', refunded_by_manager:'ຜູ້ຈັດການ', refund_reason_label:'ເຫດຜົນ',
+    refund_evidence_hint:'ຖ່າຍຮູບເປັນຫຼັກຖານກ່ອນທີ່ຈະດຳເນີນການຄືນເງິນນີ້.',
+    take_photo:'📷 ຖ່າຍຮູບ', retake_photo:'📷 ຖ່າຍຮູບໃໝ່', optional_label:'ບໍ່ບັງຄັບ', continue_label:'ດຳເນີນຕໍ່',
+    refund_order_title:'ຄືນເງິນອໍເດີນີ້?', refund_order_sub:'ນີ້ຈະໝາຍອໍເດີເປັນຄືນເງິນແລ້ວ ແລະ ເອົາອອກຈາກຍອດລາຍຮັບ. ໃສ່ລະຫັດຜູ້ຈັດການເພື່ອຢືນຢັນ.',
+    training_mode_title:'ໂໝດຝຶກຊ້ອມ', training_mode_hint:'ຝຶກໃຊ້ແອັບໂດຍບໍ່ກະທົບອໍເດີ, ສະຕັອກ, ຫຼື ຍອດຂາຍທີ່ແທ້ຈິງ. ໃສ່ລະຫັດຂອງທ່ານເພື່ອດຳເນີນຕໍ່.',
+    training_mode_active:'ໂໝດຝຶກຊ້ອມ — ບໍ່ກະທົບຂໍ້ມູນຈິງ', quit_training:'ອອກຈາກໂໝດຝຶກຊ້ອມ', training_mode_setting_up:'ກຳລັງຕັ້ງຄ່າໂໝດຝຶກຊ້ອມ…',
+    export_csv_title:'ສົ່ງອອກປະຫວັດອໍເດີ?', export_csv_sub:'ນີ້ຈະດາວໂຫຼດຂໍ້ມູນອໍເດີທັງໝົດເປັນໄຟລ໌ CSV. ໃສ່ລະຫັດຜູ້ດູແລລະບົບເພື່ອຢືນຢັນ.',
+    staff_names_title:'ຊື່ພະນັກງານ', staff_names_hint:'ໃສ່ຊື່ຈິງໃຫ້ແຕ່ລະບັນຊີ — ມັນຈະສະແດງຢູ່ໃນທຸກອໍເດີໃນປະຫວັດ ແລະ ໃນໃບບິນ, ເພື່ອໃຫ້ທ່ານຮູ້ສະເໝີວ່າໃຜເປັນຄົນຂາຍ.',
+    staff1_label:'ພະນັກງານ 1', staff2_label:'ພະນັກງານ 2', staff3_label:'ພະນັກງານ 3', manager_name_label:'ຜູ້ຈັດການ', admin_name_label:'ຜູ້ດູແລລະບົບ',
+    placed_by_label:'ສັ່ງໂດຍ', served_by_label:'ບໍລິການໂດຍ',
+    tab_revenue:'📊 ລາຍຮັບ', revenue_restricted_hint:'ສະຫຼຸບລາຍຮັບສາມາດເບິ່ງໄດ້ດ້ວຍລະຫັດຜູ້ຈັດການ ຫຼື ຜູ້ດູແລລະບົບເທົ່ານັ້ນ.',
+    revenue_gate_hint:'ພື້ນທີ່ນີ້ຖືກຈຳກັດ. ໃສ່ລະຫັດຜູ້ຈັດການ ຫຼື ຜູ້ດູແລລະບົບເພື່ອເບິ່ງລາຍຮັບ ແລະ ລາຍຈ່າຍ.',
+    expense_sync_error_hint:'ບໍ່ສາມາດໂຫຼດຂໍ້ມູນລາຍຈ່າຍໄດ້ — ໂປຣເຈັກ Firebase ນີ້ອາດຈະຕ້ອງອັບເດດກົດຄວາມປອດໄພເພື່ອອະນຸຍາດການເຂົ້າເຖິງ pos_expenses. ສ່ວນອື່ນຂອງແອັບບໍ່ໄດ້ຮັບຜົນກະທົບ.',
+    daily_income_title:'ລາຍຮັບປະຈຳວັນ', select_date_label:'ວັນທີ',
+    operational_expenses_title:'ລາຍຈ່າຍດຳເນີນງານ', operational_expenses_hint:'ເງິນສົດທີ່ຈ່າຍອອກ ເຊັ່ນ: ນ້ຳກ້ອນ, ອຸປະກອນປະຈຳວັນ, ຫຼື ເງິນສົດທີ່ເກັບໄວ້ສຳລັບມື້ຕໍ່ໄປ. ຈະຖືກຫັກອອກຈາກລາຍຮັບເງິນສົດເທົ່ານັ້ນ.',
+    expense_amount_label:'ຈຳນວນ (₭)', expense_note_label:'ໝາຍເຫດ', expense_note_placeholder:'ຕົວຢ່າງ: ນ້ຳກ້ອນ',
+    submit_expense_btn:'ບັນທຶກ', no_expenses_yet:'ຍັງບໍ່ມີລາຍຈ່າຍສຳລັບມື້ນີ້.', total_expenses_label:'ລາຍຈ່າຍລວມ',
+    net_income_title:'ລາຍຮັບສຸດທິ', gross_cash_label:'ເງິນສົດລວມ', net_cash_label:'ເງິນສົດສຸດທິ',
+    other_income_label:'ລາຍຮັບອື່ນ', grand_total_net_label:'ລາຍຮັບສຸດທິລວມທັງໝົດ',
+    income_analytics_title:'ການວິເຄາະລາຍຮັບ', income_analytics_hint:'ລາຍຮັບສຸດທິສະສົມຂອງຊ່ວງເວລາປັດຈຸບັນ ໃນແຕ່ລະສະກຸນເງິນ. USD/THB ສະແດງເປັນຍອດລວມ — ລາຍຈ່າຍຖືກຕິດຕາມເປັນເງິນກີບເທົ່ານັ້ນ.',
+    period_day:'ມື້ນີ້', period_week:'ອາທິດນີ້', period_month:'ເດືອນນີ້', period_quarter:'ໄຕມາດນີ້', period_half:'ເຄິ່ງປີນີ້', period_year:'ປີນີ້',
+    tab_cost:'💰 ຕົ້ນທຶນ & ລາຍຈ່າຍ', cost_restricted_hint:'ຕົ້ນທຶນ ແລະ ລາຍຈ່າຍສາມາດເບິ່ງໄດ້ດ້ວຍລະຫັດຜູ້ຈັດການ ຫຼື ຜູ້ດູແລລະບົບເທົ່ານັ້ນ.',
+    cost_gate_hint:'ພື້ນທີ່ນີ້ຖືກຈຳກັດ. ໃສ່ລະຫັດຜູ້ຈັດການ ຫຼື ຜູ້ດູແລລະບົບເພື່ອເບິ່ງຕົ້ນທຶນ ແລະ ກຳໄລຂອງສິນຄ້າ.',
+    product_cost_title:'ຕົ້ນທຶນສິນຄ້າ ແລະ ລາຍຮັບສຸດທິ', product_cost_hint:'ຕົ້ນທຶນຖືກດຶງມາຈາກສູດຂອງເຄື່ອງດື່ມແຕ່ລະຢ່າງ ແລະ ຕົ້ນທຶນວັດຖຸດິບຂ້າງລຸ່ມນີ້ໂດຍກົງ — ແກ້ໄຂອັນໃດອັນໜຶ່ງກໍ່ຈະອັບເດດອັດຕະໂນມັດ.',
+    product_label:'ສິນຄ້າ', capital_cost_label:'ຕົ້ນທຶນ', retail_price_label:'ລາຄາຂາຍ', net_income_label:'ລາຍຮັບສຸດທິ', margin_label:'ກຳໄລ',
+    no_cost_data:'ບໍ່ມີຂໍ້ມູນຕົ້ນທຶນ', no_priced_items_yet:'ຍັງບໍ່ມີເມນູທີ່ຕັ້ງລາຄາ.',
+    raw_material_costs_title:'ຕົ້ນທຶນວັດຖຸດິບ', raw_material_costs_hint:'ໃສ່ລາຄາທີ່ຈ່າຍຈິງ: ລາຄາຂອງໜຶ່ງຊຸດ ແລະ ມີຈັກໜ່ວຍໃນນັ້ນ, ຈາກນັ້ນໜຶ່ງໜ່ວຍມີຈັກ (ກຣາມ/ມລ/ອັນ). ຕົ້ນທຶນຕໍ່ໜ່ວຍ ແລະ ຕໍ່ກຣາມ/ມລ/ອັນ ຈະຄິດໄລ່ອັດຕະໂນມັດ.',
+    set_price_label:'ລາຄາຊຸດ (₭)', units_per_set_label:'ຈຳນວນໜ່ວຍຕໍ່ຊຸດ', unit_size_label:'ຈຳນວນຕໍ່ໜ່ວຍ',
+    cost_per_unit_label:'ຕົ້ນທຶນຕໍ່ໜ່ວຍ', cost_per_base_unit_label:'ຕົ້ນທຶນຕໍ່ຫົວໜ່ວຍພື້ນຖານ',
+    unavailable_label:'ໝົດ', mark_unavailable:'ໝາຍວ່າໝົດ', mark_available:'ໝາຍວ່າມີຄືນ'
   },
   th: {
     tab_order:'🧋 สั่งเครื่องดื่ม', tab_menu:'📋 เมนู', tab_history:'🧾 ประวัติ', tab_deleted:'🔒 ที่ลบแล้ว', tab_settings:'⚙️ ตั้งค่า',
@@ -911,7 +1042,40 @@ var TRANSLATIONS = {
     pin_locked_title:'พยายามผิดหลายครั้งเกินไป', pin_locked_prefix:'เพื่อความปลอดภัย การป้อนรหัส PIN ถูกระงับชั่วคราว ลองใหม่อีกครั้งใน', pin_locked_suffix:'นาที',
     receipt_qr_label:'คิวอาร์โค้ดในใบเสร็จ', receipt_qr_hint:'แสดงที่ด้านล่างของใบเสร็จที่พิมพ์ทุกใบ — เหมาะสำหรับลิงก์ TikTok, Facebook หรือโปรแกรมสะสมแต้ม',
     photo_visibility_label:'ความชัดเจนของภาพ',
-    preview_receipt:'ดูตัวอย่างใบเสร็จ', preview_label:'🧾 ตัวอย่าง — ยังไม่ได้บันทึก', back_to_cart:'← กลับไปที่ตะกร้า', confirm_order:'ยืนยันและทำรายการให้เสร็จสิ้น'
+    preview_receipt:'ดูตัวอย่างใบเสร็จ', preview_label:'🧾 ตัวอย่าง — ยังไม่ได้บันทึก', back_to_cart:'← กลับไปที่ตะกร้า', confirm_order:'ยืนยันและทำรายการให้เสร็จสิ้น',
+    reset_menu_title:'รีเซ็ตเมนูเป็นค่าเริ่มต้น?', reset_menu_sub:'การดำเนินการนี้จะแทนที่เมนูและท็อปปิ้งของคุณด้วยรายการเริ่มต้นอย่างถาวร ป้อนรหัส PIN ผู้ดูแลระบบเพื่อยืนยัน',
+    reprint_receipt:'🖨 พิมพ์ใบเสร็จซ้ำ', customer_copy_label:'🧾 สำเนาลูกค้า', kitchen_copy_label:'🍳 สำเนาครัว',
+    refund_order:'↩ คืนเงิน', refunded_label:'คืนเงินแล้ว', refunded_at_label:'คืนเงินเมื่อ', refunded_by_label:'คืนเงินโดย',
+    refunded_by_admin:'ผู้ดูแลระบบ', refunded_by_manager:'ผู้จัดการ', refund_reason_label:'เหตุผล',
+    refund_evidence_hint:'ถ่ายภาพเป็นหลักฐานก่อนดำเนินการคืนเงินนี้',
+    take_photo:'📷 ถ่ายภาพ', retake_photo:'📷 ถ่ายภาพใหม่', optional_label:'ไม่บังคับ', continue_label:'ดำเนินการต่อ',
+    refund_order_title:'คืนเงินออเดอร์นี้?', refund_order_sub:'การดำเนินการนี้จะทำเครื่องหมายออเดอร์ว่าคืนเงินแล้ว และตัดออกจากยอดรายได้ ป้อนรหัส PIN ผู้จัดการเพื่อยืนยัน',
+    training_mode_title:'โหมดฝึกอบรม', training_mode_hint:'ฝึกใช้แอปโดยไม่กระทบออเดอร์ สต็อก หรือยอดขายจริง ป้อนรหัส PIN ของคุณเพื่อดำเนินการต่อ',
+    training_mode_active:'โหมดฝึกอบรม — ไม่กระทบข้อมูลจริง', quit_training:'ออกจากโหมดฝึกอบรม', training_mode_setting_up:'กำลังตั้งค่าโหมดฝึกอบรม…',
+    export_csv_title:'ส่งออกประวัติออเดอร์?', export_csv_sub:'การดำเนินการนี้จะดาวน์โหลดข้อมูลออเดอร์ทั้งหมดเป็นไฟล์ CSV ป้อนรหัส PIN ผู้ดูแลระบบเพื่อยืนยัน',
+    staff_names_title:'ชื่อพนักงาน', staff_names_hint:'ใส่ชื่อจริงให้แต่ละบัญชี — จะแสดงในทุกออเดอร์ในประวัติและในใบเสร็จ เพื่อให้คุณรู้เสมอว่าใครเป็นคนขาย',
+    staff1_label:'พนักงาน 1', staff2_label:'พนักงาน 2', staff3_label:'พนักงาน 3', manager_name_label:'ผู้จัดการ', admin_name_label:'ผู้ดูแลระบบ',
+    placed_by_label:'สั่งโดย', served_by_label:'ให้บริการโดย',
+    tab_revenue:'📊 รายได้', revenue_restricted_hint:'สรุปรายได้สามารถดูได้ด้วยรหัส PIN ผู้จัดการหรือผู้ดูแลระบบเท่านั้น',
+    revenue_gate_hint:'พื้นที่นี้ถูกจำกัด ป้อนรหัส PIN ผู้จัดการหรือผู้ดูแลระบบเพื่อดูรายได้และรายจ่าย',
+    expense_sync_error_hint:'ไม่สามารถโหลดข้อมูลรายจ่ายได้ — โปรเจกต์ Firebase นี้อาจต้องอัปเดตกฎความปลอดภัยเพื่ออนุญาตการเข้าถึงคอลเลกชัน pos_expenses ส่วนอื่นของแอปไม่ได้รับผลกระทบ',
+    daily_income_title:'รายได้รายวัน', select_date_label:'วันที่',
+    operational_expenses_title:'ค่าใช้จ่ายในการดำเนินงาน', operational_expenses_hint:'เงินสดที่จ่ายออกไป เช่น น้ำแข็ง อุปกรณ์ประจำวัน หรือเงินสดที่เก็บไว้สำหรับวันถัดไป จะถูกหักออกจากรายได้เงินสดเท่านั้น',
+    expense_amount_label:'จำนวนเงิน (₭)', expense_note_label:'บันทึกช่วยจำ', expense_note_placeholder:'เช่น น้ำแข็ง',
+    submit_expense_btn:'บันทึก', no_expenses_yet:'ยังไม่มีรายจ่ายสำหรับวันนี้', total_expenses_label:'รายจ่ายรวม',
+    net_income_title:'รายได้สุทธิ', gross_cash_label:'เงินสดรวม', net_cash_label:'เงินสดสุทธิ',
+    other_income_label:'รายได้อื่น', grand_total_net_label:'รายได้สุทธิรวมทั้งหมด',
+    income_analytics_title:'การวิเคราะห์รายได้', income_analytics_hint:'รายได้สุทธิสะสมของช่วงเวลาปัจจุบัน ในแต่ละสกุลเงิน USD/THB แสดงเป็นยอดรวม — รายจ่ายถูกติดตามเป็นเงินกีบเท่านั้น',
+    period_day:'วันนี้', period_week:'สัปดาห์นี้', period_month:'เดือนนี้', period_quarter:'ไตรมาสนี้', period_half:'ครึ่งปีนี้', period_year:'ปีนี้',
+    tab_cost:'💰 ต้นทุน & ค่าใช้จ่าย', cost_restricted_hint:'ต้นทุนและค่าใช้จ่ายสามารถดูได้ด้วยรหัส PIN ผู้จัดการหรือผู้ดูแลระบบเท่านั้น',
+    cost_gate_hint:'พื้นที่นี้ถูกจำกัด ป้อนรหัส PIN ผู้จัดการหรือผู้ดูแลระบบเพื่อดูต้นทุนและกำไรของสินค้า',
+    product_cost_title:'ต้นทุนสินค้าและรายได้สุทธิ', product_cost_hint:'ต้นทุนดึงมาจากสูตรของเครื่องดื่มแต่ละแก้วและต้นทุนวัตถุดิบด้านล่างโดยตรง — แก้ไขอย่างใดอย่างหนึ่งจะอัปเดตโดยอัตโนมัติ',
+    product_label:'สินค้า', capital_cost_label:'ต้นทุน', retail_price_label:'ราคาขาย', net_income_label:'รายได้สุทธิ', margin_label:'มาร์จิ้น',
+    no_cost_data:'ไม่มีข้อมูลต้นทุน', no_priced_items_yet:'ยังไม่มีเมนูที่ตั้งราคา',
+    raw_material_costs_title:'ต้นทุนวัตถุดิบ', raw_material_costs_hint:'ป้อนราคาที่จ่ายจริง: ราคาของหนึ่งชุดและมีกี่หน่วยในนั้น จากนั้นหนึ่งหน่วยมีกี่ (กรัม/มล./ชิ้น) ต้นทุนต่อหน่วยและต่อกรัม/มล./ชิ้นจะคำนวณโดยอัตโนมัติ',
+    set_price_label:'ราคาชุด (₭)', units_per_set_label:'จำนวนหน่วยต่อชุด', unit_size_label:'จำนวนต่อหน่วย',
+    cost_per_unit_label:'ต้นทุนต่อหน่วย', cost_per_base_unit_label:'ต้นทุนต่อหน่วยฐาน',
+    unavailable_label:'หมด', mark_unavailable:'ทำเครื่องหมายว่าหมด', mark_available:'ทำเครื่องหมายว่ามีสินค้า'
   }
 };
 function tr(key){
@@ -925,6 +1089,8 @@ function tr(key){
    types is that account's password — it is never stored in this file,
    which is what makes this real, server-checked protection. */
 var STAFF_EMAIL = "staff@memetea-pos.com";
+var STAFF_EMAIL_2 = "staff2@memetea-pos.com";
+var STAFF_EMAIL_3 = "staff3@memetea-pos.com";
 var MANAGER_EMAIL = "manager@memetea-pos.com";
 var ADMIN_EMAIL = "admin@memetea-pos.com";
 
@@ -933,6 +1099,8 @@ var state = {
   unlocked:false,
   loggedInRole:null, // 'staff' | 'manager' | 'admin' — set at login, grants that
                       // role's reserved tabs persistent access for the session
+  loggedInAccount:null, // 'staff1' | 'staff2' | 'staff3' | 'manager' | 'admin' —
+                         // which specific account logged in, recorded on every order
   pinFailCount:0,
   pinLockedUntil:null,
   pinInput:'',
@@ -955,6 +1123,7 @@ var state = {
   restoringOrderId:null,
   loaded:false,
   settingsLoaded:false, menuLoaded:false, toppingsLoaded:false, ordersLoaded:false, ingredientsLoaded:false, recipesLoaded:false,
+  expensesLoaded:false, expenses:{}, expenseSyncError:false,
   stockSyncError:false,
   language:'en',
   syncStatus:'connecting', // connecting | synced | error
@@ -979,6 +1148,14 @@ var state = {
   splitTransfer:'',
   receiptOrder:null,
   receiptPreview:null,
+  refundEvidence:null, // {orderId, photo, reason} — set while capturing evidence and through the approval step
+  trainingMode:false,
+  trainingRole:null, // 'staff' | 'manager' | 'admin' — whichever PIN was used to enter Training Mode
+  trainingEntering:false,
+  trainingPromptOpen:false,
+  trainingPinInput:'',
+  trainingPinError:false,
+  trainingPinChecking:false,
   completingOrder:false,
   historyRange:'today',
   historyCustomFrom:'',
@@ -1004,26 +1181,66 @@ var state = {
   newIngredientDraft:null,
   depositDrafts:{},
   recipeEditingItemId:null,
-  recipeLineDrafts:{}
+  recipeLineDrafts:{},
+  revenueUnlocked:false,
+  revenuePinInput:'',
+  revenuePinError:false,
+  revenuePinChecking:false,
+  revenueSummaryDate:null, // 'YYYY-MM-DD', defaults to today on first render
+  expenseAmountInput:'',
+  expenseNoteInput:'',
+  costUnlocked:false,
+  costPinInput:'',
+  costPinError:false,
+  costPinChecking:false
 };
 
 /* ================= FIREBASE (multi-device sync + auth) ================= */
 var fbApp = firebase.initializeApp(FIREBASE_CONFIG);
-var db = firebase.firestore();
+var realDb = firebase.firestore();
 var appInitialized = false;
 
 // A second, isolated Firebase app instance used ONLY to verify the manager
 // PIN for destructive order actions. It has its own separate login session,
 // so checking the manager PIN never disturbs the staff member's own session.
 var managerApp = firebase.initializeApp(FIREBASE_CONFIG, "managerApp");
-var managerDb = managerApp.firestore();
+var realManagerDb = managerApp.firestore();
 
 // A third, isolated Firebase app instance for the administrator — the only
 // account permitted to view and restore deleted orders. Also fully separate
 // from the staff and manager sessions.
 var adminApp = firebase.initializeApp(FIREBASE_CONFIG, "adminApp");
-var adminDb = adminApp.firestore();
+var realAdminDb = adminApp.firestore();
 var deletedOrdersUnsub = null;
+
+// A fourth isolated app instance used only to verify a PIN (staff, manager,
+// or admin — whichever one matches) when entering Training Mode, again
+// without disturbing whatever account is actually logged into the main session.
+var trainingCheckApp = firebase.initializeApp(FIREBASE_CONFIG, "trainingCheckApp");
+
+/* ---- Training Mode ----
+   Every read/write in the whole app goes through db / managerDb / adminDb.
+   Wrapping them in this proxy means Training Mode needs no changes anywhere
+   else in the codebase: whenever state.trainingMode is on, every collection
+   name is transparently redirected to a training_-prefixed twin collection
+   on the SAME Firestore project, so checkout, menu edits, stock, settings,
+   refunds, deletions — everything — keeps working exactly as written, but
+   never touches the real data. Exiting Training Mode is a full page reload
+   (see POS.quitTrainingMode), which is the simplest guaranteed-clean way to
+   drop everything and land back in the real session with real data. */
+function makeDbProxy(realFirestore){
+  return {
+    collection: function(name){
+      var actualName = state.trainingMode ? ('training_'+name) : name;
+      return realFirestore.collection(actualName);
+    },
+    batch: function(){ return realFirestore.batch(); },
+    runTransaction: function(updateFn){ return realFirestore.runTransaction(updateFn); }
+  };
+}
+var db = makeDbProxy(realDb);
+var managerDb = makeDbProxy(realManagerDb);
+var adminDb = makeDbProxy(realAdminDb);
 
 function ensureInitialized(){
   if(!appInitialized){
@@ -1057,6 +1274,15 @@ function handleStockSyncError(label){
     render();
   };
 }
+/* Same idea for operational expenses (pos_expenses) — a missing Firestore
+   rule for this collection must never block the core app from loading. */
+function handleExpenseSyncError(label){
+  return function(err){
+    console.error('Expense sync error ('+label+')', err);
+    state.expenseSyncError = true;
+    render();
+  };
+}
 
 var LISTENER_LABELS = ['settings','menu','toppings','orders'];
 function setListenerOk(label){
@@ -1074,8 +1300,16 @@ function recomputeSyncStatus(){
     state.syncStatus = 'connecting';
   }
 }
-function init(){
-  db.collection('pos_settings').doc('main').onSnapshot(function(doc){
+/* Listener unsubscribe functions are tracked so Training Mode can tear down
+   the real-data listeners and re-subscribe against the training_ collections
+   (via the db proxy above) without a page reload. */
+var activeDataUnsubs = [];
+function teardownDataListeners(){
+  activeDataUnsubs.forEach(function(unsub){ try{ unsub(); }catch(e){} });
+  activeDataUnsubs = [];
+}
+function setupDataListeners(){
+  activeDataUnsubs.push(db.collection('pos_settings').doc('main').onSnapshot(function(doc){
     if(doc.exists){
       state.settings = Object.assign({}, DEFAULT_SETTINGS, doc.data());
     } else {
@@ -1086,9 +1320,9 @@ function init(){
     setListenerOk('settings');
     checkLoaded();
     render();
-  }, handleSyncError('settings'));
+  }, handleSyncError('settings')));
 
-  db.collection('pos_menu').doc('main').onSnapshot(function(doc){
+  activeDataUnsubs.push(db.collection('pos_menu').doc('main').onSnapshot(function(doc){
     if(doc.exists && doc.data().items){
       state.menu = doc.data().items;
     } else {
@@ -1099,9 +1333,9 @@ function init(){
     setListenerOk('menu');
     checkLoaded();
     render();
-  }, handleSyncError('menu'));
+  }, handleSyncError('menu')));
 
-  db.collection('pos_toppings').doc('main').onSnapshot(function(doc){
+  activeDataUnsubs.push(db.collection('pos_toppings').doc('main').onSnapshot(function(doc){
     if(doc.exists && doc.data().items){
       state.toppings = doc.data().items;
     } else {
@@ -1112,17 +1346,17 @@ function init(){
     setListenerOk('toppings');
     checkLoaded();
     render();
-  }, handleSyncError('toppings'));
+  }, handleSyncError('toppings')));
 
-  db.collection('pos_orders').orderBy('timestamp','desc').onSnapshot(function(snap){
+  activeDataUnsubs.push(db.collection('pos_orders').orderBy('timestamp','desc').onSnapshot(function(snap){
     state.orders = snap.docs.map(function(d){ return d.data(); });
     state.ordersLoaded = true;
     setListenerOk('orders');
     checkLoaded();
     render();
-  }, handleSyncError('orders'));
+  }, handleSyncError('orders')));
 
-  db.collection('pos_ingredients').doc('main').onSnapshot(function(doc){
+  activeDataUnsubs.push(db.collection('pos_ingredients').doc('main').onSnapshot(function(doc){
     if(doc.exists && doc.data().items){
       state.ingredients = doc.data().items;
     } else {
@@ -1132,9 +1366,9 @@ function init(){
     state.ingredientsLoaded = true;
     state.stockSyncError = false;
     render();
-  }, handleStockSyncError('ingredients'));
+  }, handleStockSyncError('ingredients')));
 
-  db.collection('pos_recipes').doc('main').onSnapshot(function(doc){
+  activeDataUnsubs.push(db.collection('pos_recipes').doc('main').onSnapshot(function(doc){
     if(doc.exists && doc.data().items){
       state.recipes = doc.data().items;
     } else {
@@ -1144,8 +1378,19 @@ function init(){
     state.recipesLoaded = true;
     state.stockSyncError = false;
     render();
-  }, handleStockSyncError('recipes'));
+  }, handleStockSyncError('recipes')));
 
+  activeDataUnsubs.push(db.collection('pos_expenses').onSnapshot(function(snap){
+    var byDate = {};
+    snap.docs.forEach(function(d){ byDate[d.id] = d.data(); });
+    state.expenses = byDate;
+    state.expensesLoaded = true;
+    state.expenseSyncError = false;
+    render();
+  }, handleExpenseSyncError('expenses')));
+}
+function init(){
+  setupDataListeners();
   setInterval(tickClock, 30000);
 }
 
@@ -1327,6 +1572,143 @@ function prettyDate(key){
   return d.toLocaleDateString('en-GB',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
 }
 
+/* ================= REVENUE SUMMARY: income + expense helpers =================
+   Expenses (ice, daily supplies, cash-drawer float withheld for the next
+   day) are only ever paid out of physical cash, so they only ever reduce
+   the Cash channel — Transfer/E-Gets/FoodPanda are never touched by them.
+   Refunded orders are excluded everywhere here, same as History's revenue
+   figures. */
+function dateKeyFromDate(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function incomeBySourceForDate(dateKeyStr){
+  var result = {
+    LAK:{cash:0,transfer:0,egets:0,foodpanda:0},
+    USD:{cash:0,transfer:0,egets:0,foodpanda:0},
+    THB:{cash:0,transfer:0,egets:0,foodpanda:0}
+  };
+  state.orders.forEach(function(o){
+    if(o.refunded) return;
+    if(dateKey(o.timestamp) !== dateKeyStr) return;
+    var cur = o.currency || 'LAK';
+    if(!result[cur]) return;
+    if(o.paymentMethod==='split'){
+      result[cur].cash += (cur==='LAK' ? (o.splitCashLAK||0) : (o.splitCash||0));
+      result[cur].transfer += (cur==='LAK' ? (o.splitTransferLAK||0) : (o.splitTransfer||0));
+      return;
+    }
+    var amt = cur==='LAK' ? o.total : (o.displayTotal!=null ? o.displayTotal : fromLAK(o.total, cur));
+    if(o.paymentMethod==='cash') result[cur].cash += amt;
+    else if(o.paymentMethod==='egets') result[cur].egets += amt;
+    else if(o.paymentMethod==='foodpanda') result[cur].foodpanda += amt;
+    else result[cur].transfer += amt; // transfer + legacy qr
+  });
+  return result;
+}
+function getExpenseEntriesForDate(dateKeyStr){
+  return (state.expenses[dateKeyStr] && state.expenses[dateKeyStr].entries) || [];
+}
+function getExpenseTotalForDate(dateKeyStr){
+  return getExpenseEntriesForDate(dateKeyStr).reduce(function(sum,e){ return sum + (Number(e.amount)||0); }, 0);
+}
+function expensesTotalInRange(startKeyStr, endKeyStrInclusive){
+  var total = 0;
+  Object.keys(state.expenses).forEach(function(dk){
+    if(dk >= startKeyStr && dk <= endKeyStrInclusive){
+      (state.expenses[dk].entries||[]).forEach(function(e){ total += Number(e.amount)||0; });
+    }
+  });
+  return total;
+}
+function ordersInRange(startMs, endMsExclusive){
+  return state.orders.filter(function(o){
+    if(o.refunded) return false;
+    var t = new Date(o.timestamp).getTime();
+    return t >= startMs && t < endMsExclusive;
+  });
+}
+function grossByCurrencyForOrders(orders){
+  var totals = {};
+  orders.forEach(function(o){
+    var cur = o.currency || 'LAK';
+    var amt = cur==='LAK' ? o.total : (o.displayTotal!=null ? o.displayTotal : fromLAK(o.total, cur));
+    totals[cur] = (totals[cur]||0) + amt;
+  });
+  return totals;
+}
+function periodStartDate(period){
+  var now = new Date();
+  var y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
+  if(period==='week'){
+    var dow = now.getDay();
+    var diffToMonday = (dow===0) ? 6 : dow-1;
+    return new Date(y,m,d-diffToMonday);
+  }
+  if(period==='month') return new Date(y,m,1);
+  if(period==='quarter') return new Date(y, Math.floor(m/3)*3, 1);
+  if(period==='half') return new Date(y, m<6?0:6, 1);
+  if(period==='year') return new Date(y,0,1);
+  return new Date(y,m,d); // 'day'
+}
+/* Only LAK is deducted for expenses (that's the only currency operational
+   expenses are ever tracked in) — USD/THB are shown as gross since there's
+   nothing to subtract from them. */
+function computeNetForPeriod(period){
+  var start = periodStartDate(period);
+  var now = new Date();
+  var orders = ordersInRange(start.getTime(), now.getTime()+1);
+  var gross = grossByCurrencyForOrders(orders);
+  var expenseTotal = expensesTotalInRange(dateKeyFromDate(start), dateKeyFromDate(now));
+  var net = Object.assign({}, gross);
+  net.LAK = (net.LAK||0) - expenseTotal;
+  return {gross: gross, expenseTotal: expenseTotal, net: net};
+}
+
+/* ================= COST AND EXPENSE: ingredient cost + product margin =================
+   A three-level purchasing hierarchy, entered manually by Manager/Admin:
+   Set (e.g. a case) -> Unit (e.g. one carton in the case) -> base measure
+   (grams/ml/pieces inside one unit). Two divisions get from a set's price
+   all the way down to a cost per gram/ml/piece, which is what recipes are
+   actually priced in. */
+function ingredientCostPerUnit(ing){
+  var setPrice = Number(ing.costSetPrice)||0;
+  var unitsPerSet = Number(ing.costUnitsPerSet)||0;
+  if(unitsPerSet<=0) return 0;
+  return setPrice / unitsPerSet;
+}
+function ingredientCostPerBaseUnit(ing){
+  var unitCost = ingredientCostPerUnit(ing);
+  var unitSize = Number(ing.costUnitSize)||0;
+  if(unitSize<=0) return 0;
+  return unitCost / unitSize;
+}
+/* Capital cost of one item at one size = sum over that size's recipe of
+   (ingredient cost per gram/ml/piece x amount used). Reads live from
+   state.recipes and state.ingredients every time, so it automatically
+   reflects any recipe or cost edit — nothing here is cached or duplicated. */
+function computeProductCost(menuItemId, size){
+  var recipeLines = (state.recipes && state.recipes[menuItemId] && state.recipes[menuItemId][size]) || [];
+  var total = 0;
+  recipeLines.forEach(function(rl){
+    var ing = (state.ingredients||[]).filter(function(i){ return i.id===rl.ingredientId; })[0];
+    if(!ing) return;
+    total += ingredientCostPerBaseUnit(ing) * (Number(rl.amount)||0);
+  });
+  return total;
+}
+/* Gross margin = (price - cost) / price, expressed as a percentage — the
+   standard retail/F&B "how much of every sale is profit" metric. Green at
+   50%+ (a healthy, typical milk-tea-shop margin), yellow 30-49%, red at or
+   below 29% (price needs to go up). Returns null when there's no cost data
+   yet to judge against. */
+function marginStatusFor(price, cost){
+  if(!(cost>0) || !(price>0)) return null;
+  var marginPct = ((price - cost) / price) * 100;
+  if(marginPct <= 29) return 'red';
+  if(marginPct < 50) return 'yellow';
+  return 'green';
+}
+
 /* ================= FOCUS PRESERVATION RENDER ================= */
 function applyPageBackground(){
   var rootEl = document.getElementById('pos-root');
@@ -1418,12 +1800,18 @@ function buildAppHTML(){
   if(!state.loaded){
     return '<div class="pos-loading">🧋 Loading your shop…</div>';
   }
+  if(state.trainingEntering){
+    return '<div class="pos-loading">🎓 '+tr('training_mode_setting_up')+'</div>';
+  }
   var html = '';
   html += buildHeader();
+  if(state.trainingMode) html += buildTrainingBanner();
   html += '<div class="pos-main">';
   if(state.tab==='order') html += buildOrderTab();
   else if(state.tab==='history') html += buildHistoryTab();
   else if(state.tab==='stock') html += buildStockTab();
+  else if(state.tab==='revenue') html += buildRevenueSummaryTab();
+  else if(state.tab==='cost') html += buildCostExpenseTab();
   else if(state.tab==='deleted') html += buildDeletedOrdersTab();
   else if(state.tab==='settings') html += buildSettingsTab();
   html += '</div>';
@@ -1431,12 +1819,50 @@ function buildAppHTML(){
   if(state.receiptPreview) html += buildReceiptPreviewModal();
   if(state.receiptOrder) html += buildReceiptModal();
   if(state.managerPrompt) html += buildManagerPinModal();
+  else if(state.refundEvidence) html += buildRefundEvidenceModal();
+  if(state.trainingPromptOpen) html += buildTrainingPinGate();
   return html;
+}
+function buildTrainingBanner(){
+  return '' +
+  '<div class="training-banner">' +
+    '<span>🎓 '+tr('training_mode_active')+'</span>' +
+    '<button class="btn btn-small" onclick="POS.quitTrainingMode()">'+tr('quit_training')+'</button>' +
+  '</div>';
+}
+function buildTrainingPinGate(){
+  var locked = isPinLocked();
+  var dots = '';
+  for(var i=0;i<state.trainingPinInput.length;i++){
+    dots += '<span class="pin-dot filled'+(state.trainingPinError?' error':'')+'"></span>';
+  }
+  if(!dots) dots = '<span class="pin-dots-empty">'+tr('enter_pin_prompt').split(',')[0]+'</span>';
+  var disabled = state.trainingPinChecking || locked;
+  var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
+  var keypadHtml = keys.map(function(k){
+    if(k==='back') return '<button class="pin-key-back" '+(disabled?'disabled':'')+' onclick="POS.trainingPinBackspace()">⌫</button>';
+    if(k==='enter') return '<button class="pin-key-enter" '+(disabled?'disabled':'')+' onclick="POS.trainingPinSubmit()">✓</button>';
+    return '<button '+(disabled?'disabled':'')+' onclick="POS.trainingPinPress(\''+k+'\')">'+k+'</button>';
+  }).join('');
+  return '' +
+  '<div class="pos-overlay" onclick="if(event.target===this) POS.cancelTrainingPrompt()">' +
+    '<div class="pos-modal" style="max-width:320px;text-align:center;">' +
+      '<button class="modal-close-x" '+(disabled?'disabled':'')+' onclick="POS.cancelTrainingPrompt()">✕</button>' +
+      '<div class="admin-gate-icon">🎓</div>' +
+      '<h1 style="font-size:17px;">'+tr('training_mode_title')+'</h1>' +
+      (locked ? buildPinLockoutNotice() : (
+        '<p style="font-size:12.5px;color:var(--espresso-soft);margin:4px 0 16px;">'+(state.trainingPinChecking?tr('checking'):tr('training_mode_hint'))+'</p>' +
+        '<div class="pin-dots">'+dots+'</div>' +
+        '<div class="pin-error-msg">'+(state.trainingPinError?tr('incorrect_pin'):'&nbsp;')+'</div>'
+      )) +
+      '<div class="pin-keypad">'+keypadHtml+'</div>' +
+    '</div>' +
+  '</div>';
 }
 
 function buildHeader(){
   var s = state.settings;
-  var tabDefs = [['order','tab_order'],['history','tab_history'],['stock','tab_stock'],['deleted','tab_deleted'],['settings','tab_settings']];
+  var tabDefs = [['order','tab_order'],['history','tab_history'],['stock','tab_stock'],['revenue','tab_revenue'],['cost','tab_cost'],['deleted','tab_deleted'],['settings','tab_settings']];
   var navHtml = tabDefs.map(function(td){
     return '<button class="'+(state.tab===td[0]?'active':'')+'" onclick="POS.setTab(\''+td[0]+'\')">'+tr(td[1])+'</button>';
   }).join('');
@@ -1463,6 +1889,7 @@ function buildHeader(){
     '<div class="pos-nav">'+navHtml+'</div>' +
     '<div style="text-align:right;display:flex;align-items:center;gap:12px;">' +
       '<button class="cart-btn" onclick="POS.goToCart()" title="'+tr('current_order')+'">🛒'+(cartCount>0 ? '<span class="cart-badge">'+cartCount+'</span>' : '')+'</button>' +
+      (state.trainingMode ? '' : '<button class="lock-btn" onclick="POS.openTrainingPrompt()" title="'+tr('training_mode_title')+'">🎓</button>') +
       '<button class="lock-btn" onclick="POS.lockApp()" title="Lock Screen">🔒</button>' +
       '<div>' +
         '<div class="lang-row">'+langHtml+'</div>' +
@@ -1509,19 +1936,54 @@ function buildLoginScreen(){
 }
 
 /* ================= MANAGER APPROVAL MODAL ================= */
+/* Step 1 of a refund: capture camera evidence + an optional reason before
+   any approval PIN is even asked for. The <input> uses capture="environment"
+   so on a phone/tablet this opens the camera directly — there is no "choose
+   from gallery" option, only a live photo. Once a photo exists, "Continue"
+   hands off to the existing manager-approval PIN flow (buildManagerPinModal),
+   which is what actually applies the refund. */
+function buildRefundEvidenceModal(){
+  var ev = state.refundEvidence;
+  var order = state.orders.filter(function(o){ return o.id===ev.orderId; })[0];
+  var photoHtml = ev.photo
+    ? '<div class="refund-photo-preview"><img src="'+ev.photo+'" alt=""/></div>'
+    : '<div class="refund-photo-placeholder">📷</div>';
+  var canContinue = !!ev.photo;
+  return '' +
+  '<div class="pos-overlay" onclick="if(event.target===this) POS.cancelRefundEvidence()">' +
+    '<div class="pos-modal" style="max-width:340px;">' +
+      '<button class="modal-close-x" onclick="POS.cancelRefundEvidence()">✕</button>' +
+      '<h2 style="font-size:17px;">↩ '+tr('refund_order')+(order?' '+tr('order_number')+String(order.number).padStart(4,'0'):'')+'</h2>' +
+      '<p class="hint" style="margin-top:0;">'+tr('refund_evidence_hint')+'</p>' +
+      photoHtml +
+      '<div style="display:flex;gap:8px;margin:10px 0;">' +
+        '<label class="btn btn-outline btn-small">'+(ev.photo?tr('retake_photo'):tr('take_photo'))+'<input type="file" accept="image/*" capture="environment" style="display:none" onchange="POS.handleRefundPhotoCapture(this)"/></label>' +
+        (ev.photo ? '<button class="btn btn-ghost btn-small" onclick="POS.removeRefundPhoto()">'+tr('remove')+'</button>' : '') +
+      '</div>' +
+      '<div class="field"><label>'+tr('refund_reason_label')+' ('+tr('optional_label')+')</label><textarea id="pos-refund-reason" rows="2" oninput="POS.updateRefundReason(this.value)">'+escapeHtml(ev.reason)+'</textarea></div>' +
+      '<div style="display:flex;gap:8px;margin-top:10px;">' +
+        '<button class="btn btn-primary" '+(canContinue?'':'disabled')+' onclick="POS.continueToRefundApproval()">'+tr('continue_label')+'</button>' +
+        '<button class="btn btn-ghost" onclick="POS.cancelRefundEvidence()">'+tr('cancel')+'</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
 function buildManagerPinModal(){
   var p = state.managerPrompt;
-  var isClearAll = p.action==='clearHistory';
-  var title = isClearAll ? tr('clear_all_history_title') : tr('delete_order_title');
-  var sub = isClearAll
-    ? tr('clear_all_history_sub')
-    : tr('delete_order_sub');
+  var isAdmin = p.role==='admin';
+  var isEither = p.role==='either';
+  var title, sub;
+  if(p.action==='clearHistory'){ title = tr('clear_all_history_title'); sub = tr('clear_all_history_sub'); }
+  else if(p.action==='resetMenu'){ title = tr('reset_menu_title'); sub = tr('reset_menu_sub'); }
+  else if(p.action==='refundOrder'){ title = tr('refund_order_title'); sub = tr('refund_order_sub'); }
+  else if(p.action==='exportCsv'){ title = tr('export_csv_title'); sub = tr('export_csv_sub'); }
+  else { title = tr('delete_order_title'); sub = tr('delete_order_sub'); }
   var locked = isPinLocked();
   var dots = '';
   for(var i=0;i<state.managerPinInput.length;i++){
     dots += '<span class="pin-dot filled'+(state.managerPinError?' error':'')+'"></span>';
   }
-  if(!dots) dots = '<span class="pin-dots-empty">'+tr('manager_pin_placeholder')+'</span>';
+  if(!dots) dots = '<span class="pin-dots-empty">'+(isEither?tr('manager_admin_pin_placeholder'):(isAdmin?tr('admin_pin_placeholder'):tr('manager_pin_placeholder')))+'</span>';
   var disabled = state.managerPinChecking || locked;
   var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
   var keypadHtml = keys.map(function(k){
@@ -1537,7 +1999,7 @@ function buildManagerPinModal(){
       (locked ? buildPinLockoutNotice() : (
         '<p style="font-size:12.5px;color:var(--espresso-soft);margin:4px 0 16px;">'+escapeHtml(state.managerPinChecking?tr('checking'):sub)+'</p>' +
         '<div class="pin-dots">'+dots+'</div>' +
-        '<div class="pin-error-msg">'+(state.managerPinError?tr('incorrect_manager_pin'):'&nbsp;')+'</div>'
+        '<div class="pin-error-msg">'+(state.managerPinError?(isEither?tr('incorrect_manager_admin_pin'):(isAdmin?tr('incorrect_admin_pin'):tr('incorrect_manager_pin'))):'&nbsp;')+'</div>'
       )) +
       '<div class="pin-keypad">'+keypadHtml+'</div>' +
     '</div>' +
@@ -1568,7 +2030,7 @@ function buildOrderTab(){
     return '<button class="chip currency-chip '+(state.orderCurrency===c[0]?'active':'')+'" onclick="POS.setOrderCurrency(\''+c[0]+'\')">'+c[1]+'</button>';
   }).join('');
 
-  var items = state.menu.filter(function(m){ return m.active !== false; });
+  var items = state.menu.slice();
   if(state.activeCategory!=='All') items = items.filter(function(m){ return m.category===state.activeCategory; });
   if(state.search.trim()){
     var q = state.search.trim().toLowerCase();
@@ -1584,8 +2046,10 @@ function buildOrderTab(){
     var minP = priceVals.length? Math.min.apply(null,priceVals) : 0;
     var accent = categoryVar(colorForCategory(m.category));
     var visual = m.photo ? '<img class="item-photo" src="'+m.photo+'" alt=""/>' : '<div class="item-photo-emoji"><span class="emoji">'+m.emoji+'</span></div>';
-    return '<button class="item-card" style="--accent:'+accent+'" onclick="POS.openItem(\''+m.id+'\')">' +
+    var unavailable = m.active===false;
+    return '<button class="item-card'+(unavailable?' item-card-unavailable':'')+'" style="--accent:'+accent+'" '+(unavailable?'disabled':'onclick="POS.openItem(\''+m.id+'\')"')+'>' +
       visual +
+      (unavailable ? '<span class="unavailable-badge">'+tr('unavailable_label')+'</span>' : '') +
       '<p class="name">'+escapeHtml(itemDisplayName(m))+'</p>' +
       '<p class="cat">'+escapeHtml(m.category)+'</p>' +
       '<p class="price">from '+formatMoneyAs(minP, state.orderCurrency)+'</p>' +
@@ -1612,7 +2076,6 @@ function buildCategoryPicker(){
   var byCat = {};
   var order = [];
   state.menu.forEach(function(m){
-    if(m.active===false) return;
     if(!byCat[m.category]){ byCat[m.category]=[]; order.push(m.category); }
     byCat[m.category].push(m);
   });
@@ -1635,7 +2098,7 @@ function buildCategoryPicker(){
     '<button class="cat-card cat-card-all" onclick="POS.selectCategory(\'All\')">' +
       '<div class="cat-card-photo cat-card-photo-emoji" style="--accent:var(--caramel);"><span class="emoji">🧋</span></div>' +
       '<p class="cat-card-name">'+tr('all_items')+'</p>' +
-      '<p class="cat-card-count">'+state.menu.filter(function(m){return m.active!==false;}).length+' '+tr('items_suffix')+'</p>' +
+      '<p class="cat-card-count">'+state.menu.length+' '+tr('items_suffix')+'</p>' +
     '</button>';
 
   return '' +
@@ -1720,7 +2183,9 @@ function buildDraftOrder(){
     splitCash: state.paymentMethod==='split' ? splitCashInput : null,
     splitTransfer: state.paymentMethod==='split' ? splitTransferInput : null,
     splitCashLAK: state.paymentMethod==='split' ? splitCashInput*rate : null,
-    splitTransferLAK: state.paymentMethod==='split' ? splitTransferInput*rate : null
+    splitTransferLAK: state.paymentMethod==='split' ? splitTransferInput*rate : null,
+    placedByAccount: state.loggedInAccount || null,
+    placedByRole: state.loggedInRole || null
   };
 }
 /* The amount actually paid, in the currency actually paid — never converted to LAK for display. */
@@ -1736,6 +2201,7 @@ function orderPaidDisplay(o){
 function dayTotalsByCurrency(dayOrders){
   var totals = {};
   dayOrders.forEach(function(o){
+    if(o.refunded) return;
     var p = orderPaidAmount(o);
     totals[p.cur] = (totals[p.cur]||0) + p.amount;
   });
@@ -1871,6 +2337,14 @@ function buildItemModal(){
 }
 
 /* ---- Receipt ---- */
+/* Resolves a stored account key (e.g. 'staff2') to whatever friendly name
+   the shop owner has given it in Settings, falling back to a generic
+   label like "Staff 2" until they do. */
+function staffNameFor(accountKey){
+  if(!accountKey) return '—';
+  var names = (state.settings && state.settings.staffNames) || {};
+  return (names[accountKey] && names[accountKey].trim()) || DEFAULT_STAFF_LABELS[accountKey] || accountKey;
+}
 function paymentMethodLabel(pm){
   if(pm==='cash') return tr('cash');
   if(pm==='transfer') return tr('transfer');
@@ -1933,16 +2407,35 @@ function buildReceiptContentHtml(o, isPreview){
     '<div class="r-row big"><span>'+tr('total')+'</span><span>'+formatMoney(o.total)+'</span></div>' +
     (isForeign ? '<div class="r-row big" style="color:var(--taro);"><span>'+tr('paid_in')+' '+escapeHtml(o.currency)+'</span><span>'+formatForeignAmount(o.displayTotal, o.currency)+'</span></div>' : '') +
     '<div class="r-row"><span>'+tr('receipt_payment')+'</span><span>'+escapeHtml(paymentDisplayFor(o))+'</span></div>' +
+    (o.placedByAccount ? '<div class="r-row"><span>'+tr('served_by_label')+'</span><span>'+escapeHtml(staffNameFor(o.placedByAccount))+'</span></div>' : '') +
     cashRowsHtml +
     '<div class="r-footer">'+nl2br(s.footerMessage)+'</div>' +
     (s.receiptQrCode ? '<div class="r-qr"><img src="'+s.receiptQrCode+'" alt=""/></div>' : '');
+}
+/* Wraps the receipt content in two copies for printing — a customer copy
+   (always the one shown on screen) and a kitchen copy, so every checkout
+   prints both in a single print job. The kitchen copy is completely
+   hidden on screen (.print-only) and only appears in the print output,
+   separated by a dashed cut line and a forced page break so they come out
+   as two distinct slips even on a continuous receipt roll. */
+function buildReceiptCopiesHtml(o, isPreview){
+  var content = buildReceiptContentHtml(o, isPreview);
+  return '' +
+    '<div class="receipt-copy">' +
+      '<div class="receipt-copy-label print-only">'+tr('customer_copy_label')+'</div>' +
+      content +
+    '</div>' +
+    '<div class="receipt-copy receipt-copy-kitchen print-only">' +
+      '<div class="receipt-copy-label">'+tr('kitchen_copy_label')+'</div>' +
+      content +
+    '</div>';
 }
 function buildReceiptModal(){
   var o = state.receiptOrder;
   return '' +
   '<div class="pos-overlay" onclick="if(event.target===this) POS.closeReceipt()">' +
     '<div class="pos-modal receipt-modal">' +
-      '<div id="receipt-content">' + buildReceiptContentHtml(o, false) + '</div>' +
+      '<div id="receipt-content">' + buildReceiptCopiesHtml(o, false) + '</div>' +
       '<div class="receipt-actions">' +
         '<button class="btn btn-ghost" onclick="POS.closeReceipt()">'+tr('new_order')+'</button>' +
         '<button class="btn btn-primary" onclick="window.print()">'+tr('print_receipt')+'</button>' +
@@ -1978,11 +2471,14 @@ function buildMenuTab(){
       if(m.nameLo) translations.push('ລາວ: '+m.nameLo);
       if(m.nameTh) translations.push('ไทย: '+m.nameTh);
       var translationLine = translations.length ? '<div class="t3">'+escapeHtml(translations.join('   ·   '))+'</div>' : '';
+      var unavailable = m.active===false;
+      var unavailableLine = unavailable ? '<div class="t3" style="color:var(--danger);">⚠ '+tr('unavailable_label')+'</div>' : '';
       return '' +
-      '<div class="mgmt-row">' +
+      '<div class="mgmt-row'+(unavailable?' order-row-refunded':'')+'">' +
         thumb +
-        '<div class="info"><div class="t1">'+escapeHtml(m.name)+'</div>'+translationLine+'<div class="t2">'+priceStr+'</div></div>' +
+        '<div class="info"><div class="t1">'+escapeHtml(m.name)+'</div>'+translationLine+unavailableLine+'<div class="t2">'+priceStr+'</div></div>' +
         '<div class="acts">' +
+          '<button class="btn '+(unavailable?'btn-primary':'btn-outline')+' btn-small" onclick="POS.toggleItemAvailability(\''+m.id+'\')">'+(unavailable?tr('mark_available'):tr('mark_unavailable'))+'</button>' +
           '<button class="btn btn-outline btn-small" onclick="POS.editItem(\''+m.id+'\')">'+tr('edit')+'</button>' +
           '<button class="btn btn-danger btn-small" onclick="POS.deleteItem(\''+m.id+'\')">'+tr('delete')+'</button>' +
         '</div>' +
@@ -2157,8 +2653,14 @@ function buildHistoryTab(){
     return true; // all
   });
 
+  // Revenue, best-sellers, and payment-method breakdowns must never count a
+  // refunded order — the money was given back. The order itself still shows
+  // up in the day-by-day list below (marked "Refunded"), just excluded from
+  // every revenue-style total.
+  var filteredForRevenue = filtered.filter(function(o){ return !o.refunded; });
+
   var revenueByCurrency = {};
-  filtered.forEach(function(o){
+  filteredForRevenue.forEach(function(o){
     var p = orderPaidAmount(o);
     revenueByCurrency[p.cur] = (revenueByCurrency[p.cur]||0) + p.amount;
   });
@@ -2167,7 +2669,7 @@ function buildHistoryTab(){
   if(!presentCurrencies.length) presentCurrencies = ['LAK'];
   var count = filtered.length;
   var tally = {};
-  filtered.forEach(function(o){ o.items.forEach(function(l){ tally[l.name]=(tally[l.name]||0)+l.qty; }); });
+  filteredForRevenue.forEach(function(o){ o.items.forEach(function(l){ tally[l.name]=(tally[l.name]||0)+l.qty; }); });
   var topItem = Object.keys(tally).sort(function(a,b){return tally[b]-tally[a];})[0] || '—';
 
   var rangeChips = [['today',tr('today')],['week',tr('last_7_days')],['all',tr('all_time')],['custom',tr('custom_range')]].map(function(r){
@@ -2213,11 +2715,11 @@ function buildHistoryTab(){
   customPickerHtml +
   '<div class="section-card">' +
     '<h2>'+tr('revenue_by_payment')+'</h2><p class="hint">'+tr('revenue_by_payment_hint')+'</p>' +
-    buildRevenueChart(filtered) +
+    buildRevenueChart(filteredForRevenue) +
   '</div>' +
   '<div class="section-card">' +
     '<h2>'+tr('best_sellers')+'</h2><p class="hint">'+tr('best_sellers_hint')+'</p>' +
-    buildTopItemsChart(filtered) +
+    buildTopItemsChart(filteredForRevenue) +
   '</div>' +
   groupsHtml;
 }
@@ -2391,17 +2893,36 @@ function buildOrderRow(o){
     var lines = o.items.map(function(l){
       return '<div class="di"><span>'+l.qty+'x '+escapeHtml(l.name)+' ('+l.size+')</span><span>'+formatForeignAmount(fromLAK(l.unitPrice*l.qty, cur), cur)+'</span></div>';
     }).join('');
+    var refundDetailHtml = '';
+    if(o.refunded){
+      var rd = o.refundedAt ? new Date(o.refundedAt) : null;
+      refundDetailHtml = '' +
+      '<div class="refund-detail">' +
+        '<div class="refund-detail-title">'+tr('refunded_label')+'</div>' +
+        (rd ? '<div class="di"><span>'+tr('refunded_at_label')+'</span><span>'+rd.toLocaleDateString('en-GB')+' '+rd.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+'</span></div>' : '') +
+        '<div class="di"><span>'+tr('refunded_by_label')+'</span><span>'+(o.refundedBy==='admin'?tr('refunded_by_admin'):tr('refunded_by_manager'))+'</span></div>' +
+        (o.refundReason ? '<div class="di"><span>'+tr('refund_reason_label')+'</span><span>'+escapeHtml(o.refundReason)+'</span></div>' : '') +
+        (o.refundPhoto ? '<div class="refund-photo"><img src="'+o.refundPhoto+'" alt=""/></div>' : '') +
+      '</div>';
+    }
     detail = '' +
     '<div class="order-detail">' +
       lines +
       '<div class="di"><span>'+tr('receipt_payment')+'</span><span>'+escapeHtml(paymentDisplayFor(o))+(cur!=='LAK'?' ('+cur+')':'')+'</span></div>' +
-      '<div class="dactions"><button class="btn btn-danger btn-small" onclick="POS.deleteOrder(\''+o.id+'\')">'+tr('delete_order')+'</button></div>' +
+      '<div class="di"><span>'+tr('placed_by_label')+'</span><span>'+escapeHtml(staffNameFor(o.placedByAccount))+'</span></div>' +
+      refundDetailHtml +
+      '<div class="dactions">' +
+        '<button class="btn btn-outline btn-small" onclick="POS.reprintOrder(\''+o.id+'\')">'+tr('reprint_receipt')+'</button>' +
+        (o.refunded ? '' : '<button class="btn btn-outline btn-small" onclick="POS.startRefundEvidence(\''+o.id+'\')">'+tr('refund_order')+'</button>') +
+        '<button class="btn btn-danger btn-small" onclick="POS.deleteOrder(\''+o.id+'\')">'+tr('delete_order')+'</button>' +
+      '</div>' +
     '</div>';
   }
+  var refundBadge = o.refunded ? ' <span class="refunded-badge">'+tr('refunded_label')+'</span>' : '';
   return '' +
-  '<div class="order-row">' +
+  '<div class="order-row'+(o.refunded?' order-row-refunded':'')+'">' +
     '<div class="order-row-top" onclick="POS.toggleOrder(\''+o.id+'\')">' +
-      '<div><div class="onum">'+tr('order_number')+String(o.number).padStart(4,'0')+'</div><div class="otime">'+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+'</div></div>' +
+      '<div><div class="onum">'+tr('order_number')+String(o.number).padStart(4,'0')+refundBadge+'</div><div class="otime">'+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})+'</div></div>' +
       '<div class="ototal">'+orderPaidDisplay(o)+'</div>' +
     '</div>' +
     detail +
@@ -2422,7 +2943,9 @@ function buildStockTab(){
   if(!hasStockAccess()){
     return buildStockPinGate();
   }
-  var privileged = state.loggedInRole==='manager' || state.loggedInRole==='admin';
+  var privileged = state.trainingMode
+    ? (state.trainingRole==='manager' || state.trainingRole==='admin')
+    : (state.loggedInRole==='manager' || state.loggedInRole==='admin');
   var subTabs = [['raw','stock_raw_materials'],['deposit','stock_deposit'],['recipes','stock_recipes']];
   var subTabHtml = subTabs.map(function(s){
     return '<button class="chip '+(state.stockSubTab===s[0]?'active':'')+'" onclick="POS.setStockSubTab(\''+s[0]+'\')">'+tr(s[1])+'</button>';
@@ -2477,6 +3000,271 @@ function buildStockPinGate(){
   '</div>';
 }
 
+function buildRevenuePinGate(){
+  var locked = isPinLocked();
+  var dots = '';
+  for(var i=0;i<state.revenuePinInput.length;i++){
+    dots += '<span class="pin-dot filled'+(state.revenuePinError?' error':'')+'"></span>';
+  }
+  if(!dots) dots = '<span class="pin-dots-empty">'+tr('manager_admin_pin_placeholder')+'</span>';
+  var disabled = state.revenuePinChecking || locked;
+  var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
+  var keypadHtml = keys.map(function(k){
+    if(k==='back') return '<button class="pin-key-back" '+(disabled?'disabled':'')+' onclick="POS.revenuePinBackspace()">⌫</button>';
+    if(k==='enter') return '<button class="pin-key-enter" '+(disabled?'disabled':'')+' onclick="POS.revenuePinSubmit()">✓</button>';
+    return '<button '+(disabled?'disabled':'')+' onclick="POS.revenuePinPress(\''+k+'\')">'+k+'</button>';
+  }).join('');
+  return '' +
+  '<div class="admin-gate">' +
+    '<div class="login-card" style="max-width:320px;margin:24px auto;">' +
+      '<div class="admin-gate-icon">🔒</div>' +
+      '<h1>'+tr('manager_admin_only')+'</h1>' +
+      (locked ? buildPinLockoutNotice() : (
+        '<p>'+(state.revenuePinChecking?tr('checking'):tr('revenue_gate_hint'))+'</p>' +
+        '<div class="pin-dots">'+dots+'</div>' +
+        '<div class="pin-error-msg">'+(state.revenuePinError?tr('incorrect_manager_admin_pin'):'&nbsp;')+'</div>'
+      )) +
+      '<div class="pin-keypad">'+keypadHtml+'</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function buildCostPinGate(){
+  var locked = isPinLocked();
+  var dots = '';
+  for(var i=0;i<state.costPinInput.length;i++){
+    dots += '<span class="pin-dot filled'+(state.costPinError?' error':'')+'"></span>';
+  }
+  if(!dots) dots = '<span class="pin-dots-empty">'+tr('manager_admin_pin_placeholder')+'</span>';
+  var disabled = state.costPinChecking || locked;
+  var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
+  var keypadHtml = keys.map(function(k){
+    if(k==='back') return '<button class="pin-key-back" '+(disabled?'disabled':'')+' onclick="POS.costPinBackspace()">⌫</button>';
+    if(k==='enter') return '<button class="pin-key-enter" '+(disabled?'disabled':'')+' onclick="POS.costPinSubmit()">✓</button>';
+    return '<button '+(disabled?'disabled':'')+' onclick="POS.costPinPress(\''+k+'\')">'+k+'</button>';
+  }).join('');
+  return '' +
+  '<div class="admin-gate">' +
+    '<div class="login-card" style="max-width:320px;margin:24px auto;">' +
+      '<div class="admin-gate-icon">🔒</div>' +
+      '<h1>'+tr('manager_admin_only')+'</h1>' +
+      (locked ? buildPinLockoutNotice() : (
+        '<p>'+(state.costPinChecking?tr('checking'):tr('cost_gate_hint'))+'</p>' +
+        '<div class="pin-dots">'+dots+'</div>' +
+        '<div class="pin-error-msg">'+(state.costPinError?tr('incorrect_manager_admin_pin'):'&nbsp;')+'</div>'
+      )) +
+      '<div class="pin-keypad">'+keypadHtml+'</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function buildCostExpenseTab(){
+  if(!hasCostAccess()){
+    return buildCostPinGate();
+  }
+  var privileged = state.loggedInRole==='manager' || state.loggedInRole==='admin';
+  var banner = '' +
+  '<div class="section-card" style="background:var(--taro-light);border-color:var(--taro);">' +
+    '<h2 style="color:var(--taro);">'+tr('manager_admin_area_title')+'</h2>' +
+    '<p class="hint">'+(privileged ? tr('privileged_session_hint') : tr('cost_restricted_hint'))+'</p>' +
+    (privileged ? '' : '<button class="btn btn-ghost btn-small" onclick="POS.lockCostTab(); POS.setTab(\'cost\')">'+tr('lock_tab_now')+'</button>') +
+  '</div>';
+  return banner + buildProductCostSection() + buildRawMaterialCostSection();
+}
+
+function buildProductCostSection(){
+  var rows = [];
+  state.menu.forEach(function(m){
+    ['S','M','L'].forEach(function(sz){
+      var price = Number(m.prices[sz])||0;
+      if(price<=0) return;
+      var cost = computeProductCost(m.id, sz);
+      var net = price - cost;
+      var status = marginStatusFor(price, cost);
+      rows.push({item:m, size:sz, price:price, cost:cost, net:net, status:status});
+    });
+  });
+
+  var rowsHtml = rows.length ? rows.map(function(r){
+    var statusClass = r.status ? 'status-'+r.status : 'status-neutral';
+    var marginText = r.cost>0 ? (Math.round(((r.price-r.cost)/r.price)*100)+'%') : tr('no_cost_data');
+    return '' +
+    '<tr>' +
+      '<td>'+escapeHtml(itemDisplayName(r.item))+' ('+r.size+')</td>' +
+      '<td>'+formatMoney(r.cost)+'</td>' +
+      '<td>'+formatMoney(r.price)+'</td>' +
+      '<td>'+formatMoney(r.net)+'</td>' +
+      '<td><span class="cost-status-badge '+statusClass+'">'+marginText+'</span></td>' +
+    '</tr>';
+  }).join('') : '';
+
+  return '' +
+  '<div class="section-card">' +
+    '<h2>'+tr('product_cost_title')+'</h2><p class="hint">'+tr('product_cost_hint')+'</p>' +
+    (rows.length ?
+      ('<div class="rev-table-wrap"><table class="rev-table"><thead><tr>' +
+        '<th>'+tr('product_label')+'</th><th>'+tr('capital_cost_label')+'</th><th>'+tr('retail_price_label')+'</th><th>'+tr('net_income_label')+'</th><th>'+tr('margin_label')+'</th>' +
+      '</tr></thead><tbody>' + rowsHtml + '</tbody></table></div>')
+      : ('<p class="hint" style="margin-top:0;">'+tr('no_priced_items_yet')+'</p>')) +
+  '</div>';
+}
+
+function buildRawMaterialCostSection(){
+  var ingredients = state.ingredients || [];
+  var rowsHtml = ingredients.map(function(ing){
+    var unitCost = ingredientCostPerUnit(ing);
+    var baseCost = ingredientCostPerBaseUnit(ing);
+    return '' +
+    '<div class="mgmt-row" style="flex-wrap:wrap;row-gap:10px;">' +
+      '<span class="em">'+ingredientEmoji(ing.unit)+'</span>' +
+      '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+tr('cost_per_base_unit_label')+': '+formatMoney(baseCost)+' / '+escapeHtml(ing.unit)+'</div></div>' +
+      '<div class="cost-entry-grid">' +
+        '<div class="deposit-field"><label>'+tr('set_price_label')+'</label><input id="pos-cost-setprice-'+ing.id+'" type="text" inputmode="decimal" placeholder="0" value="'+(ing.costSetPrice?escapeHtml(String(ing.costSetPrice)):'')+'" oninput="POS.updateIngredientCost(\''+ing.id+'\',\'costSetPrice\',this.value)" onblur="POS.persistIngredientCost(\''+ing.id+'\')"/></div>' +
+        '<div class="deposit-field"><label>'+tr('units_per_set_label')+'</label><input id="pos-cost-unitsperset-'+ing.id+'" type="text" inputmode="decimal" placeholder="0" value="'+(ing.costUnitsPerSet?escapeHtml(String(ing.costUnitsPerSet)):'')+'" oninput="POS.updateIngredientCost(\''+ing.id+'\',\'costUnitsPerSet\',this.value)" onblur="POS.persistIngredientCost(\''+ing.id+'\')"/></div>' +
+        '<div class="deposit-field"><label>'+tr('unit_size_label')+' ('+escapeHtml(ing.unit)+')</label><input id="pos-cost-unitsize-'+ing.id+'" type="text" inputmode="decimal" placeholder="0" value="'+(ing.costUnitSize?escapeHtml(String(ing.costUnitSize)):'')+'" oninput="POS.updateIngredientCost(\''+ing.id+'\',\'costUnitSize\',this.value)" onblur="POS.persistIngredientCost(\''+ing.id+'\')"/></div>' +
+      '</div>' +
+      '<div class="cost-derived-line">'+tr('cost_per_unit_label')+': '+formatMoney(unitCost)+' &nbsp;·&nbsp; '+tr('cost_per_base_unit_label')+': '+formatMoney(baseCost)+'/'+escapeHtml(ing.unit)+'</div>' +
+    '</div>';
+  }).join('');
+
+  return '' +
+  '<div class="section-card">' +
+    '<h2>'+tr('raw_material_costs_title')+'</h2><p class="hint">'+tr('raw_material_costs_hint')+'</p>' +
+    (ingredients.length ? rowsHtml : '<p class="hint" style="margin-top:0;">'+tr('no_ingredients_yet')+'</p>') +
+  '</div>';
+}
+
+function buildRevenueSummaryTab(){
+  if(!hasRevenueAccess()){
+    return buildRevenuePinGate();
+  }
+  var privileged = state.loggedInRole==='manager' || state.loggedInRole==='admin';
+  var todayKey = dateKey(new Date().toISOString());
+  var selectedDate = state.revenueSummaryDate || todayKey;
+
+  var banner = '' +
+  '<div class="section-card" style="background:var(--taro-light);border-color:var(--taro);">' +
+    '<h2 style="color:var(--taro);">'+tr('manager_admin_area_title')+'</h2>' +
+    '<p class="hint">'+(privileged ? tr('privileged_session_hint') : tr('revenue_restricted_hint'))+'</p>' +
+    (privileged ? '' : '<button class="btn btn-ghost btn-small" onclick="POS.lockRevenueTab(); POS.setTab(\'revenue\')">'+tr('lock_tab_now')+'</button>') +
+  '</div>';
+
+  var errorBanner = state.expenseSyncError ? (
+    '<div class="section-card" style="background:#FFFBF9;border-color:var(--danger-light);">' +
+      '<h2 style="color:var(--danger);">'+tr('stock_sync_error_title')+'</h2>' +
+      '<p class="hint">'+tr('expense_sync_error_hint')+'</p>' +
+    '</div>'
+  ) : '';
+
+  return banner + errorBanner + buildDailyIncomeSection(selectedDate, todayKey) + buildRevenueAnalyticsSection();
+}
+
+function buildDailyIncomeSection(selectedDate, todayKey){
+  var income = incomeBySourceForDate(selectedDate);
+  var presentCurrencies = ['LAK','USD','THB'].filter(function(cur){
+    var s = income[cur];
+    return s.cash>0 || s.transfer>0 || s.egets>0 || s.foodpanda>0;
+  });
+  if(!presentCurrencies.length) presentCurrencies = ['LAK'];
+  var sourceRows = [['cash','cash'],['transfer','transfer'],['egets','egets'],['foodpanda','foodpanda']];
+
+  var incomeTableHtml = '' +
+    '<div class="rev-table-wrap"><table class="rev-table"><thead><tr><th></th>' +
+    presentCurrencies.map(function(cur){ return '<th>'+cur+'</th>'; }).join('') +
+    '</tr></thead><tbody>' +
+    sourceRows.map(function(sr){
+      return '<tr><td>'+tr(sr[1])+'</td>' +
+        presentCurrencies.map(function(cur){ return '<td>'+formatForeignAmount(income[cur][sr[0]], cur)+'</td>'; }).join('') +
+      '</tr>';
+    }).join('') +
+    '<tr class="rev-total-row"><td>'+tr('total')+'</td>' +
+      presentCurrencies.map(function(cur){
+        var s = income[cur];
+        return '<td>'+formatForeignAmount(s.cash+s.transfer+s.egets+s.foodpanda, cur)+'</td>';
+      }).join('') +
+    '</tr>' +
+    '</tbody></table></div>';
+
+  var expenseEntries = getExpenseEntriesForDate(selectedDate);
+  var expenseTotal = getExpenseTotalForDate(selectedDate);
+  var entriesHtml = expenseEntries.length ? expenseEntries.map(function(e, idx){
+    var dt = e.submittedAt ? new Date(e.submittedAt) : null;
+    var metaParts = [];
+    if(e.note) metaParts.push(escapeHtml(e.note));
+    if(dt) metaParts.push(dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}));
+    if(e.submittedBy) metaParts.push(escapeHtml(staffNameFor(e.submittedBy)));
+    return '' +
+    '<div class="mgmt-row">' +
+      '<div class="info"><div class="t1">'+formatMoney(e.amount)+'</div><div class="t2">'+metaParts.join(' · ')+'</div></div>' +
+      '<div class="acts"><button class="btn btn-ghost btn-small" onclick="POS.removeExpenseEntry(\''+selectedDate+'\','+idx+')">'+tr('remove')+'</button></div>' +
+    '</div>';
+  }).join('') : ('<p class="hint" style="margin:0;">'+tr('no_expenses_yet')+'</p>');
+
+  var netCashLAK = income.LAK.cash - expenseTotal;
+  var grandTotalLAK = netCashLAK + income.LAK.transfer + income.LAK.egets + income.LAK.foodpanda;
+  var otherCurrencyRows = presentCurrencies.filter(function(c){ return c!=='LAK'; }).map(function(cur){
+    var s = income[cur];
+    return '<div class="summary-row"><span>'+tr('other_income_label')+' ('+cur+')</span><span>'+formatForeignAmount(s.cash+s.transfer+s.egets+s.foodpanda, cur)+'</span></div>';
+  }).join('');
+
+  return '' +
+  '<div class="section-card">' +
+    '<h2>'+tr('daily_income_title')+'</h2>' +
+    '<div class="field" style="max-width:220px;"><label>'+tr('select_date_label')+'</label><input id="pos-revenue-date" type="date" max="'+todayKey+'" value="'+selectedDate+'" oninput="POS.setRevenueSummaryDate(this.value)"/></div>' +
+    incomeTableHtml +
+  '</div>' +
+  '<div class="section-card">' +
+    '<h2>'+tr('operational_expenses_title')+'</h2><p class="hint">'+tr('operational_expenses_hint')+'</p>' +
+    '<div class="deposit-inputs">' +
+      '<div class="deposit-field"><label>'+tr('expense_amount_label')+'</label><input id="pos-expense-amount" type="text" inputmode="decimal" placeholder="0" value="'+escapeHtml(state.expenseAmountInput)+'" oninput="POS.updateExpenseAmount(this.value)"/></div>' +
+      '<div class="deposit-field"><label>'+tr('expense_note_label')+' ('+tr('optional_label')+')</label><input id="pos-expense-note" type="text" placeholder="'+tr('expense_note_placeholder')+'" value="'+escapeHtml(state.expenseNoteInput)+'" oninput="POS.updateExpenseNote(this.value)"/></div>' +
+      '<button class="btn btn-primary btn-small" onclick="POS.submitExpense()">'+tr('submit_expense_btn')+'</button>' +
+    '</div>' +
+    '<div style="margin-top:12px;">'+entriesHtml+'</div>' +
+    '<div class="summary-row total" style="margin-top:10px;"><span>'+tr('total_expenses_label')+'</span><span>-'+formatMoney(expenseTotal)+'</span></div>' +
+  '</div>' +
+  '<div class="section-card">' +
+    '<h2>'+tr('net_income_title')+'</h2>' +
+    '<div class="summary-row"><span>'+tr('gross_cash_label')+'</span><span>'+formatMoney(income.LAK.cash)+'</span></div>' +
+    '<div class="summary-row"><span>'+tr('total_expenses_label')+'</span><span>-'+formatMoney(expenseTotal)+'</span></div>' +
+    '<div class="summary-row total"><span>'+tr('net_cash_label')+'</span><span>'+formatMoney(netCashLAK)+'</span></div>' +
+    '<div class="summary-row"><span>'+tr('transfer')+'</span><span>'+formatMoney(income.LAK.transfer)+'</span></div>' +
+    '<div class="summary-row"><span>'+tr('egets')+'</span><span>'+formatMoney(income.LAK.egets)+'</span></div>' +
+    '<div class="summary-row"><span>'+tr('foodpanda')+'</span><span>'+formatMoney(income.LAK.foodpanda)+'</span></div>' +
+    '<div class="summary-row total" style="border-top:2px solid var(--border);margin-top:6px;padding-top:8px;"><span>'+tr('grand_total_net_label')+'</span><span>'+formatMoney(grandTotalLAK)+'</span></div>' +
+    otherCurrencyRows +
+  '</div>';
+}
+
+function buildRevenueAnalyticsSection(){
+  var periods = [['day','period_day'],['week','period_week'],['month','period_month'],['quarter','period_quarter'],['half','period_half'],['year','period_year']];
+  var results = periods.map(function(p){ return {labelKey:p[1], data: computeNetForPeriod(p[0])}; });
+
+  var allCurs = {LAK:true};
+  results.forEach(function(r){ Object.keys(r.data.gross).forEach(function(c){ allCurs[c]=true; }); });
+  var currencies = Object.keys(allCurs).sort(function(a,b){ return (a==='LAK'?-1:1) - (b==='LAK'?-1:1); });
+
+  var tableHtml = '' +
+    '<div class="rev-table-wrap"><table class="rev-table"><thead><tr><th></th>' +
+    results.map(function(r){ return '<th>'+tr(r.labelKey)+'</th>'; }).join('') +
+    '</tr></thead><tbody>' +
+    currencies.map(function(cur){
+      return '<tr><td>'+cur+'</td>' +
+        results.map(function(r){
+          var val = cur==='LAK' ? (r.data.net.LAK||0) : (r.data.gross[cur]||0);
+          return '<td>'+formatForeignAmount(val, cur)+'</td>';
+        }).join('') +
+      '</tr>';
+    }).join('') +
+    '</tbody></table></div>';
+
+  return '' +
+  '<div class="section-card">' +
+    '<h2>'+tr('income_analytics_title')+'</h2><p class="hint">'+tr('income_analytics_hint')+'</p>' +
+    tableHtml +
+  '</div>';
+}
+
 function buildIngredientEditForm(ing){
   var d = ing || state.newIngredientDraft;
   var isNew = !ing;
@@ -2512,14 +3300,34 @@ function buildIngredientEditForm(ing){
 function hasSettingsAccess(){
   return state.settingsUnlocked || state.loggedInRole==='manager' || state.loggedInRole==='admin';
 }
+/* In Training Mode, Stock access is judged by which PIN was used to ENTER
+   training (state.trainingRole), not by whatever the real logged-in role
+   happens to be — a staff member can enter Training Mode with their own
+   PIN and freely use Order/History, but Stock stays reserved for whoever
+   entered training as a manager or admin, just like it's reserved for them
+   in the real app. */
 function hasStockAccess(){
+  if(state.trainingMode){
+    return state.stockUnlocked || state.trainingRole==='manager' || state.trainingRole==='admin';
+  }
   return state.stockUnlocked || state.loggedInRole==='manager' || state.loggedInRole==='admin';
 }
 function hasAdminAccess(){
   return state.adminUnlocked || state.loggedInRole==='admin';
 }
+/* Revenue Summary exposes net income and expense data, so it's gated the
+   same way as Settings and Stock: Manager or Admin only. */
+function hasRevenueAccess(){
+  return state.revenueUnlocked || state.loggedInRole==='manager' || state.loggedInRole==='admin';
+}
+/* Cost and Expense exposes ingredient costs and product margins — same
+   Manager/Admin-only gate. */
+function hasCostAccess(){
+  return state.costUnlocked || state.loggedInRole==='manager' || state.loggedInRole==='admin';
+}
 function effectiveStockRole(){
-  if(state.loggedInRole==='manager' || state.loggedInRole==='admin') return state.loggedInRole;
+  var privilegedRole = state.trainingMode ? state.trainingRole : state.loggedInRole;
+  if(privilegedRole==='manager' || privilegedRole==='admin') return privilegedRole;
   return state.stockUnlockedRole;
 }
 function stockStatusFor(stock, target){
@@ -2887,6 +3695,17 @@ function buildSettingsTab(){
     '<button class="btn btn-primary" style="width:auto;margin-top:14px;" onclick="POS.saveSettings()">'+tr('save_settings')+'</button>' +
   '</div>' +
   '<div class="section-card">' +
+    '<h2>'+tr('staff_names_title')+'</h2><p class="hint">'+tr('staff_names_hint')+'</p>' +
+    '<div class="field-grid">' +
+      '<div class="field"><label>'+tr('staff1_label')+'</label><input id="pos-set-staffname-staff1" type="text" placeholder="'+tr('staff1_label')+'" value="'+escapeHtml((f.staffNames&&f.staffNames.staff1)||'')+'" oninput="POS.updateStaffName(\'staff1\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('staff2_label')+'</label><input id="pos-set-staffname-staff2" type="text" placeholder="'+tr('staff2_label')+'" value="'+escapeHtml((f.staffNames&&f.staffNames.staff2)||'')+'" oninput="POS.updateStaffName(\'staff2\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('staff3_label')+'</label><input id="pos-set-staffname-staff3" type="text" placeholder="'+tr('staff3_label')+'" value="'+escapeHtml((f.staffNames&&f.staffNames.staff3)||'')+'" oninput="POS.updateStaffName(\'staff3\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('manager_name_label')+'</label><input id="pos-set-staffname-manager" type="text" placeholder="'+tr('manager_name_label')+'" value="'+escapeHtml((f.staffNames&&f.staffNames.manager)||'')+'" oninput="POS.updateStaffName(\'manager\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('admin_name_label')+'</label><input id="pos-set-staffname-admin" type="text" placeholder="'+tr('admin_name_label')+'" value="'+escapeHtml((f.staffNames&&f.staffNames.admin)||'')+'" oninput="POS.updateStaffName(\'admin\',this.value)"/></div>' +
+    '</div>' +
+    '<button class="btn btn-primary" style="width:auto;margin-top:14px;" onclick="POS.saveSettings()">'+tr('save_settings')+'</button>' +
+  '</div>' +
+  '<div class="section-card">' +
     '<h2>'+tr('page_appearance')+'</h2><p class="hint">'+tr('page_appearance_hint')+'</p>' +
     '<div class="settings-cols">' +
       '<div class="field">' +
@@ -2990,11 +3809,12 @@ var POS = {
     render();
     var pin = state.pinInput;
     var auth = firebase.auth();
-    var onSuccess = function(role){
+    var onSuccess = function(role, accountKey){
       return function(){
         state.pinInput = '';
         state.pinChecking = false;
         state.loggedInRole = role;
+        state.loggedInAccount = accountKey;
         registerPinSuccess();
         // onAuthStateChanged below will flip state.unlocked and start init()
       };
@@ -3007,11 +3827,22 @@ var POS = {
       registerPinFailure();
       render();
     };
-    auth.signInWithEmailAndPassword(STAFF_EMAIL, pin).then(onSuccess('staff')).catch(function(){
-      auth.signInWithEmailAndPassword(MANAGER_EMAIL, pin).then(onSuccess('manager')).catch(function(){
-        auth.signInWithEmailAndPassword(ADMIN_EMAIL, pin).then(onSuccess('admin')).catch(onFail);
+    // Tries every known account in turn. All three staff accounts are each
+    // a team member's own individual PIN, but grant identical 'staff'
+    // access; falls through to manager, then admin. The account key (3rd
+    // item) is what gets recorded on every order so History can show who
+    // actually rang it up.
+    var accountsToTry = [
+      [STAFF_EMAIL, 'staff', 'staff1'], [STAFF_EMAIL_2, 'staff', 'staff2'], [STAFF_EMAIL_3, 'staff', 'staff3'],
+      [MANAGER_EMAIL, 'manager', 'manager'], [ADMIN_EMAIL, 'admin', 'admin']
+    ];
+    function attemptLogin(idx){
+      auth.signInWithEmailAndPassword(accountsToTry[idx][0], pin).then(onSuccess(accountsToTry[idx][1], accountsToTry[idx][2])).catch(function(){
+        if(idx+1 < accountsToTry.length) attemptLogin(idx+1);
+        else onFail();
       });
-    });
+    }
+    attemptLogin(0);
   },
   lockApp: function(){
     firebase.auth().signOut().catch(function(e){ console.error(e); });
@@ -3019,6 +3850,7 @@ var POS = {
     // person to unlock the app starts from a clean slate regardless of
     // who was signed in before.
     state.loggedInRole = null;
+    state.loggedInAccount = null;
     state.settingsUnlocked = false;
     state.settingsForm = null;
     state.stockUnlocked = false;
@@ -3026,9 +3858,120 @@ var POS = {
     state.adminUnlocked = false;
   },
 
+  /* ---- Training Mode: practice freely without touching real data.
+     Entering requires re-confirming a PIN (staff, manager, or admin — any
+     works); quitting is instant and needs no PIN at all, and simply reloads
+     the page so every part of the app — listeners, local state, everything —
+     comes back fresh against the real data. ---- */
+  openTrainingPrompt: function(){
+    state.trainingPromptOpen = true;
+    state.trainingPinInput = '';
+    state.trainingPinError = false;
+    render();
+  },
+  cancelTrainingPrompt: function(){
+    if(state.trainingPinChecking) return;
+    state.trainingPromptOpen = false;
+    state.trainingPinInput = '';
+    state.trainingPinError = false;
+    render();
+  },
+  trainingPinPress: function(digit){
+    if(state.trainingPinChecking || isPinLocked()) return;
+    if(state.trainingPinInput.length >= 12) return;
+    state.trainingPinInput += digit;
+    state.trainingPinError = false;
+    render();
+  },
+  trainingPinBackspace: function(){
+    if(state.trainingPinChecking || isPinLocked()) return;
+    state.trainingPinInput = state.trainingPinInput.slice(0,-1);
+    state.trainingPinError = false;
+    render();
+  },
+  trainingPinSubmit: function(){
+    if(state.trainingPinChecking || !state.trainingPinInput || isPinLocked()) return;
+    state.trainingPinChecking = true;
+    state.trainingPinError = false;
+    render();
+    var pin = state.trainingPinInput;
+    var checkAuth = trainingCheckApp.auth();
+    var onVerified = function(role){
+      return function(){
+        state.trainingPinChecking = false;
+        state.trainingPinInput = '';
+        state.trainingPromptOpen = false;
+        state.trainingRole = role;
+        registerPinSuccess();
+        POS.enterTrainingMode();
+      };
+    };
+    var onFailed = function(e){
+      console.error('Training PIN check failed', e);
+      state.trainingPinChecking = false;
+      state.trainingPinError = true;
+      state.trainingPinInput = '';
+      registerPinFailure();
+      render();
+    };
+    var accountsToTry = [
+      [STAFF_EMAIL, 'staff'], [STAFF_EMAIL_2, 'staff'], [STAFF_EMAIL_3, 'staff'],
+      [MANAGER_EMAIL, 'manager'], [ADMIN_EMAIL, 'admin']
+    ];
+    function attemptCheck(idx){
+      checkAuth.signInWithEmailAndPassword(accountsToTry[idx][0], pin).then(function(){ return checkAuth.signOut(); }).then(onVerified(accountsToTry[idx][1])).catch(function(){
+        if(idx+1 < accountsToTry.length) attemptCheck(idx+1);
+        else onFailed();
+      });
+    }
+    attemptCheck(0);
+  },
+  enterTrainingMode: function(){
+    state.trainingEntering = true;
+    render();
+    teardownDataListeners();
+    // Seed the training_ collections from a snapshot of the real data (so
+    // practice starts with the actual menu/settings/stock), and wipe any
+    // leftover practice orders from a previous training session so it's
+    // always a completely fresh start.
+    var seeds = [
+      realDb.collection('training_pos_settings').doc('main').set(state.settings),
+      realDb.collection('training_pos_menu').doc('main').set({items: state.menu}),
+      realDb.collection('training_pos_toppings').doc('main').set({items: state.toppings}),
+      realDb.collection('training_pos_ingredients').doc('main').set({items: state.ingredients||[]}),
+      realDb.collection('training_pos_recipes').doc('main').set({items: state.recipes||{}}),
+      realDb.collection('training_pos_meta').doc('counter').set({value: 1}),
+      realDb.collection('training_pos_orders').get().then(function(snap){
+        if(!snap.docs.length) return null;
+        var batch = realDb.batch();
+        snap.docs.forEach(function(d){ batch.delete(d.ref); });
+        return batch.commit();
+      })
+    ];
+    Promise.all(seeds).then(function(){
+      state.trainingMode = true;
+      state.trainingEntering = false;
+      state.cart = [];
+      state.orders = [];
+      state.tab = 'order';
+      state.orderView = 'categories';
+      setupDataListeners();
+      render();
+    }).catch(function(e){
+      console.error('Could not start training mode', e);
+      state.trainingEntering = false;
+      setupDataListeners(); // restore the real listeners since we tore them down above
+      render();
+      window.alert('Could not start training mode: '+e.message);
+    });
+  },
+  quitTrainingMode: function(){
+    location.reload();
+  },
+
   /* ---- Manager approval (order deletion / clearing history) ---- */
-  requestManagerApproval: function(action, orderId){
-    state.managerPrompt = {action:action, orderId:orderId||null};
+  requestManagerApproval: function(action, orderId, role){
+    state.managerPrompt = {action:action, orderId:orderId||null, role: role||'manager'};
     state.managerPinInput = '';
     state.managerPinError = false;
     render();
@@ -3059,53 +4002,91 @@ var POS = {
     state.managerPinError = false;
     render();
     var prompt = state.managerPrompt;
-    var managerAuth = managerApp.auth();
-    managerAuth.signInWithEmailAndPassword(MANAGER_EMAIL, state.managerPinInput).then(function(){
-      var task;
-      if(prompt.action==='clearHistory'){
-        task = managerDb.collection('pos_orders').get().then(function(snap){
-          var docs = snap.docs;
-          var chunks = [];
-          for(var i=0;i<docs.length;i+=200){ chunks.push(docs.slice(i,i+200)); }
-          var chain = Promise.resolve();
-          chunks.forEach(function(chunk){
-            chain = chain.then(function(){
-              var batch = managerDb.batch();
-              chunk.forEach(function(d){
-                var archived = Object.assign({}, d.data(), {deletedAt: new Date().toISOString(), deletedBy: 'manager'});
-                batch.set(managerDb.collection('pos_deleted_orders').doc(d.id), archived);
-                batch.delete(d.ref);
+    var pin = state.managerPinInput;
+
+    function attemptWithRole(useAdmin){
+      var actorApp = useAdmin ? adminApp : managerApp;
+      var actorEmail = useAdmin ? ADMIN_EMAIL : MANAGER_EMAIL;
+      var opDb = useAdmin ? adminDb : managerDb;
+      var actorAuth = actorApp.auth();
+      return actorAuth.signInWithEmailAndPassword(actorEmail, pin).then(function(){
+        var task;
+        if(prompt.action==='clearHistory'){
+          task = opDb.collection('pos_orders').get().then(function(snap){
+            var docs = snap.docs;
+            var chunks = [];
+            for(var i=0;i<docs.length;i+=200){ chunks.push(docs.slice(i,i+200)); }
+            var chain = Promise.resolve();
+            chunks.forEach(function(chunk){
+              chain = chain.then(function(){
+                var batch = opDb.batch();
+                chunk.forEach(function(d){
+                  var archived = Object.assign({}, d.data(), {deletedAt: new Date().toISOString(), deletedBy: useAdmin?'admin':'manager'});
+                  batch.set(opDb.collection('pos_deleted_orders').doc(d.id), archived);
+                  batch.delete(d.ref);
+                });
+                return batch.commit();
               });
-              return batch.commit();
             });
+            return chain;
           });
-          return chain;
-        });
-      } else {
-        var orderData = state.orders.filter(function(o){ return o.id===prompt.orderId; })[0];
-        if(orderData){
-          var archived = Object.assign({}, orderData, {deletedAt: new Date().toISOString(), deletedBy: 'manager'});
-          task = managerDb.collection('pos_deleted_orders').doc(prompt.orderId).set(archived)
-            .then(function(){ return managerDb.collection('pos_orders').doc(prompt.orderId).delete(); });
+        } else if(prompt.action==='resetMenu'){
+          state.menu = JSON.parse(JSON.stringify(DEFAULT_MENU));
+          state.toppings = JSON.parse(JSON.stringify(DEFAULT_TOPPINGS));
+          task = opDb.collection('pos_menu').doc('main').set({items: state.menu})
+            .then(function(){ return opDb.collection('pos_toppings').doc('main').set({items: state.toppings}); });
+        } else if(prompt.action==='refundOrder'){
+          var refundEv = state.refundEvidence;
+          task = opDb.collection('pos_orders').doc(prompt.orderId).update({
+            refunded: true,
+            refundedAt: new Date().toISOString(),
+            refundedBy: useAdmin?'admin':'manager',
+            refundReason: refundEv ? (refundEv.reason||'') : '',
+            refundPhoto: refundEv ? refundEv.photo : null
+          });
+        } else if(prompt.action==='exportCsv'){
+          POS.performCsvExport();
+          task = Promise.resolve();
         } else {
-          task = managerDb.collection('pos_orders').doc(prompt.orderId).delete();
+          var orderData = state.orders.filter(function(o){ return o.id===prompt.orderId; })[0];
+          if(orderData){
+            var archived = Object.assign({}, orderData, {deletedAt: new Date().toISOString(), deletedBy: useAdmin?'admin':'manager'});
+            task = opDb.collection('pos_deleted_orders').doc(prompt.orderId).set(archived)
+              .then(function(){ return opDb.collection('pos_orders').doc(prompt.orderId).delete(); });
+          } else {
+            task = opDb.collection('pos_orders').doc(prompt.orderId).delete();
+          }
         }
-      }
-      return task.then(function(){ return managerAuth.signOut(); });
-    }).then(function(){
+        return task.then(function(){ return actorAuth.signOut(); });
+      });
+    }
+
+    // role 'either' (used for refunds) tries manager first, then falls back
+    // to admin — any of the two can approve. 'admin' or 'manager' (or the
+    // default) try only that one specific credential, as before.
+    var rolesToTry = prompt.role==='either' ? [false, true] : [prompt.role==='admin'];
+    function attempt(idx){
+      return attemptWithRole(rolesToTry[idx]).catch(function(err){
+        if(idx+1 < rolesToTry.length) return attempt(idx+1);
+        throw err;
+      });
+    }
+
+    attempt(0).then(function(){
       state.managerPinChecking = false;
       state.managerPrompt = null;
       state.managerPinInput = '';
+      state.refundEvidence = null;
       registerPinSuccess();
       render();
     }).catch(function(e){
-      console.error('Manager approval failed', e);
+      console.error('Manager/Admin approval failed', e);
       state.managerPinChecking = false;
       state.managerPinError = true;
       state.managerPinInput = '';
       registerPinFailure();
       render();
-      managerAuth.signOut().catch(function(){});
+      actorAuth.signOut().catch(function(){});
     });
   },
 
@@ -3294,6 +4275,163 @@ var POS = {
     state.editingIngredientId = null;
     state.newIngredientDraft = null;
   },
+  revenuePinPress: function(digit){
+    if(state.revenuePinChecking || isPinLocked()) return;
+    if(state.revenuePinInput.length >= 12) return;
+    state.revenuePinInput += digit;
+    state.revenuePinError = false;
+    render();
+  },
+  revenuePinBackspace: function(){
+    if(state.revenuePinChecking || isPinLocked()) return;
+    state.revenuePinInput = state.revenuePinInput.slice(0,-1);
+    state.revenuePinError = false;
+    render();
+  },
+  revenuePinSubmit: function(){
+    if(state.revenuePinChecking || !state.revenuePinInput || isPinLocked()) return;
+    state.revenuePinChecking = true;
+    state.revenuePinError = false;
+    render();
+    var pin = state.revenuePinInput;
+    var onUnlocked = function(){
+      state.revenuePinChecking = false;
+      state.revenuePinInput = '';
+      state.revenueUnlocked = true;
+      registerPinSuccess();
+      render();
+    };
+    var onFailed = function(e){
+      console.error('Revenue PIN check failed', e);
+      state.revenuePinChecking = false;
+      state.revenuePinError = true;
+      state.revenuePinInput = '';
+      registerPinFailure();
+      render();
+    };
+    var mgrAuth = managerApp.auth();
+    mgrAuth.signInWithEmailAndPassword(MANAGER_EMAIL, pin).then(function(){
+      return mgrAuth.signOut();
+    }).then(onUnlocked).catch(function(){
+      var admAuth = adminApp.auth();
+      admAuth.signInWithEmailAndPassword(ADMIN_EMAIL, pin).then(function(){
+        return admAuth.signOut();
+      }).then(onUnlocked).catch(onFailed);
+    });
+  },
+  lockRevenueTab: function(){
+    state.revenueUnlocked = false;
+    state.revenuePinInput = '';
+    state.revenuePinError = false;
+  },
+  costPinPress: function(digit){
+    if(state.costPinChecking || isPinLocked()) return;
+    if(state.costPinInput.length >= 12) return;
+    state.costPinInput += digit;
+    state.costPinError = false;
+    render();
+  },
+  costPinBackspace: function(){
+    if(state.costPinChecking || isPinLocked()) return;
+    state.costPinInput = state.costPinInput.slice(0,-1);
+    state.costPinError = false;
+    render();
+  },
+  costPinSubmit: function(){
+    if(state.costPinChecking || !state.costPinInput || isPinLocked()) return;
+    state.costPinChecking = true;
+    state.costPinError = false;
+    render();
+    var pin = state.costPinInput;
+    var onUnlocked = function(){
+      state.costPinChecking = false;
+      state.costPinInput = '';
+      state.costUnlocked = true;
+      registerPinSuccess();
+      render();
+    };
+    var onFailed = function(e){
+      console.error('Cost PIN check failed', e);
+      state.costPinChecking = false;
+      state.costPinError = true;
+      state.costPinInput = '';
+      registerPinFailure();
+      render();
+    };
+    var mgrAuth = managerApp.auth();
+    mgrAuth.signInWithEmailAndPassword(MANAGER_EMAIL, pin).then(function(){
+      return mgrAuth.signOut();
+    }).then(onUnlocked).catch(function(){
+      var admAuth = adminApp.auth();
+      admAuth.signInWithEmailAndPassword(ADMIN_EMAIL, pin).then(function(){
+        return admAuth.signOut();
+      }).then(onUnlocked).catch(onFailed);
+    });
+  },
+  lockCostTab: function(){
+    state.costUnlocked = false;
+    state.costPinInput = '';
+    state.costPinError = false;
+  },
+  setRevenueSummaryDate: function(v){
+    state.revenueSummaryDate = v;
+    render();
+  },
+  updateExpenseAmount: function(v){
+    state.expenseAmountInput = sanitizeDecimal(v);
+    render();
+  },
+  updateExpenseNote: function(v){
+    state.expenseNoteInput = v;
+    render();
+  },
+  submitExpense: function(){
+    var amt = Number(state.expenseAmountInput||0);
+    if(!amt || amt<=0){ window.alert('Enter an amount greater than 0.'); return; }
+    var dateKeyStr = state.revenueSummaryDate || dateKey(new Date().toISOString());
+    var entry = {
+      amount: amt,
+      note: state.expenseNoteInput || '',
+      submittedBy: state.loggedInAccount || null,
+      submittedAt: new Date().toISOString()
+    };
+    var existingEntries = getExpenseEntriesForDate(dateKeyStr);
+    var docData = {date: dateKeyStr, entries: existingEntries.concat([entry])};
+    state.expenses[dateKeyStr] = docData;
+    state.expenseAmountInput = '';
+    state.expenseNoteInput = '';
+    db.collection('pos_expenses').doc(dateKeyStr).set(docData).catch(function(e){
+      window.alert('Could not save expense: '+e.message);
+    });
+    render();
+  },
+  removeExpenseEntry: function(dateKeyStr, entryIndex){
+    var existingEntries = getExpenseEntriesForDate(dateKeyStr).slice();
+    existingEntries.splice(entryIndex, 1);
+    var docData = {date: dateKeyStr, entries: existingEntries};
+    state.expenses[dateKeyStr] = docData;
+    db.collection('pos_expenses').doc(dateKeyStr).set(docData).catch(function(e){
+      window.alert('Could not update expenses: '+e.message);
+    });
+    render();
+  },
+  updateIngredientCost: function(id, field, value){
+    var ing = state.ingredients.filter(function(i){return i.id===id;})[0];
+    if(!ing) return;
+    ing[field] = sanitizeDecimal(value);
+    render(); // live recompute of unit cost / product margins as you type
+  },
+  persistIngredientCost: function(id){
+    var ing = state.ingredients.filter(function(i){return i.id===id;})[0];
+    if(!ing) return;
+    ing.costSetPrice = Number(ing.costSetPrice)||0;
+    ing.costUnitsPerSet = Number(ing.costUnitsPerSet)||0;
+    ing.costUnitSize = Number(ing.costUnitSize)||0;
+    db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(function(e){
+      window.alert('Could not save ingredient cost: '+e.message);
+    });
+    render();
+  },
 
   restoreOrder: function(orderId){
     if(state.restoringOrderId) return;
@@ -3323,7 +4461,11 @@ var POS = {
   },
   setTab: function(t){
     var settingsPrivileged = state.loggedInRole==='manager' || state.loggedInRole==='admin';
-    var stockPrivileged = state.loggedInRole==='manager' || state.loggedInRole==='admin';
+    var stockPrivileged = state.trainingMode
+      ? (state.trainingRole==='manager' || state.trainingRole==='admin')
+      : (state.loggedInRole==='manager' || state.loggedInRole==='admin');
+    var revenuePrivileged = state.loggedInRole==='manager' || state.loggedInRole==='admin';
+    var costPrivileged = state.loggedInRole==='manager' || state.loggedInRole==='admin';
     var adminPrivileged = state.loggedInRole==='admin';
     if(state.tab==='deleted' && t!=='deleted' && !adminPrivileged){
       POS.lockAdminTab();
@@ -3334,12 +4476,21 @@ var POS = {
     if(state.tab==='stock' && t!=='stock' && !stockPrivileged){
       POS.lockStockTab();
     }
+    if(state.tab==='revenue' && t!=='revenue' && !revenuePrivileged){
+      POS.lockRevenueTab();
+    }
+    if(state.tab==='cost' && t!=='cost' && !costPrivileged){
+      POS.lockCostTab();
+    }
     state.tab = t;
     if(t==='settings' && !state.settingsForm){
       state.settingsForm = JSON.parse(JSON.stringify(state.settings));
     }
     if(t==='deleted' && adminPrivileged){
       POS.ensureDeletedOrdersLoaded();
+    }
+    if(t==='revenue' && !state.revenueSummaryDate){
+      state.revenueSummaryDate = dateKey(new Date().toISOString());
     }
     state.editingItemId=null; state.newItemDraft=null; state.editingToppingId=null; state.newToppingDraft=null;
     render();
@@ -3350,7 +4501,12 @@ var POS = {
   goToCart: function(){
     if(state.tab==='deleted' && state.loggedInRole!=='admin'){ POS.lockAdminTab(); }
     if(state.tab==='settings' && !(state.loggedInRole==='manager'||state.loggedInRole==='admin')){ POS.lockSettingsTab(); }
-    if(state.tab==='stock' && !(state.loggedInRole==='manager'||state.loggedInRole==='admin')){ POS.lockStockTab(); }
+    if(state.tab==='revenue' && !(state.loggedInRole==='manager'||state.loggedInRole==='admin')){ POS.lockRevenueTab(); }
+    if(state.tab==='cost' && !(state.loggedInRole==='manager'||state.loggedInRole==='admin')){ POS.lockCostTab(); }
+    var stockPrivilegedForCart = state.trainingMode
+      ? (state.trainingRole==='manager' || state.trainingRole==='admin')
+      : (state.loggedInRole==='manager' || state.loggedInRole==='admin');
+    if(state.tab==='stock' && !stockPrivilegedForCart){ POS.lockStockTab(); }
     state.tab = 'order';
     state.orderView = 'items';
     if(!state.activeCategory) state.activeCategory = 'All';
@@ -3485,6 +4641,12 @@ var POS = {
     });
   },
   closeReceipt: function(){ state.receiptOrder=null; render(); },
+  reprintOrder: function(id){
+    var order = state.orders.filter(function(o){ return o.id===id; })[0];
+    if(!order) return;
+    state.receiptOrder = order;
+    render();
+  },
 
   /* ---- Stock: sub-tab navigation ---- */
   setStockSubTab: function(t){
@@ -3957,6 +5119,13 @@ var POS = {
     db.collection('pos_menu').doc('main').set({items: state.menu}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
     render();
   },
+  toggleItemAvailability: function(id){
+    var m = state.menu.filter(function(i){return i.id===id;})[0];
+    if(!m) return;
+    m.active = (m.active===false) ? true : false;
+    db.collection('pos_menu').doc('main').set({items: state.menu}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
+    render();
+  },
   startNewTopping: function(){ state.newToppingDraft={name:'New Topping', price:3000}; render(); },
   editTopping: function(id){ state.editingToppingId=id; render(); },
   cancelToppingEdit: function(){ state.editingToppingId=null; state.newToppingDraft=null; render(); },
@@ -3995,14 +5164,68 @@ var POS = {
   deleteOrder: function(id){
     POS.requestManagerApproval('deleteOrder', id);
   },
+  /* ---- Refund: camera evidence step, then hands off to manager approval ---- */
+  startRefundEvidence: function(orderId){
+    state.refundEvidence = {orderId: orderId, photo: null, reason: ''};
+    render();
+  },
+  cancelRefundEvidence: function(){
+    if(state.managerPinChecking) return;
+    state.refundEvidence = null;
+    render();
+  },
+  handleRefundPhotoCapture: function(inputEl){
+    var file = inputEl && inputEl.files && inputEl.files[0];
+    if(!file || !state.refundEvidence) return;
+    if(!/^image\//.test(file.type)){ window.alert('Please take a photo.'); return; }
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var img = new Image();
+      img.onload = function(){
+        var maxDim = 900;
+        var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        var w = Math.round(img.width*scale), h = Math.round(img.height*scale);
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        if(state.refundEvidence) state.refundEvidence.photo = dataUrl;
+        render();
+      };
+      img.onerror = function(){ window.alert('Could not read that photo — please try again.'); };
+      img.src = e.target.result;
+    };
+    reader.onerror = function(){ window.alert('Could not read that photo — please try again.'); };
+    reader.readAsDataURL(file);
+  },
+  removeRefundPhoto: function(){
+    if(!state.refundEvidence) return;
+    state.refundEvidence.photo = null;
+    render();
+  },
+  updateRefundReason: function(value){
+    if(!state.refundEvidence) return;
+    state.refundEvidence.reason = value;
+    render();
+  },
+  continueToRefundApproval: function(){
+    if(!state.refundEvidence || !state.refundEvidence.photo) return;
+    POS.requestManagerApproval('refundOrder', state.refundEvidence.orderId, 'either');
+  },
   exportCsv: function(){
-    var rows = [['Order #','Date','Time','Items','Subtotal (LAK)','Discount (LAK)','Service Charge (LAK)','Total (LAK)','Payment Method','Paid Currency','Paid Amount']];
+    POS.requestManagerApproval('exportCsv', null, 'admin');
+  },
+  performCsvExport: function(){
+    var rows = [['Order #','Date','Time','Items','Subtotal (LAK)','Discount (LAK)','Service Charge (LAK)','Total (LAK)','Payment Method','Paid Currency','Paid Amount','Placed By','Refunded','Refund Reason']];
     state.orders.slice().sort(function(a,b){return new Date(a.timestamp)-new Date(b.timestamp);}).forEach(function(o){
       var d = new Date(o.timestamp);
       var itemsStr = o.items.map(function(l){return l.qty+'x '+l.name+' ('+l.size+')';}).join('; ');
       var cur = o.currency || 'LAK';
       var paidAmount = cur==='LAK' ? o.total : (o.displayTotal!=null ? o.displayTotal.toFixed(2) : '');
-      rows.push([o.number, d.toLocaleDateString('en-GB'), d.toLocaleTimeString('en-US'), '"'+itemsStr.replace(/"/g,'""')+'"', o.subtotal, o.discount, o.serviceCharge, o.total, o.paymentMethod, cur, paidAmount]);
+      var refundReasonStr = o.refunded ? '"'+String(o.refundReason||'').replace(/"/g,'""')+'"' : '';
+      var placedByStr = '"'+staffNameFor(o.placedByAccount).replace(/"/g,'""')+'"';
+      rows.push([o.number, d.toLocaleDateString('en-GB'), d.toLocaleTimeString('en-US'), '"'+itemsStr.replace(/"/g,'""')+'"', o.subtotal, o.discount, o.serviceCharge, o.total, o.paymentMethod, cur, paidAmount, placedByStr, o.refunded?'Yes':'No', refundReasonStr]);
     });
     var csv = rows.map(function(r){return r.join(',');}).join('\n');
     var blob = new Blob([csv], {type:'text/csv'});
@@ -4023,6 +5246,12 @@ var POS = {
     state.settingsForm[field] = isNumeric ? (value===''?0:Number(value)) : value;
     render();
   },
+  updateStaffName: function(accountKey, value){
+    if(!state.settingsForm) state.settingsForm = JSON.parse(JSON.stringify(state.settings));
+    if(!state.settingsForm.staffNames) state.settingsForm.staffNames = {};
+    state.settingsForm.staffNames[accountKey] = value;
+    render();
+  },
   saveSettings: function(){
     var merged = Object.assign({}, state.settings, state.settingsForm);
     state.settings = merged;
@@ -4032,15 +5261,10 @@ var POS = {
     render();
   },
   resetMenu: function(){
-    if(!window.confirm('Reset the menu and toppings to the default milk tea shop list? Your custom items will be lost.')) return;
-    state.menu = JSON.parse(JSON.stringify(DEFAULT_MENU));
-    state.toppings = JSON.parse(JSON.stringify(DEFAULT_TOPPINGS));
-    db.collection('pos_menu').doc('main').set({items: state.menu}).catch(function(e){ window.alert('Could not reset menu: '+e.message); });
-    db.collection('pos_toppings').doc('main').set({items: state.toppings}).catch(function(e){ window.alert('Could not reset toppings: '+e.message); });
-    render();
+    POS.requestManagerApproval('resetMenu', null, 'admin');
   },
   clearHistory: function(){
-    POS.requestManagerApproval('clearHistory', null);
+    POS.requestManagerApproval('clearHistory', null, 'admin');
   }
 };
 window.POS = POS;
@@ -4065,6 +5289,8 @@ document.addEventListener('keydown', function(e){
   var press, backspace, submit;
   if(state.managerPrompt){
     press = POS.managerPinPress; backspace = POS.managerPinBackspace; submit = POS.managerPinSubmit;
+  } else if(state.trainingPromptOpen){
+    press = POS.trainingPinPress; backspace = POS.trainingPinBackspace; submit = POS.trainingPinSubmit;
   } else if(!state.unlocked){
     press = POS.pinPress; backspace = POS.pinBackspace; submit = POS.pinSubmit;
   } else if(state.tab==='deleted' && !hasAdminAccess()){
@@ -4073,6 +5299,10 @@ document.addEventListener('keydown', function(e){
     press = POS.settingsPinPress; backspace = POS.settingsPinBackspace; submit = POS.settingsPinSubmit;
   } else if(state.tab==='stock' && !hasStockAccess()){
     press = POS.stockPinPress; backspace = POS.stockPinBackspace; submit = POS.stockPinSubmit;
+  } else if(state.tab==='revenue' && !hasRevenueAccess()){
+    press = POS.revenuePinPress; backspace = POS.revenuePinBackspace; submit = POS.revenuePinSubmit;
+  } else if(state.tab==='cost' && !hasCostAccess()){
+    press = POS.costPinPress; backspace = POS.costPinBackspace; submit = POS.costPinSubmit;
   } else {
     return;
   }
@@ -4096,6 +5326,7 @@ firebase.auth().onAuthStateChanged(function(user){
   } else {
     state.unlocked = false;
     state.loggedInRole = null;
+    state.loggedInAccount = null;
     state.settingsUnlocked = false;
     state.settingsForm = null;
     state.stockUnlocked = false;
