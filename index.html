@@ -80,19 +80,33 @@
   border-bottom:2px solid var(--border);
   padding:14px 24px;
   display:flex;
-  align-items:center;
+  flex-direction:column;
+  gap:12px;
+  position:sticky;top:0;z-index:20;
+}
+.pos-header-top{
+  display:flex;
+  align-items:flex-start;
   justify-content:space-between;
   gap:16px;
   flex-wrap:wrap;
-  position:sticky;top:0;z-index:20;
 }
+.header-utility-cluster{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  margin-left:auto;
+}
+.header-utility-meta{text-align:right;}
 .pos-brand{display:flex;align-items:center;gap:10px;}
 .pos-brand .cup-mark{
   width:38px;height:38px;flex:none;object-fit:cover;border-radius:50%;
 }
 .pos-brand-text h1{font-size:19px;margin:0;font-weight:600;color:var(--caramel-dark);letter-spacing:.2px;}
 .pos-brand-text p{font-size:11.5px;margin:0;color:var(--espresso-soft);}
-.pos-nav{display:flex;gap:6px;background:var(--cream-dark);padding:4px;border-radius:999px;}
+.pos-nav{display:flex;gap:6px;background:var(--cream-dark);padding:4px;border-radius:999px;align-self:flex-start;flex-wrap:wrap;}
 .pos-nav button{
   border:none;background:transparent;color:var(--espresso-soft);
   padding:9px 16px;border-radius:999px;font-size:13.5px;font-weight:600;
@@ -1885,21 +1899,23 @@ function buildHeader(){
   var cartCount = state.cart.reduce(function(s,l){ return s+l.qty; }, 0);
   return '' +
   '<div class="pos-header"'+headerStyle+'>' +
-    '<div class="pos-brand">' +
-      logoImg('cup-mark') +
-      '<div class="pos-brand-text"><h1>'+escapeHtml(s.shopName)+'</h1><p>'+escapeHtml(s.tagline)+'</p></div>' +
-    '</div>' +
-    '<div class="pos-nav">'+navHtml+'</div>' +
-    '<div style="text-align:right;display:flex;align-items:center;gap:12px;">' +
-      '<button class="cart-btn" onclick="POS.goToCart()" title="'+tr('current_order')+'">🛒'+(cartCount>0 ? '<span class="cart-badge">'+cartCount+'</span>' : '')+'</button>' +
-      (state.trainingMode ? '' : '<button class="lock-btn" onclick="POS.openTrainingPrompt()" title="'+tr('training_mode_title')+'">🎓</button>') +
-      '<button class="lock-btn" onclick="POS.lockApp()" title="Lock Screen">🔒</button>' +
-      '<div>' +
-        '<div class="lang-row">'+langHtml+'</div>' +
-        '<div class="pos-clock" id="live-clock">'+formatClock()+'</div>' +
-        '<div class="sync-row">'+syncHtml+'</div>' +
+    '<div class="pos-header-top">' +
+      '<div class="pos-brand">' +
+        logoImg('cup-mark') +
+        '<div class="pos-brand-text"><h1>'+escapeHtml(s.shopName)+'</h1><p>'+escapeHtml(s.tagline)+'</p></div>' +
+      '</div>' +
+      '<div class="header-utility-cluster">' +
+        '<button class="cart-btn" onclick="POS.goToCart()" title="'+tr('current_order')+'">🛒'+(cartCount>0 ? '<span class="cart-badge">'+cartCount+'</span>' : '')+'</button>' +
+        (state.trainingMode ? '' : '<button class="lock-btn" onclick="POS.openTrainingPrompt()" title="'+tr('training_mode_title')+'">🎓</button>') +
+        '<button class="lock-btn" onclick="POS.lockApp()" title="Lock Screen">🔒</button>' +
+        '<div class="header-utility-meta">' +
+          '<div class="lang-row">'+langHtml+'</div>' +
+          '<div class="pos-clock" id="live-clock">'+formatClock()+'</div>' +
+          '<div class="sync-row">'+syncHtml+'</div>' +
+        '</div>' +
       '</div>' +
     '</div>' +
+    '<div class="pos-nav">'+navHtml+'</div>' +
   '</div>';
 }
 
