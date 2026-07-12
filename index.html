@@ -38,6 +38,7 @@
   --radius:14px;
 }
 
+html, body{touch-action:pan-x pan-y;}
 *,*::before,*::after{box-sizing:border-box;}
 #pos-root{
   font-family:'Inter',sans-serif;
@@ -46,7 +47,7 @@
   min-height:100vh;
   padding:0;
   line-height:1.4;
-  touch-action:manipulation;
+  touch-action:pan-x pan-y;
 }
 #pos-root h1,#pos-root h2,#pos-root h3,.brand-font{
   font-family:'Fredoka',sans-serif;
@@ -5331,6 +5332,27 @@ document.addEventListener('keydown', function(e){
   if(isDigit) press(e.key);
   else if(isBackspace) backspace();
   else if(isEnter) submit();
+});
+
+/* ================= ZOOM PREVENTION =================
+   The viewport meta tag's user-scalable=no stops zoom on most mobile
+   browsers, but iOS Safari has deliberately ignored that restriction since
+   iOS 10 (an Apple accessibility decision) — it still allows pinch-zoom
+   regardless of viewport settings. These listeners catch what the meta tag
+   and touch-action CSS can't: Safari's own gesture events for pinch-zoom,
+   plus desktop zoom via Ctrl+scroll-wheel and Ctrl+Plus/Minus/0. */
+['gesturestart','gesturechange','gestureend'].forEach(function(evt){
+  document.addEventListener(evt, function(e){ e.preventDefault(); }, {passive:false});
+});
+document.addEventListener('touchmove', function(e){
+  if(e.touches && e.touches.length > 1) e.preventDefault();
+}, {passive:false});
+document.addEventListener('wheel', function(e){
+  if(e.ctrlKey) e.preventDefault();
+}, {passive:false});
+document.addEventListener('keydown', function(e){
+  var zoomKeys = ['=','+','-','_','0'];
+  if((e.ctrlKey || e.metaKey) && zoomKeys.indexOf(e.key)>-1){ e.preventDefault(); }
 });
 
 /* ================= BOOTSTRAP ================= */
