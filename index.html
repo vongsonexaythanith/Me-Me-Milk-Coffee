@@ -766,13 +766,17 @@ var TRANSLATIONS = {
     manager_pin_placeholder:'Manager PIN', incorrect_manager_pin:'Incorrect manager PIN',
     sugar_word:'sugar',
     topping_name_label:'Name', extra_price_label:'Extra price',
-    tab_stock:'📦 Stock',
+    tab_stock:'📦 Shop Stock',
+    tab_house_stock:'🏠 House Stock',
+    house_stock_hint:'Your warehouse / back-stock supply of raw materials. Depositing stock into Shop Stock draws from here.',
+    house_stock_qty_label:'In house stock',
+    insufficient_house_stock:'Not enough house stock for this deposit — continuing will make house stock go negative. Continue anyway?',
     stock_raw_materials:'Raw Materials', stock_deposit:'Deposit Stock', stock_recipes:'Recipes',
     raw_materials_hint:'Every ingredient and how much is currently in stock.',
     add_ingredient:'+ Add Ingredient',
     ingredient_name_label:'Ingredient name', unit_label:'Unit', unit_grams:'Grams (g)', unit_ml:'Milliliters (ml)', unit_pcs:'Piece',
-    current_stock_label:'Current stock',
-    deposit_hint:'Enter the amount in one unit (e.g. one bag or bottle) and how many of those you\'re adding — the total is added on top of the current stock automatically.',
+    current_stock_label:'Shop Stock',
+    deposit_hint:'Enter the amount in one unit (e.g. one bag or bottle) and how many of those you\'re adding — the total is moved from House Stock into Shop Stock automatically.',
     deposit_amount_placeholder:'Amount to add', deposit_btn:'Deposit',
     deposit_per_unit_label:'Amount Per Set', deposit_set_label:'Set', deposit_preview_suffix:'will be added',
     recipes_hint:'Set how much of each ingredient goes into one drink. This powers automatic stock deduction whenever an order is completed.',
@@ -908,13 +912,17 @@ var TRANSLATIONS = {
     manager_pin_placeholder:'ລະຫັດຜູ້ຈັດການ', incorrect_manager_pin:'ລະຫັດຜູ້ຈັດການຜິດ',
     sugar_word:'ນ້ຳຕານ',
     topping_name_label:'ຊື່', extra_price_label:'ລາຄາເພີ່ມ',
-    tab_stock:'📦 ສະຕັອກ',
+    tab_stock:'📦 ສະຕັອກຮ້ານ',
+    tab_house_stock:'🏠 ສະຕັອກສາງ',
+    house_stock_hint:'ສະຕັອກສາງ/ສະຕັອກສຳຮອງຂອງວັດຖຸດິບ. ການຝາກສະຕັອກເຂົ້າສະຕັອກຮ້ານຈະດຶງມາຈາກບ່ອນນີ້.',
+    house_stock_qty_label:'ໃນສະຕັອກສາງ',
+    insufficient_house_stock:'ສະຕັອກສາງບໍ່ພຽງພໍສຳລັບການຝາກນີ້ — ການດຳເນີນຕໍ່ຈະເຮັດໃຫ້ສະຕັອກສາງຕິດລົບ. ດຳເນີນຕໍ່ບໍ?',
     stock_raw_materials:'ວັດຖຸດິບ', stock_deposit:'ຝາກສະຕັອກ', stock_recipes:'ສູດສ່ວນປະສົມ',
     raw_materials_hint:'ວັດຖຸດິບທັງໝົດ ແລະ ຈຳນວນທີ່ຍັງເຫຼືອຢູ່ໃນສະຕັອກ.',
     add_ingredient:'+ ເພີ່ມວັດຖຸດິບ',
     ingredient_name_label:'ຊື່ວັດຖຸດິບ', unit_label:'ຫົວໜ່ວຍ', unit_grams:'ກຣາມ (g)', unit_ml:'ມິນລິລິດ (ml)', unit_pcs:'ອັນ',
-    current_stock_label:'ສະຕັອກປັດຈຸບັນ',
-    deposit_hint:'ໃສ່ຈຳນວນຕໍ່ 1 ໜ່ວຍ (ເຊັ່ນ: 1 ຖົງ ຫຼື 1 ແກ້ວ) ແລະ ຈຳນວນຊຸດທີ່ຈະເພີ່ມ — ຍອດລວມຈະຖືກບວກເຂົ້າສະຕັອກປັດຈຸບັນອັດຕະໂນມັດ.',
+    current_stock_label:'ສະຕັອກຮ້ານ',
+    deposit_hint:'ໃສ່ຈຳນວນຕໍ່ 1 ໜ່ວຍ (ເຊັ່ນ: 1 ຖົງ ຫຼື 1 ແກ້ວ) ແລະ ຈຳນວນຊຸດທີ່ຈະເພີ່ມ — ຍອດລວມຈະຖືກຍ້າຍຈາກສະຕັອກສາງເຂົ້າສະຕັອກຮ້ານອັດຕະໂນມັດ.',
     deposit_amount_placeholder:'ຈຳນວນທີ່ຈະເພີ່ມ', deposit_btn:'ຝາກ',
     deposit_per_unit_label:'ຈຳນວນຕໍ່ຊຸດ', deposit_set_label:'ຊຸດ', deposit_preview_suffix:'ຈະຖືກເພີ່ມ',
     recipes_hint:'ຕັ້ງຄ່າວ່າແຕ່ລະວັດຖຸດິບໃຊ້ເທົ່າໃດຕໍ່ເຄື່ອງດື່ມໜຶ່ງແກ້ວ. ນີ້ຄືສິ່ງທີ່ຄວບຄຸມການຫັກສະຕັອກອັດຕະໂນມັດເມື່ອອໍເດີສຳເລັດ.',
@@ -1050,13 +1058,17 @@ var TRANSLATIONS = {
     manager_pin_placeholder:'รหัส PIN ผู้จัดการ', incorrect_manager_pin:'รหัส PIN ผู้จัดการไม่ถูกต้อง',
     sugar_word:'น้ำตาล',
     topping_name_label:'ชื่อ', extra_price_label:'ราคาเพิ่ม',
-    tab_stock:'📦 สต็อก',
+    tab_stock:'📦 สต็อกร้าน',
+    tab_house_stock:'🏠 สต็อกคลัง',
+    house_stock_hint:'สต็อกคลัง/สต็อกสำรองของวัตถุดิบ การฝากสต็อกเข้าสต็อกร้านจะดึงมาจากที่นี่',
+    house_stock_qty_label:'ในสต็อกคลัง',
+    insufficient_house_stock:'สต็อกคลังไม่พอสำหรับการฝากนี้ — การดำเนินการต่อจะทำให้สต็อกคลังติดลบ ดำเนินการต่อหรือไม่?',
     stock_raw_materials:'วัตถุดิบ', stock_deposit:'ฝากสต็อก', stock_recipes:'สูตรส่วนผสม',
     raw_materials_hint:'วัตถุดิบทั้งหมดและจำนวนที่เหลืออยู่ในสต็อก',
     add_ingredient:'+ เพิ่มวัตถุดิบ',
     ingredient_name_label:'ชื่อวัตถุดิบ', unit_label:'หน่วย', unit_grams:'กรัม (g)', unit_ml:'มิลลิลิตร (ml)', unit_pcs:'ชิ้น',
-    current_stock_label:'สต็อกปัจจุบัน',
-    deposit_hint:'ป้อนจำนวนต่อ 1 หน่วย (เช่น 1 ถุง หรือ 1 ขวด) และจำนวนชุดที่จะเพิ่ม — ยอดรวมจะถูกบวกเข้าสต็อกปัจจุบันโดยอัตโนมัติ',
+    current_stock_label:'สต็อกร้าน',
+    deposit_hint:'ป้อนจำนวนต่อ 1 หน่วย (เช่น 1 ถุง หรือ 1 ขวด) และจำนวนชุดที่จะเพิ่ม — ยอดรวมจะถูกย้ายจากสต็อกคลังเข้าสต็อกร้านโดยอัตโนมัติ',
     deposit_amount_placeholder:'จำนวนที่จะเพิ่ม', deposit_btn:'ฝาก',
     deposit_per_unit_label:'จำนวนต่อชุด', deposit_set_label:'ชุด', deposit_preview_suffix:'จะถูกเพิ่ม',
     recipes_hint:'ตั้งค่าว่าแต่ละวัตถุดิบใช้เท่าไรต่อเครื่องดื่มหนึ่งแก้ว นี่คือสิ่งที่ควบคุมการหักสต็อกอัตโนมัติเมื่อออเดอร์เสร็จสมบูรณ์',
@@ -1221,6 +1233,7 @@ var state = {
   stockPinError:false,
   stockPinChecking:false,
   editingIngredientId:null,
+  editingHouseStockId:null,
   newIngredientDraft:null,
   depositDrafts:{},
   recipeEditingItemId:null,
@@ -1229,9 +1242,7 @@ var state = {
   premixLoaded:false,
   newPremixDraft:null,
   editingPremixId:null,
-  premixEditingCompositionId:null,
   premixCompositionDrafts:{},
-  toppingEditingCompositionId:null,
   toppingCompositionDraft:null,
   revenueUnlocked:false,
   revenuePinInput:'',
@@ -1928,6 +1939,7 @@ function buildAppHTML(){
   if(state.tab==='order') html += buildOrderTab();
   else if(state.tab==='history') html += buildHistoryTab();
   else if(state.tab==='stock') html += buildStockTab();
+  else if(state.tab==='housestock') html += buildHouseStockTab();
   else if(state.tab==='revenue') html += buildRevenueSummaryTab();
   else if(state.tab==='cost') html += buildCostExpenseTab();
   else if(state.tab==='deleted') html += buildDeletedOrdersTab();
@@ -1980,7 +1992,7 @@ function buildTrainingPinGate(){
 
 function buildHeader(){
   var s = state.settings;
-  var tabDefs = [['order','tab_order'],['history','tab_history'],['stock','tab_stock'],['revenue','tab_revenue'],['cost','tab_cost'],['deleted','tab_deleted'],['settings','tab_settings']];
+  var tabDefs = [['order','tab_order'],['history','tab_history'],['stock','tab_stock'],['housestock','tab_house_stock'],['revenue','tab_revenue'],['cost','tab_cost'],['deleted','tab_deleted'],['settings','tab_settings']];
   var navHtml = tabDefs.map(function(td){
     return '<button class="'+(state.tab===td[0]?'active':'')+'" onclick="POS.setTab(\''+td[0]+'\')">'+tr(td[1])+'</button>';
   }).join('');
@@ -2611,23 +2623,18 @@ function buildMenuTab(){
 
   var toppingsHtml = state.toppings.map(function(t){
     if(state.editingToppingId===t.id) return buildToppingEditForm(t);
-    var compOpen = state.toppingEditingCompositionId===t.id;
     var compSummary = (t.composition && t.composition.length) ? t.composition.map(function(cl){
       var comp = resolveStockComponent(cl.ingredientId, cl.kind);
       return comp ? (comp.name+' '+cl.amount+comp.unit) : null;
     }).filter(Boolean).join(', ') : '';
     return '' +
-    '<div class="mgmt-row" style="flex-direction:column;align-items:stretch;row-gap:10px;">' +
-      '<div style="display:flex;align-items:center;gap:12px;">' +
-        '<span class="em">🧊</span>' +
-        '<div class="info"><div class="t1">'+escapeHtml(t.name)+'</div><div class="t2">+'+formatMoney(t.price)+(compSummary?' · '+compSummary:'')+'</div></div>' +
-        '<div class="acts">' +
-          '<button class="btn btn-outline btn-small" onclick="POS.editTopping(\''+t.id+'\')">'+tr('edit')+'</button>' +
-          '<button class="btn btn-outline btn-small" onclick="POS.toggleToppingComposition(\''+t.id+'\')">'+(compOpen?tr('close_composition'):tr('edit_composition'))+'</button>' +
-          '<button class="btn btn-danger btn-small" onclick="POS.deleteTopping(\''+t.id+'\')">'+tr('delete')+'</button>' +
-        '</div>' +
+    '<div class="mgmt-row">' +
+      '<span class="em">🧊</span>' +
+      '<div class="info"><div class="t1">'+escapeHtml(t.name)+'</div><div class="t2">+'+formatMoney(t.price)+(compSummary?' · '+compSummary:'')+'</div></div>' +
+      '<div class="acts">' +
+        '<button class="btn btn-outline btn-small" onclick="POS.editTopping(\''+t.id+'\')">'+tr('edit')+'</button>' +
+        '<button class="btn btn-danger btn-small" onclick="POS.deleteTopping(\''+t.id+'\')">'+tr('delete')+'</button>' +
       '</div>' +
-      (compOpen ? buildToppingCompositionEditor(t) : '') +
     '</div>';
   }).join('');
   var newToppingForm = state.newToppingDraft ? buildToppingEditForm(null) : '<button class="btn btn-outline" onclick="POS.startNewTopping()">'+tr('add_topping_btn')+'</button>';
@@ -2749,7 +2756,8 @@ function buildToppingEditForm(t){
       '<div class="field"><label>'+tr('topping_name_label')+'</label><input id="pos-top-name" type="text" value="'+escapeHtml(d.name)+'" oninput="POS.updateToppingDraft('+(isNew?'null':'\''+t.id+'\'')+',\'name\',this.value)"/></div>' +
       '<div class="field"><label>'+tr('extra_price_label')+'</label><input id="pos-top-price" type="text" inputmode="numeric" value="'+(d.price||'')+'" oninput="POS.updateToppingDraft('+(isNew?'null':'\''+t.id+'\'')+',\'price\',this.value)"/></div>' +
     '</div>' +
-    '<div style="display:flex;gap:8px;">' +
+    buildToppingCompositionEditor(d) +
+    '<div style="display:flex;gap:8px;margin-top:8px;">' +
       '<button class="btn btn-primary" style="width:auto;margin-top:0;" onclick="POS.saveTopping('+(isNew?'null':'\''+t.id+'\'')+')">'+tr('save')+'</button>' +
       '<button class="btn btn-ghost" onclick="POS.cancelToppingEdit()">'+tr('cancel')+'</button>' +
     '</div>' +
@@ -3172,6 +3180,63 @@ function buildStockPinGate(){
         '<div class="pin-error-msg">'+(state.stockPinError?tr('incorrect_manager_admin_pin'):'&nbsp;')+'</div>'
       )) +
       '<div class="pin-keypad">'+keypadHtml+'</div>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ================= HOUSE STOCK =================
+   House Stock is the warehouse/back-stock supply — same Raw Materials list
+   as Shop Stock (state.ingredients, same pos_ingredients doc), just a
+   second quantity field (houseStock) per ingredient. Depositing stock in
+   Shop Stock's "Deposit Stock" screen transfers from here; House Stock
+   itself is topped up directly whenever new supply arrives at the
+   warehouse. Shares Shop Stock's manager/admin PIN gate — one unlock
+   covers both, since they're really two views onto the same privileged
+   inventory area. */
+function buildHouseStockTab(){
+  if(!hasStockAccess()){
+    return buildStockPinGate();
+  }
+  var privileged = state.trainingMode
+    ? (state.trainingRole==='manager' || state.trainingRole==='admin')
+    : (state.loggedInRole==='manager' || state.loggedInRole==='admin');
+  var ingredients = state.ingredients || [];
+  var rows = ingredients.map(function(ing){
+    if(state.editingHouseStockId===ing.id) return buildHouseStockEditForm(ing);
+    return '' +
+    '<div class="mgmt-row">' +
+      '<span class="em">'+ingredientEmoji(ing.unit)+'</span>' +
+      '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+tr('house_stock_qty_label')+': '+formatIngredientAmount(ing.houseStock)+' '+escapeHtml(ing.unit)+'</div></div>' +
+      '<div class="acts"><button class="btn btn-outline btn-small" onclick="POS.editHouseStock(\''+ing.id+'\')">'+tr('edit')+'</button></div>' +
+    '</div>';
+  }).join('');
+  var errorBanner = state.stockSyncError ? (
+    '<div class="section-card" style="background:#FFFBF9;border-color:var(--danger-light);">' +
+      '<h2 style="color:var(--danger);">'+tr('stock_sync_error_title')+'</h2>' +
+      '<p class="hint">'+tr('stock_sync_error_hint')+'</p>' +
+    '</div>'
+  ) : '';
+  return '' +
+  '<div class="section-card" style="background:var(--taro-light);border-color:var(--taro);">' +
+    '<h2 style="color:var(--taro);">'+tr('manager_admin_area_title')+'</h2>' +
+    '<p class="hint">'+(privileged ? tr('privileged_session_hint') : tr('stock_restricted_hint'))+'</p>' +
+    (privileged ? '' : '<button class="btn btn-ghost btn-small" onclick="POS.lockStockTab(); POS.setTab(\'housestock\')">'+tr('lock_tab_now')+'</button>') +
+  '</div>' +
+  errorBanner +
+  '<div class="section-card">' +
+    '<h2>'+tr('tab_house_stock')+'</h2><p class="hint">'+tr('house_stock_hint')+'</p>' +
+    (rows || '<p class="hint" style="margin-top:0;">'+tr('no_ingredients_yet')+'</p>') +
+  '</div>';
+}
+function buildHouseStockEditForm(ing){
+  return '' +
+  '<div class="section-card" style="background:var(--cream-dark);box-shadow:none;">' +
+    '<div class="field-grid">' +
+      '<div class="field"><label>'+escapeHtml(ing.name)+' ('+escapeHtml(ing.unit)+')</label><input id="pos-housestock-'+ing.id+'" type="text" inputmode="decimal" value="'+(ing.houseStock!=null?ing.houseStock:0)+'" oninput="POS.updateHouseStockDraft(\''+ing.id+'\',this.value)"/></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<button class="btn btn-primary" style="width:auto;margin-top:0;" onclick="POS.saveHouseStock(\''+ing.id+'\')">'+tr('save')+'</button>' +
+      '<button class="btn btn-ghost" onclick="POS.cancelHouseStockEdit()">'+tr('cancel')+'</button>' +
     '</div>' +
   '</div>';
 }
@@ -3606,7 +3671,7 @@ function buildDepositStockSubTab(){
     return '' +
     '<div class="mgmt-row" style="flex-wrap:wrap;row-gap:10px;">' +
       '<span class="em">'+ingredientEmoji(ing.unit)+'</span>' +
-      '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+tr('current_stock_label')+': '+formatIngredientAmount(ing.stock)+' '+escapeHtml(ing.unit)+'</div></div>' +
+      '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+tr('current_stock_label')+': '+formatIngredientAmount(ing.stock)+' '+escapeHtml(ing.unit)+' · '+tr('house_stock_qty_label')+': '+formatIngredientAmount(ing.houseStock)+' '+escapeHtml(ing.unit)+'</div></div>' +
       '<div class="deposit-inputs">' +
         '<div class="deposit-field"><label>'+tr('deposit_per_unit_label')+'</label><input id="pos-ing-perunit-'+ing.id+'" type="text" inputmode="decimal" placeholder="0" value="'+(ing.amountPerUnit?escapeHtml(String(ing.amountPerUnit)):'')+'" oninput="POS.updateIngredientAmountPerUnit(\''+ing.id+'\',this.value)"/></div>' +
         '<div class="deposit-field"><label>'+tr('deposit_set_label')+'</label><input id="pos-deposit-sets-'+ing.id+'" type="text" inputmode="decimal" placeholder="0" value="'+escapeHtml(setsDraft)+'" oninput="POS.updateDepositSets(\''+ing.id+'\',this.value)"/></div>' +
@@ -3627,23 +3692,18 @@ function buildPremixSubTab(){
   var premixList = state.premix || [];
   var rows = premixList.map(function(pm){
     if(state.editingPremixId===pm.id) return buildPremixEditForm(pm);
-    var compOpen = state.premixEditingCompositionId===pm.id;
     var compCount = (pm.composition||[]).length;
     var subtitle = compCount
       ? (compCount+' '+tr('raw_material_group_label').toLowerCase()+' · '+tr('per_unit_prefix')+' 1'+escapeHtml(pm.unit))
       : tr('no_composition_set');
     return '' +
-    '<div class="mgmt-row" style="flex-direction:column;align-items:stretch;row-gap:10px;">' +
-      '<div style="display:flex;align-items:center;gap:12px;">' +
-        '<span class="em">'+ingredientEmoji(pm.unit)+'</span>' +
-        '<div class="info"><div class="t1">'+escapeHtml(pm.name)+'</div><div class="t2">'+subtitle+'</div></div>' +
-        '<div class="acts">' +
-          '<button class="btn btn-outline btn-small" onclick="POS.editPremix(\''+pm.id+'\')">'+tr('edit')+'</button>' +
-          '<button class="btn btn-outline btn-small" onclick="POS.togglePremixComposition(\''+pm.id+'\')">'+(compOpen?tr('close_composition'):tr('edit_composition'))+'</button>' +
-          '<button class="btn btn-danger btn-small" onclick="POS.deletePremix(\''+pm.id+'\')">'+tr('delete')+'</button>' +
-        '</div>' +
+    '<div class="mgmt-row">' +
+      '<span class="em">'+ingredientEmoji(pm.unit)+'</span>' +
+      '<div class="info"><div class="t1">'+escapeHtml(pm.name)+'</div><div class="t2">'+subtitle+'</div></div>' +
+      '<div class="acts">' +
+        '<button class="btn btn-outline btn-small" onclick="POS.editPremix(\''+pm.id+'\')">'+tr('edit')+'</button>' +
+        '<button class="btn btn-danger btn-small" onclick="POS.deletePremix(\''+pm.id+'\')">'+tr('delete')+'</button>' +
       '</div>' +
-      (compOpen ? buildPremixCompositionEditor(pm) : '') +
     '</div>';
   }).join('');
   var newForm = state.newPremixDraft ? buildPremixEditForm(null) : '<button class="btn btn-outline" onclick="POS.startNewPremix()">'+tr('add_premix')+'</button>';
@@ -3669,7 +3729,7 @@ function buildPremixEditForm(pm){
         '<option value="pcs" '+(d.unit==='pcs'?'selected':'')+'>'+tr('unit_pcs')+'</option>' +
       '</select></div>' +
     '</div>' +
-    (isNew ? buildPremixCompositionEditor(d) : '') +
+    buildPremixCompositionEditor(d) +
     '<div style="display:flex;gap:8px;margin-top:8px;">' +
       '<button class="btn btn-primary" style="width:auto;margin-top:0;" onclick="POS.savePremix('+idArg+')">'+tr('save')+'</button>' +
       '<button class="btn btn-ghost" onclick="POS.cancelPremixEdit()">'+tr('cancel')+'</button>' +
@@ -4560,6 +4620,7 @@ var POS = {
     state.stockPinError = false;
     state.recipeEditingItemId = null;
     state.editingIngredientId = null;
+    state.editingHouseStockId = null;
     state.newIngredientDraft = null;
   },
   revenuePinPress: function(digit){
@@ -4760,7 +4821,7 @@ var POS = {
     if(state.tab==='settings' && t!=='settings' && !settingsPrivileged){
       POS.lockSettingsTab();
     }
-    if(state.tab==='stock' && t!=='stock' && !stockPrivileged){
+    if((state.tab==='stock' || state.tab==='housestock') && t!=='stock' && t!=='housestock' && !stockPrivileged){
       POS.lockStockTab();
     }
     if(state.tab==='revenue' && t!=='revenue' && !revenuePrivileged){
@@ -4793,7 +4854,7 @@ var POS = {
     var stockPrivilegedForCart = state.trainingMode
       ? (state.trainingRole==='manager' || state.trainingRole==='admin')
       : (state.loggedInRole==='manager' || state.loggedInRole==='admin');
-    if(state.tab==='stock' && !stockPrivilegedForCart){ POS.lockStockTab(); }
+    if((state.tab==='stock' || state.tab==='housestock') && !stockPrivilegedForCart){ POS.lockStockTab(); }
     state.tab = 'order';
     state.orderView = 'items';
     if(!state.activeCategory) state.activeCategory = 'All';
@@ -4946,7 +5007,7 @@ var POS = {
 
   /* ---- Stock: raw materials ---- */
   startNewIngredient: function(){
-    state.newIngredientDraft = {name:'New Ingredient', unit:'g', stock:0, weeklyTarget:0, monthlyTarget:0, amountPerSet:0};
+    state.newIngredientDraft = {name:'New Ingredient', unit:'g', stock:0, houseStock:0, weeklyTarget:0, monthlyTarget:0, amountPerSet:0};
     render();
   },
   editIngredient: function(id){ state.editingIngredientId=id; render(); },
@@ -4970,6 +5031,25 @@ var POS = {
     ing.weeklyTarget = Number(ing.weeklyTarget)||0;
     ing.monthlyTarget = Number(ing.monthlyTarget)||0;
     db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(function(e){ console.error('Could not save target', e); });
+    render();
+  },
+
+  /* ---- House Stock (warehouse quantity — same ingredient record as Shop
+     Stock, just the houseStock field instead of stock) ---- */
+  editHouseStock: function(id){ state.editingHouseStockId=id; render(); },
+  cancelHouseStockEdit: function(){ state.editingHouseStockId=null; render(); },
+  updateHouseStockDraft: function(id, value){
+    var ing = (state.ingredients||[]).filter(function(i){return i.id===id;})[0];
+    if(!ing) return;
+    ing.houseStock = sanitizeDecimal(value);
+    render();
+  },
+  saveHouseStock: function(id){
+    var ing = (state.ingredients||[]).filter(function(i){return i.id===id;})[0];
+    if(!ing) return;
+    ing.houseStock = Number(ing.houseStock)||0;
+    state.editingHouseStockId = null;
+    db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(function(e){ window.alert('Could not save house stock: '+e.message); });
     render();
   },
   updateIngredientAmountPerSet: function(id, value){
@@ -5027,6 +5107,12 @@ var POS = {
     state.depositDrafts[id] = sanitizeDecimal(value);
     render();
   },
+  /* Deposit Stock now moves stock from House Stock into Shop Stock rather
+     than creating it from nowhere: total = perUnit x sets is added to
+     ing.stock (Shop Stock) AND subtracted from ing.houseStock (House
+     Stock) in the same write. Matches the app's established pattern
+     elsewhere (Make Batch) of warning-but-not-blocking if the source would
+     go negative, rather than hard-blocking the deposit. */
   depositStock: function(id){
     var ing = state.ingredients.filter(function(i){return i.id===id;})[0];
     if(!ing) return;
@@ -5035,7 +5121,10 @@ var POS = {
     if(!perUnit || perUnit<=0){ window.alert('Please enter the amount per unit for this deposit first.'); return; }
     if(!sets || sets<=0){ window.alert('Enter the number of sets (must be greater than 0).'); return; }
     var total = perUnit * sets;
+    var wouldGoNegative = (Number(ing.houseStock)||0) - total < 0;
+    if(wouldGoNegative && !window.confirm(tr('insufficient_house_stock'))) return;
     ing.stock = Math.round(((Number(ing.stock)||0) + total) * 1000) / 1000;
+    ing.houseStock = Math.round(((Number(ing.houseStock)||0) - total) * 1000) / 1000;
     ing.amountPerUnit = 0;
     delete state.depositDrafts[id];
     db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(function(e){ window.alert('Could not deposit stock: '+e.message); });
@@ -5140,11 +5229,6 @@ var POS = {
     db.collection('pos_premix').doc('main').set({items: state.premix}).catch(function(e){ window.alert('Could not delete pre-mix: '+e.message); });
     render();
   },
-  togglePremixComposition: function(id){
-    state.premixEditingCompositionId = state.premixEditingCompositionId===id ? null : id;
-    if(!state.premixCompositionDrafts[id]) state.premixCompositionDrafts[id] = {ingredientId:'', amount:''};
-    render();
-  },
   updatePremixCompositionDraft: function(premixId, field, value){
     if(field==='amount') value = sanitizeDecimal(value);
     if(!state.premixCompositionDrafts[premixId]) state.premixCompositionDrafts[premixId] = {ingredientId:'', amount:''};
@@ -5192,11 +5276,6 @@ var POS = {
 
   /* ---- Toppings: composition (links a topping to raw materials / pre-mix
      for stock deduction; separate from the name/price editor above) ---- */
-  toggleToppingComposition: function(id){
-    state.toppingEditingCompositionId = state.toppingEditingCompositionId===id ? null : id;
-    state.toppingCompositionDraft = {ingredientId:'', kind:'raw', amount:''};
-    render();
-  },
   updateToppingCompositionDraft: function(field, value){
     if(!state.toppingCompositionDraft) state.toppingCompositionDraft = {ingredientId:'', kind:'raw', amount:''};
     if(field==='ingredientId'){
@@ -5209,13 +5288,23 @@ var POS = {
     }
     render();
   },
+  /* Mirrors _findPremixTarget: resolves either an already-saved topping (in
+     state.toppings) or the not-yet-saved new-topping draft, so the same
+     add/remove-row functions work whether the topping exists on the server
+     yet or not. */
+  _findToppingTarget: function(id){
+    if(state.newToppingDraft && state.newToppingDraft.id===id) return {item: state.newToppingDraft, isNew:true};
+    var existing = (state.toppings||[]).filter(function(t){return t.id===id;})[0];
+    return existing ? {item: existing, isNew:false} : null;
+  },
   addToppingCompositionLine: function(toppingId){
     var d = state.toppingCompositionDraft || {};
     var amt = Number(d.amount);
     if(!d.ingredientId){ window.alert('Please choose an ingredient.'); return; }
     if(!amt || amt<=0){ window.alert('Enter an amount greater than 0.'); return; }
-    var t = state.toppings.filter(function(x){return x.id===toppingId;})[0];
-    if(!t) return;
+    var found = this._findToppingTarget(toppingId);
+    if(!found) return;
+    var t = found.item;
     if(!t.composition) t.composition = [];
     var kind = d.kind==='premix' ? 'premix' : undefined;
     var existing = t.composition.filter(function(cl){return cl.ingredientId===d.ingredientId && (cl.kind||'raw')===(kind||'raw');})[0];
@@ -5226,14 +5315,18 @@ var POS = {
       t.composition.push(newLine);
     }
     state.toppingCompositionDraft = {ingredientId:'', kind:'raw', amount:''};
-    db.collection('pos_toppings').doc('main').set({items: state.toppings}).catch(function(e){ window.alert('Could not save topping composition: '+e.message); });
+    if(!found.isNew){
+      db.collection('pos_toppings').doc('main').set({items: state.toppings}).catch(function(e){ window.alert('Could not save topping composition: '+e.message); });
+    }
     render();
   },
   removeToppingCompositionLine: function(toppingId, ingredientId, kind){
-    var t = state.toppings.filter(function(x){return x.id===toppingId;})[0];
-    if(!t || !t.composition) return;
-    t.composition = t.composition.filter(function(cl){ return !(cl.ingredientId===ingredientId && (cl.kind||'raw')===(kind||'raw')); });
-    db.collection('pos_toppings').doc('main').set({items: state.toppings}).catch(function(e){ window.alert('Could not update topping composition: '+e.message); });
+    var found = this._findToppingTarget(toppingId);
+    if(!found || !found.item.composition) return;
+    found.item.composition = found.item.composition.filter(function(cl){ return !(cl.ingredientId===ingredientId && (cl.kind||'raw')===(kind||'raw')); });
+    if(!found.isNew){
+      db.collection('pos_toppings').doc('main').set({items: state.toppings}).catch(function(e){ window.alert('Could not update topping composition: '+e.message); });
+    }
     render();
   },
 
@@ -5570,8 +5663,12 @@ var POS = {
     db.collection('pos_menu').doc('main').set({items: state.menu}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
     render();
   },
-  startNewTopping: function(){ state.newToppingDraft={name:'New Topping', price:3000}; render(); },
-  editTopping: function(id){ state.editingToppingId=id; render(); },
+  startNewTopping: function(){
+    state.newToppingDraft = {id: uid('top'), name:'New Topping', price:3000, composition:[]};
+    state.toppingCompositionDraft = {ingredientId:'', kind:'raw', amount:''};
+    render();
+  },
+  editTopping: function(id){ state.editingToppingId=id; state.toppingCompositionDraft = {ingredientId:'', kind:'raw', amount:''}; render(); },
   cancelToppingEdit: function(){ state.editingToppingId=null; state.newToppingDraft=null; render(); },
   updateToppingDraft: function(id, field, value){
     var target = id ? state.toppings.filter(function(t){return t.id===id;})[0] : state.newToppingDraft;
@@ -5586,7 +5683,7 @@ var POS = {
     } else {
       var d = state.newToppingDraft;
       if(!d.name.trim()){ window.alert('Please enter a topping name.'); return; }
-      d.id = uid('top');
+      d.composition = d.composition || [];
       state.toppings.push(d);
       state.newToppingDraft = null;
     }
@@ -5741,7 +5838,7 @@ document.addEventListener('keydown', function(e){
     press = POS.adminPinPress; backspace = POS.adminPinBackspace; submit = POS.adminPinSubmit;
   } else if(state.tab==='settings' && !hasSettingsAccess()){
     press = POS.settingsPinPress; backspace = POS.settingsPinBackspace; submit = POS.settingsPinSubmit;
-  } else if(state.tab==='stock' && !hasStockAccess()){
+  } else if((state.tab==='stock' || state.tab==='housestock') && !hasStockAccess()){
     press = POS.stockPinPress; backspace = POS.stockPinBackspace; submit = POS.stockPinSubmit;
   } else if(state.tab==='revenue' && !hasRevenueAccess()){
     press = POS.revenuePinPress; backspace = POS.revenuePinBackspace; submit = POS.revenuePinSubmit;
