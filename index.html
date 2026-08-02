@@ -678,6 +678,7 @@ var DEFAULT_TOPPINGS = [
 
 var DEFAULT_INGREDIENTS = [];
 var DEFAULT_RECIPES = {};
+var DEFAULT_PREMIX = [];
 
 var SUGAR_LEVELS = [0,25,50,75,100];
 var ICE_LEVELS = [
@@ -781,7 +782,15 @@ var TRANSLATIONS = {
     stock_restricted_hint:'Stock can only be viewed or changed with a manager or administrator PIN.',
     stock_gate_hint:'This area is restricted. Enter the manager or admin PIN to view and manage stock.',
     stock_sync_error_title:'⚠️ Stock data unavailable',
-    stock_sync_error_hint:'Could not load ingredients or recipes — this Firebase project likely needs its security rules updated to allow access to the pos_ingredients and pos_recipes collections. The rest of the app is unaffected.',
+    stock_sync_error_hint:'Could not load ingredients, recipes, or pre-mix — this Firebase project likely needs its security rules updated to allow access to the pos_ingredients, pos_recipes, and pos_premix collections. The rest of the app is unaffected.',
+    stock_premix:'Pre-Mix',
+    premix_hint:'Reusable sub-recipes made from raw materials (e.g. Syrup, Cheese Cream). Used in drink recipes and toppings — selling a drink automatically deducts the underlying raw materials.',
+    no_premix_yet:'No pre-mix ingredients yet. Add your first one to get started.',
+    add_premix:'+ Add Pre-Mix', premix_name_label:'Pre-mix name',
+    premix_composition_title:'Raw Materials Used', premix_composition_hint:'How much of each raw material goes into ONE unit of this pre-mix — this ratio is used to calculate exactly how much raw material is deducted every time a drink using it is sold.',
+    edit_composition:'Edit Composition', close_composition:'Close', no_composition_set:'No composition set yet.',
+    select_component:'Select ingredient…', per_unit_prefix:'per',
+    premix_group_label:'Pre-Mix', raw_material_group_label:'Raw Materials',
     size_label:'Size', recipe_admin_only_hint:'Only an administrator can edit recipes.',
     weekly_target_label:'Weekly Target', monthly_target_label:'Monthly Target',
     deposit_needed_prefix:'Need', fully_stocked_label:'Fully stocked', no_target_set:'No target set',
@@ -915,7 +924,15 @@ var TRANSLATIONS = {
     stock_restricted_hint:'ສະຕັອກສາມາດເບິ່ງ ຫຼື ປ່ຽນໄດ້ດ້ວຍລະຫັດຜູ້ຈັດການ ຫຼື ຜູ້ດູແລລະບົບເທົ່ານັ້ນ.',
     stock_gate_hint:'ພື້ນທີ່ນີ້ຖືກຈຳກັດ. ໃສ່ລະຫັດຜູ້ຈັດການ ຫຼື ຜູ້ດູແລລະບົບເພື່ອເບິ່ງ ແລະ ຈັດການສະຕັອກ.',
     stock_sync_error_title:'⚠️ ຂໍ້ມູນສະຕັອກບໍ່ພ້ອມໃຊ້ງານ',
-    stock_sync_error_hint:'ບໍ່ສາມາດໂຫຼດວັດຖຸດິບ ຫຼື ສູດໄດ້ — ໂປຣເຈັກ Firebase ນີ້ອາດຈະຕ້ອງອັບເດດກົດຄວາມປອດໄພເພື່ອອະນຸຍາດການເຂົ້າເຖິງ pos_ingredients ແລະ pos_recipes. ສ່ວນອື່ນຂອງແອັບບໍ່ໄດ້ຮັບຜົນກະທົບ.',
+    stock_sync_error_hint:'ບໍ່ສາມາດໂຫຼດວັດຖຸດິບ, ສູດ, ຫຼື ພຣີມິກໄດ້ — ໂປຣເຈັກ Firebase ນີ້ອາດຈະຕ້ອງອັບເດດກົດຄວາມປອດໄພເພື່ອອະນຸຍາດການເຂົ້າເຖິງ pos_ingredients, pos_recipes, ແລະ pos_premix. ສ່ວນອື່ນຂອງແອັບບໍ່ໄດ້ຮັບຜົນກະທົບ.',
+    stock_premix:'ພຣີມິກ',
+    premix_hint:'ສູດຍ່ອຍທີ່ນຳໃຊ້ຊ້ຳໄດ້ ເຮັດຈາກວັດຖຸດິບ (ເຊັ່ນ: ນ້ຳຫວານ, ຄີມຊີສ). ໃຊ້ໃນສູດເຄື່ອງດື່ມ ແລະ ທັອບປິ້ງ — ການຂາຍເຄື່ອງດື່ມຈະຫັກວັດຖຸດິບທີ່ກ່ຽວຂ້ອງໂດຍອັດຕະໂນມັດ.',
+    no_premix_yet:'ຍັງບໍ່ມີພຣີມິກ. ເພີ່ມພຣີມິກທຳອິດຂອງທ່ານເພື່ອເລີ່ມຕົ້ນ.',
+    add_premix:'+ ເພີ່ມພຣີມິກ', premix_name_label:'ຊື່ພຣີມິກ',
+    premix_composition_title:'ວັດຖຸດິບທີ່ໃຊ້', premix_composition_hint:'ວັດຖຸດິບແຕ່ລະຢ່າງໃຊ້ເທົ່າໃດຕໍ່ 1 ໜ່ວຍຂອງພຣີມິກນີ້ — ອັດຕາສ່ວນນີ້ຖືກໃຊ້ເພື່ອຄິດໄລ່ວັດຖຸດິບທີ່ຈະຫັກທຸກຄັ້ງທີ່ຂາຍເຄື່ອງດື່ມທີ່ໃຊ້ມັນ.',
+    edit_composition:'ແກ້ໄຂສ່ວນປະສົມ', close_composition:'ປິດ', no_composition_set:'ຍັງບໍ່ໄດ້ຕັ້ງສ່ວນປະສົມ.',
+    select_component:'ເລືອກວັດຖຸດິບ…', per_unit_prefix:'ຕໍ່',
+    premix_group_label:'ພຣີມິກ', raw_material_group_label:'ວັດຖຸດິບ',
     size_label:'ຂະໜາດ', recipe_admin_only_hint:'ມີແຕ່ຜູ້ດູແລລະບົບເທົ່ານັ້ນທີ່ສາມາດແກ້ໄຂສູດໄດ້.',
     weekly_target_label:'ເປົ້າໝາຍລາຍອາທິດ', monthly_target_label:'ເປົ້າໝາຍລາຍເດືອນ',
     deposit_needed_prefix:'ຕ້ອງການ', fully_stocked_label:'ສະຕັອກພຽງພໍ', no_target_set:'ຍັງບໍ່ໄດ້ຕັ້ງເປົ້າໝາຍ',
@@ -1049,7 +1066,15 @@ var TRANSLATIONS = {
     stock_restricted_hint:'สต็อกสามารถดูหรือเปลี่ยนแปลงได้ด้วยรหัส PIN ผู้จัดการหรือผู้ดูแลระบบเท่านั้น',
     stock_gate_hint:'พื้นที่นี้ถูกจำกัด ป้อนรหัส PIN ผู้จัดการหรือผู้ดูแลระบบเพื่อดูและจัดการสต็อก',
     stock_sync_error_title:'⚠️ ข้อมูลสต็อกไม่พร้อมใช้งาน',
-    stock_sync_error_hint:'ไม่สามารถโหลดวัตถุดิบหรือสูตรได้ — โปรเจกต์ Firebase นี้อาจต้องอัปเดตกฎความปลอดภัยเพื่ออนุญาตการเข้าถึงคอลเลกชัน pos_ingredients และ pos_recipes ส่วนอื่นของแอปไม่ได้รับผลกระทบ',
+    stock_sync_error_hint:'ไม่สามารถโหลดวัตถุดิบ สูตร หรือพรีมิกซ์ได้ — โปรเจกต์ Firebase นี้อาจต้องอัปเดตกฎความปลอดภัยเพื่ออนุญาตการเข้าถึงคอลเลกชัน pos_ingredients, pos_recipes และ pos_premix ส่วนอื่นของแอปไม่ได้รับผลกระทบ',
+    stock_premix:'พรีมิกซ์',
+    premix_hint:'สูตรย่อยที่ใช้ซ้ำได้ ทำจากวัตถุดิบ (เช่น น้ำเชื่อม, ครีมชีส) ใช้ในสูตรเครื่องดื่มและท็อปปิ้ง — การขายเครื่องดื่มจะหักวัตถุดิบที่เกี่ยวข้องโดยอัตโนมัติ',
+    no_premix_yet:'ยังไม่มีพรีมิกซ์ เพิ่มพรีมิกซ์แรกของคุณเพื่อเริ่มต้น',
+    add_premix:'+ เพิ่มพรีมิกซ์', premix_name_label:'ชื่อพรีมิกซ์',
+    premix_composition_title:'วัตถุดิบที่ใช้', premix_composition_hint:'วัตถุดิบแต่ละอย่างใช้เท่าไรต่อ 1 หน่วยของพรีมิกซ์นี้ — อัตราส่วนนี้ใช้คำนวณวัตถุดิบที่จะถูกหักทุกครั้งที่ขายเครื่องดื่มที่ใช้มัน',
+    edit_composition:'แก้ไขส่วนผสม', close_composition:'ปิด', no_composition_set:'ยังไม่ได้ตั้งส่วนผสม',
+    select_component:'เลือกวัตถุดิบ…', per_unit_prefix:'ต่อ',
+    premix_group_label:'พรีมิกซ์', raw_material_group_label:'วัตถุดิบ',
     size_label:'ขนาด', recipe_admin_only_hint:'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถแก้ไขสูตรได้',
     weekly_target_label:'เป้าหมายรายสัปดาห์', monthly_target_label:'เป้าหมายรายเดือน',
     deposit_needed_prefix:'ต้องการ', fully_stocked_label:'สต็อกเพียงพอ', no_target_set:'ยังไม่ได้ตั้งเป้าหมาย',
@@ -1200,6 +1225,14 @@ var state = {
   depositDrafts:{},
   recipeEditingItemId:null,
   recipeLineDrafts:{},
+  premix:null,
+  premixLoaded:false,
+  newPremixDraft:null,
+  editingPremixId:null,
+  premixEditingCompositionId:null,
+  premixCompositionDrafts:{},
+  toppingEditingCompositionId:null,
+  toppingCompositionDraft:null,
   revenueUnlocked:false,
   revenuePinInput:'',
   revenuePinError:false,
@@ -1398,6 +1431,18 @@ function setupDataListeners(){
     render();
   }, handleStockSyncError('recipes')));
 
+  activeDataUnsubs.push(db.collection('pos_premix').doc('main').onSnapshot(function(doc){
+    if(doc.exists && doc.data().items){
+      state.premix = doc.data().items;
+    } else {
+      state.premix = JSON.parse(JSON.stringify(DEFAULT_PREMIX));
+      db.collection('pos_premix').doc('main').set({items: state.premix}).catch(handleStockSyncError('premix-init'));
+    }
+    state.premixLoaded = true;
+    state.stockSyncError = false;
+    render();
+  }, handleStockSyncError('premix')));
+
   activeDataUnsubs.push(db.collection('pos_expenses').onSnapshot(function(snap){
     var byDate = {};
     snap.docs.forEach(function(d){ byDate[d.id] = d.data(); });
@@ -1429,24 +1474,57 @@ function formatMoney(n){
   n = Math.round(Number(n)||0);
   return state.settings.currency + n.toLocaleString('en-US');
 }
-/* ---- Stock deduction: subtract recipe ingredients for every item sold ---- */
+/* ---- Stock deduction: subtract raw materials for every item sold. A
+   recipe line or topping composition line with kind==='premix' has no
+   stock of its own — instead its composition (raw materials needed per 1
+   unit of the pre-mix) is used to cascade the deduction straight down to
+   Raw Material stock, scaled by however much of the pre-mix the drink
+   actually uses. Everything else (kind absent) is a raw material, which
+   keeps every recipe/topping saved before this feature existed working
+   exactly as before. ---- */
 function deductStockForOrder(cartLines){
-  if(!state.ingredients || !state.recipes || !cartLines || !cartLines.length) return;
-  var changed = false;
+  if(!cartLines || !cartLines.length) return;
+  var ingredientsChanged = false;
+  function deductRaw(ingredientId, amount){
+    if(!ingredientId || !amount || !state.ingredients) return;
+    var ing = state.ingredients.filter(function(i){ return i.id===ingredientId; })[0];
+    if(!ing) return;
+    ing.stock = Math.round(((Number(ing.stock)||0) - amount) * 1000) / 1000;
+    ingredientsChanged = true;
+  }
+  function applyDeduction(componentId, kind, amount){
+    if(!componentId || !amount) return;
+    if(kind==='premix'){
+      var pm = (state.premix||[]).filter(function(p){ return p.id===componentId; })[0];
+      if(!pm || !pm.composition) return;
+      pm.composition.forEach(function(cl){
+        deductRaw(cl.ingredientId, (Number(cl.amount)||0) * amount);
+      });
+    } else {
+      deductRaw(componentId, amount);
+    }
+  }
   cartLines.forEach(function(line){
-    var itemRecipes = state.recipes[line.menuItemId];
-    if(!itemRecipes) return;
-    var recipeLines = itemRecipes[line.size];
-    if(!recipeLines || !recipeLines.length) return;
-    recipeLines.forEach(function(rl){
-      var ing = state.ingredients.filter(function(i){ return i.id===rl.ingredientId; })[0];
-      if(!ing) return;
-      var used = (Number(rl.amount)||0) * line.qty;
-      ing.stock = Math.round(((Number(ing.stock)||0) - used) * 1000) / 1000;
-      changed = true;
-    });
+    if(state.recipes){
+      var itemRecipes = state.recipes[line.menuItemId];
+      var recipeLines = itemRecipes && itemRecipes[line.size];
+      if(recipeLines && recipeLines.length){
+        recipeLines.forEach(function(rl){
+          applyDeduction(rl.ingredientId, rl.kind, (Number(rl.amount)||0) * line.qty);
+        });
+      }
+    }
+    if(line.toppings && line.toppings.length && state.toppings){
+      line.toppings.forEach(function(lt){
+        var topping = state.toppings.filter(function(t){ return t.id===lt.id; })[0];
+        if(!topping || !topping.composition || !topping.composition.length) return;
+        topping.composition.forEach(function(cl){
+          applyDeduction(cl.ingredientId, cl.kind, (Number(cl.amount)||0) * line.qty);
+        });
+      });
+    }
   });
-  if(changed){
+  if(ingredientsChanged){
     db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(function(e){
       console.error('Could not update stock after sale', e);
     });
@@ -1704,10 +1782,32 @@ function ingredientCostPerBaseUnit(ing){
    (ingredient cost per gram/ml/piece x amount used). Reads live from
    state.recipes and state.ingredients every time, so it automatically
    reflects any recipe or cost edit — nothing here is cached or duplicated. */
+/* Cost of one unit (per the pre-mix's own unit, e.g. 1ml of Syrup) = the
+   sum of (raw material cost per base unit x amount needed per 1 unit of
+   this pre-mix). Composition amounts are already expressed "per 1 unit of
+   the pre-mix", so no batch/yield conversion is needed here — same
+   quantities used for stock deduction at checkout are used for costing.
+   Reads live from state.premix and state.ingredients every time, same as
+   the raw-material cost path below. */
+function premixCostPerUnit(premixId){
+  var pm = (state.premix||[]).filter(function(p){ return p.id===premixId; })[0];
+  if(!pm || !pm.composition || !pm.composition.length) return 0;
+  var cost = 0;
+  pm.composition.forEach(function(cl){
+    var ing = (state.ingredients||[]).filter(function(i){ return i.id===cl.ingredientId; })[0];
+    if(!ing) return;
+    cost += ingredientCostPerBaseUnit(ing) * (Number(cl.amount)||0);
+  });
+  return cost;
+}
 function computeProductCost(menuItemId, size){
   var recipeLines = (state.recipes && state.recipes[menuItemId] && state.recipes[menuItemId][size]) || [];
   var total = 0;
   recipeLines.forEach(function(rl){
+    if(rl.kind==='premix'){
+      total += premixCostPerUnit(rl.ingredientId) * (Number(rl.amount)||0);
+      return;
+    }
     var ing = (state.ingredients||[]).filter(function(i){ return i.id===rl.ingredientId; })[0];
     if(!ing) return;
     total += ingredientCostPerBaseUnit(ing) * (Number(rl.amount)||0);
@@ -2511,14 +2611,23 @@ function buildMenuTab(){
 
   var toppingsHtml = state.toppings.map(function(t){
     if(state.editingToppingId===t.id) return buildToppingEditForm(t);
+    var compOpen = state.toppingEditingCompositionId===t.id;
+    var compSummary = (t.composition && t.composition.length) ? t.composition.map(function(cl){
+      var comp = resolveStockComponent(cl.ingredientId, cl.kind);
+      return comp ? (comp.name+' '+cl.amount+comp.unit) : null;
+    }).filter(Boolean).join(', ') : '';
     return '' +
-    '<div class="mgmt-row">' +
-      '<span class="em">🧊</span>' +
-      '<div class="info"><div class="t1">'+escapeHtml(t.name)+'</div><div class="t2">+'+formatMoney(t.price)+'</div></div>' +
-      '<div class="acts">' +
-        '<button class="btn btn-outline btn-small" onclick="POS.editTopping(\''+t.id+'\')">'+tr('edit')+'</button>' +
-        '<button class="btn btn-danger btn-small" onclick="POS.deleteTopping(\''+t.id+'\')">'+tr('delete')+'</button>' +
+    '<div class="mgmt-row" style="flex-direction:column;align-items:stretch;row-gap:10px;">' +
+      '<div style="display:flex;align-items:center;gap:12px;">' +
+        '<span class="em">🧊</span>' +
+        '<div class="info"><div class="t1">'+escapeHtml(t.name)+'</div><div class="t2">+'+formatMoney(t.price)+(compSummary?' · '+compSummary:'')+'</div></div>' +
+        '<div class="acts">' +
+          '<button class="btn btn-outline btn-small" onclick="POS.editTopping(\''+t.id+'\')">'+tr('edit')+'</button>' +
+          '<button class="btn btn-outline btn-small" onclick="POS.toggleToppingComposition(\''+t.id+'\')">'+(compOpen?tr('close_composition'):tr('edit_composition'))+'</button>' +
+          '<button class="btn btn-danger btn-small" onclick="POS.deleteTopping(\''+t.id+'\')">'+tr('delete')+'</button>' +
+        '</div>' +
       '</div>' +
+      (compOpen ? buildToppingCompositionEditor(t) : '') +
     '</div>';
   }).join('');
   var newToppingForm = state.newToppingDraft ? buildToppingEditForm(null) : '<button class="btn btn-outline" onclick="POS.startNewTopping()">'+tr('add_topping_btn')+'</button>';
@@ -2644,6 +2753,43 @@ function buildToppingEditForm(t){
       '<button class="btn btn-primary" style="width:auto;margin-top:0;" onclick="POS.saveTopping('+(isNew?'null':'\''+t.id+'\'')+')">'+tr('save')+'</button>' +
       '<button class="btn btn-ghost" onclick="POS.cancelToppingEdit()">'+tr('cancel')+'</button>' +
     '</div>' +
+  '</div>';
+}
+/* Links an existing topping to Raw Materials and/or Pre-Mix for automatic
+   stock deduction, using the same combined dropdown pattern as Recipes. */
+function buildToppingCompositionEditor(t){
+  var ingredients = state.ingredients || [];
+  var premixList = state.premix || [];
+  var lines = t.composition || [];
+  var lineRows = lines.map(function(cl){
+    var comp = resolveStockComponent(cl.ingredientId, cl.kind);
+    if(!comp) return '';
+    var tag = cl.kind==='premix' ? (' <span class="hint" style="font-weight:400;">('+tr('premix_group_label')+')</span>') : '';
+    return '' +
+    '<div class="mgmt-row">' +
+      '<div class="info"><div class="t1">'+escapeHtml(comp.name)+tag+'</div><div class="t2">'+cl.amount+' '+escapeHtml(comp.unit)+'</div></div>' +
+      '<div class="acts"><button class="btn btn-ghost btn-small" onclick="POS.removeToppingCompositionLine(\''+t.id+'\',\''+cl.ingredientId+'\',\''+(cl.kind||'raw')+'\')">'+tr('remove')+'</button></div>' +
+    '</div>';
+  }).join('');
+  var draft = state.toppingCompositionDraft || {ingredientId:'', kind:'raw', amount:''};
+  var options = '<optgroup label="'+tr('raw_material_group_label')+'">' +
+    ingredients.map(function(ing){
+      var sel = (draft.kind!=='premix' && draft.ingredientId===ing.id) ? 'selected' : '';
+      return '<option value="raw:'+ing.id+'" '+sel+'>'+escapeHtml(ing.name)+' ('+escapeHtml(ing.unit)+')</option>';
+    }).join('') + '</optgroup>' +
+    (premixList.length ? ('<optgroup label="'+tr('premix_group_label')+'">' +
+      premixList.map(function(pm){
+        var sel = (draft.kind==='premix' && draft.ingredientId===pm.id) ? 'selected' : '';
+        return '<option value="premix:'+pm.id+'" '+sel+'>'+escapeHtml(pm.name)+' ('+escapeHtml(pm.unit)+')</option>';
+      }).join('') + '</optgroup>') : '');
+  return '' +
+  '<div class="recipe-size-box">' +
+    (lineRows || '<p class="hint" style="margin:0 0 8px;">'+tr('no_composition_set')+'</p>') +
+    '<div class="field-grid" style="margin-top:8px;">' +
+      '<div class="field"><label>'+tr('select_component')+'</label><select id="pos-topping-comp-'+t.id+'-ing" onchange="POS.updateToppingCompositionDraft(\'ingredientId\',this.value)"><option value="">'+tr('select_component')+'</option>'+options+'</select></div>' +
+      '<div class="field"><label>'+tr('amount_label')+'</label><input id="pos-topping-comp-'+t.id+'-amt" type="text" inputmode="decimal" value="'+escapeHtml(draft.amount)+'" oninput="POS.updateToppingCompositionDraft(\'amount\',this.value)"/></div>' +
+    '</div>' +
+    '<button class="btn btn-outline btn-small" style="margin-top:8px;" onclick="POS.addToppingCompositionLine(\''+t.id+'\')">'+tr('add_line')+'</button>' +
   '</div>';
 }
 
@@ -2959,6 +3105,15 @@ function ingredientEmoji(unit){
   if(unit==='pcs') return '📦';
   return '🧂';
 }
+/* Looks up a Raw Material or Pre-Mix item by id, depending on kind. Both
+   shapes carry .name and .unit, so callers (Recipes and Toppings
+   composition editors) can treat the result identically either way.
+   kind absent/'raw' -> Raw Material (state.ingredients); kind==='premix'
+   -> Pre-Mix (state.premix). */
+function resolveStockComponent(id, kind){
+  if(kind==='premix') return (state.premix||[]).filter(function(p){ return p.id===id; })[0] || null;
+  return (state.ingredients||[]).filter(function(i){ return i.id===id; })[0] || null;
+}
 function buildStockTab(){
   if(!hasStockAccess()){
     return buildStockPinGate();
@@ -2966,13 +3121,14 @@ function buildStockTab(){
   var privileged = state.trainingMode
     ? (state.trainingRole==='manager' || state.trainingRole==='admin')
     : (state.loggedInRole==='manager' || state.loggedInRole==='admin');
-  var subTabs = [['raw','stock_raw_materials'],['deposit','stock_deposit'],['recipes','stock_recipes']];
+  var subTabs = [['raw','stock_raw_materials'],['premix','stock_premix'],['deposit','stock_deposit'],['recipes','stock_recipes']];
   var subTabHtml = subTabs.map(function(s){
     return '<button class="chip '+(state.stockSubTab===s[0]?'active':'')+'" onclick="POS.setStockSubTab(\''+s[0]+'\')">'+tr(s[1])+'</button>';
   }).join('');
   var content = '';
   if(state.stockSubTab==='deposit') content = buildDepositStockSubTab();
   else if(state.stockSubTab==='recipes') content = buildRecipesSubTab();
+  else if(state.stockSubTab==='premix') content = buildPremixSubTab();
   else content = buildRawMaterialsSubTab();
   var errorBanner = state.stockSyncError ? (
     '<div class="section-card" style="background:#FFFBF9;border-color:var(--danger-light);">' +
@@ -3466,10 +3622,110 @@ function buildDepositStockSubTab(){
   '</div>';
 }
 
+/* ================= PRE-MIX ================= */
+function buildPremixSubTab(){
+  var premixList = state.premix || [];
+  var rows = premixList.map(function(pm){
+    if(state.editingPremixId===pm.id) return buildPremixEditForm(pm);
+    var compOpen = state.premixEditingCompositionId===pm.id;
+    var compCount = (pm.composition||[]).length;
+    var subtitle = compCount
+      ? (compCount+' '+tr('raw_material_group_label').toLowerCase()+' · '+tr('per_unit_prefix')+' 1'+escapeHtml(pm.unit))
+      : tr('no_composition_set');
+    return '' +
+    '<div class="mgmt-row" style="flex-direction:column;align-items:stretch;row-gap:10px;">' +
+      '<div style="display:flex;align-items:center;gap:12px;">' +
+        '<span class="em">'+ingredientEmoji(pm.unit)+'</span>' +
+        '<div class="info"><div class="t1">'+escapeHtml(pm.name)+'</div><div class="t2">'+subtitle+'</div></div>' +
+        '<div class="acts">' +
+          '<button class="btn btn-outline btn-small" onclick="POS.editPremix(\''+pm.id+'\')">'+tr('edit')+'</button>' +
+          '<button class="btn btn-outline btn-small" onclick="POS.togglePremixComposition(\''+pm.id+'\')">'+(compOpen?tr('close_composition'):tr('edit_composition'))+'</button>' +
+          '<button class="btn btn-danger btn-small" onclick="POS.deletePremix(\''+pm.id+'\')">'+tr('delete')+'</button>' +
+        '</div>' +
+      '</div>' +
+      (compOpen ? buildPremixCompositionEditor(pm) : '') +
+    '</div>';
+  }).join('');
+  var newForm = state.newPremixDraft ? buildPremixEditForm(null) : '<button class="btn btn-outline" onclick="POS.startNewPremix()">'+tr('add_premix')+'</button>';
+  return '' +
+  '<div class="section-card">' +
+    '<h2>'+tr('stock_premix')+'</h2><p class="hint">'+tr('premix_hint')+'</p>' +
+    (rows || '<p class="hint" style="margin-top:0;">'+tr('no_premix_yet')+'</p>') +
+    '<div style="margin-top:12px;">'+newForm+'</div>' +
+  '</div>';
+}
+function buildPremixEditForm(pm){
+  var d = pm || state.newPremixDraft;
+  var isNew = !pm;
+  var idArg = isNew ? 'null' : '\''+pm.id+'\'';
+  var idBase = 'pos-premix-'+(isNew?'new':pm.id);
+  return '' +
+  '<div class="section-card" style="background:var(--cream-dark);box-shadow:none;">' +
+    '<div class="field-grid">' +
+      '<div class="field"><label>'+tr('premix_name_label')+'</label><input id="'+idBase+'-name" type="text" value="'+escapeHtml(d.name)+'" oninput="POS.updatePremixDraft('+idArg+',\'name\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('unit_label')+'</label><select id="'+idBase+'-unit" onchange="POS.updatePremixDraft('+idArg+',\'unit\',this.value)">' +
+        '<option value="g" '+(d.unit==='g'?'selected':'')+'>'+tr('unit_grams')+'</option>' +
+        '<option value="ml" '+(d.unit==='ml'?'selected':'')+'>'+tr('unit_ml')+'</option>' +
+        '<option value="pcs" '+(d.unit==='pcs'?'selected':'')+'>'+tr('unit_pcs')+'</option>' +
+      '</select></div>' +
+    '</div>' +
+    (isNew ? buildPremixCompositionEditor(d) : '') +
+    '<div style="display:flex;gap:8px;margin-top:8px;">' +
+      '<button class="btn btn-primary" style="width:auto;margin-top:0;" onclick="POS.savePremix('+idArg+')">'+tr('save')+'</button>' +
+      '<button class="btn btn-ghost" onclick="POS.cancelPremixEdit()">'+tr('cancel')+'</button>' +
+    '</div>' +
+  '</div>';
+}
+/* Raw materials + amount needed to make ONE unit of this pre-mix (e.g. 1ml
+   of Syrup). These per-unit amounts are exactly what checkout scales up by
+   however much of the pre-mix a drink actually uses, so what's entered
+   here is used directly for live stock deduction — not a separate batch
+   recipe. The Unit box next to each row is auto-synced to whichever raw
+   material is selected (not independently editable) so a composition line
+   can never end up in a unit that doesn't match how that raw material is
+   actually stocked, which would silently corrupt deductions. */
+function buildPremixCompositionEditor(pm){
+  var ingredients = state.ingredients || [];
+  var lines = pm.composition || [];
+  var lineRows = lines.map(function(cl){
+    var ing = ingredients.filter(function(i){ return i.id===cl.ingredientId; })[0];
+    if(!ing) return '';
+    return '' +
+    '<div class="mgmt-row">' +
+      '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+cl.amount+' '+escapeHtml(ing.unit)+' '+tr('per_unit_prefix')+' 1'+escapeHtml(pm.unit)+'</div></div>' +
+      '<div class="acts"><button class="btn btn-ghost btn-small" onclick="POS.removePremixCompositionLine(\''+pm.id+'\',\''+cl.ingredientId+'\')">'+tr('remove')+'</button></div>' +
+    '</div>';
+  }).join('');
+  var draft = state.premixCompositionDrafts[pm.id] || {ingredientId:'',amount:''};
+  var selectedIng = ingredients.filter(function(i){ return i.id===draft.ingredientId; })[0];
+  var ingOptions = ingredients.map(function(ing){
+    return '<option value="'+ing.id+'" '+(draft.ingredientId===ing.id?'selected':'')+'>'+escapeHtml(ing.name)+' ('+escapeHtml(ing.unit)+')</option>';
+  }).join('');
+  var unitDisplayHtml = '' +
+    '<select disabled style="opacity:0.7;">' +
+      (selectedIng
+        ? ('<option>'+(selectedIng.unit==='g'?tr('unit_grams'):selectedIng.unit==='ml'?tr('unit_ml'):tr('unit_pcs'))+'</option>')
+        : ('<option>'+tr('unit_label')+'</option>')) +
+    '</select>';
+  return '' +
+  '<div class="recipe-size-box">' +
+    '<div class="recipe-size-label">'+tr('premix_composition_title')+'</div>' +
+    '<p class="hint" style="margin:0 0 8px;">'+tr('premix_composition_hint')+'</p>' +
+    (lineRows || '<p class="hint" style="margin:0 0 8px;">'+tr('no_composition_set')+'</p>') +
+    '<div class="field-grid" style="margin-top:8px;">' +
+      '<div class="field"><label>'+tr('select_component')+'</label><select id="pos-premix-comp-'+pm.id+'-ing" onchange="POS.updatePremixCompositionDraft(\''+pm.id+'\',\'ingredientId\',this.value)"><option value="">'+tr('select_component')+'</option>'+ingOptions+'</select></div>' +
+      '<div class="field"><label>'+tr('unit_label')+'</label>'+unitDisplayHtml+'</div>' +
+      '<div class="field"><label>'+tr('amount_label')+'</label><input id="pos-premix-comp-'+pm.id+'-amt" type="text" inputmode="decimal" value="'+escapeHtml(draft.amount)+'" oninput="POS.updatePremixCompositionDraft(\''+pm.id+'\',\'amount\',this.value)"/></div>' +
+    '</div>' +
+    '<button class="btn btn-outline btn-small" style="margin-top:8px;" onclick="POS.addPremixCompositionLine(\''+pm.id+'\')">'+tr('add_line')+'</button>' +
+  '</div>';
+}
+
 function buildRecipesSubTab(){
   var ingredients = state.ingredients || [];
+  var premixList = state.premix || [];
   var canEdit = effectiveStockRole() === 'admin';
-  if(!ingredients.length){
+  if(!ingredients.length && !premixList.length){
     return '' +
     '<div class="section-card">' +
       '<h2>'+tr('stock_recipes')+'</h2><p class="hint">'+tr('recipes_hint')+'</p>' +
@@ -3483,8 +3739,8 @@ function buildRecipesSubTab(){
       var lines = itemRecipes[sz] || [];
       if(!lines.length) return null;
       var txt = lines.map(function(rl){
-        var ing = ingredients.filter(function(i){return i.id===rl.ingredientId;})[0];
-        return ing ? (ing.name+' '+rl.amount+ing.unit) : null;
+        var comp = resolveStockComponent(rl.ingredientId, rl.kind);
+        return comp ? (comp.name+' '+rl.amount+comp.unit) : null;
       }).filter(Boolean).join(', ');
       return txt ? (sz+': '+txt) : null;
     }).filter(Boolean);
@@ -3495,18 +3751,26 @@ function buildRecipesSubTab(){
       var sizeBoxes = sizes.map(function(sz){
         var lines = itemRecipes[sz] || [];
         var lineRows = lines.map(function(rl){
-          var ing = ingredients.filter(function(i){return i.id===rl.ingredientId;})[0];
-          if(!ing) return '';
+          var comp = resolveStockComponent(rl.ingredientId, rl.kind);
+          if(!comp) return '';
+          var tag = rl.kind==='premix' ? (' <span class="hint" style="font-weight:400;">('+tr('premix_group_label')+')</span>') : '';
           return '' +
           '<div class="mgmt-row">' +
-            '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+rl.amount+' '+escapeHtml(ing.unit)+'</div></div>' +
-            (canEdit ? '<div class="acts"><button class="btn btn-ghost btn-small" onclick="POS.removeRecipeLine(\''+m.id+'\',\''+sz+'\',\''+rl.ingredientId+'\')">'+tr('remove')+'</button></div>' : '') +
+            '<div class="info"><div class="t1">'+escapeHtml(comp.name)+tag+'</div><div class="t2">'+rl.amount+' '+escapeHtml(comp.unit)+'</div></div>' +
+            (canEdit ? '<div class="acts"><button class="btn btn-ghost btn-small" onclick="POS.removeRecipeLine(\''+m.id+'\',\''+sz+'\',\''+rl.ingredientId+'\',\''+(rl.kind||'raw')+'\')">'+tr('remove')+'</button></div>' : '') +
           '</div>';
         }).join('');
-        var draft = (state.recipeLineDrafts[sz]) || {ingredientId:'', amount:''};
-        var ingOptions = ingredients.map(function(ing){
-          return '<option value="'+ing.id+'" '+(draft.ingredientId===ing.id?'selected':'')+'>'+escapeHtml(ing.name)+' ('+escapeHtml(ing.unit)+')</option>';
-        }).join('');
+        var draft = (state.recipeLineDrafts[sz]) || {ingredientId:'', kind:'raw', amount:''};
+        var ingOptions = '<optgroup label="'+tr('raw_material_group_label')+'">' +
+          ingredients.map(function(ing){
+            var sel = (draft.kind!=='premix' && draft.ingredientId===ing.id) ? 'selected' : '';
+            return '<option value="raw:'+ing.id+'" '+sel+'>'+escapeHtml(ing.name)+' ('+escapeHtml(ing.unit)+')</option>';
+          }).join('') + '</optgroup>' +
+          (premixList.length ? ('<optgroup label="'+tr('premix_group_label')+'">' +
+            premixList.map(function(pm){
+              var sel = (draft.kind==='premix' && draft.ingredientId===pm.id) ? 'selected' : '';
+              return '<option value="premix:'+pm.id+'" '+sel+'>'+escapeHtml(pm.name)+' ('+escapeHtml(pm.unit)+')</option>';
+            }).join('') + '</optgroup>') : '');
         var addFormHtml = canEdit ? ('' +
           '<div class="field-grid" style="margin-top:8px;">' +
             '<div class="field"><label>'+tr('select_ingredient')+'</label><select id="pos-recipe-'+m.id+'-'+sz+'-ing" onchange="POS.updateRecipeLineDraft(\''+sz+'\',\'ingredientId\',this.value)"><option value="">'+tr('select_ingredient')+'</option>'+ingOptions+'</select></div>' +
@@ -3962,6 +4226,7 @@ var POS = {
       realDb.collection('training_pos_toppings').doc('main').set({items: state.toppings}),
       realDb.collection('training_pos_ingredients').doc('main').set({items: state.ingredients||[]}),
       realDb.collection('training_pos_recipes').doc('main').set({items: state.recipes||{}}),
+      realDb.collection('training_pos_premix').doc('main').set({items: state.premix||[]}),
       realDb.collection('training_pos_meta').doc('counter').set({value: 1}),
       realDb.collection('training_pos_orders').get().then(function(snap){
         if(!snap.docs.length) return null;
@@ -4781,14 +5046,23 @@ var POS = {
   toggleRecipeEditor: function(itemId){
     if(effectiveStockRole()!=='admin') return;
     state.recipeEditingItemId = state.recipeEditingItemId===itemId ? null : itemId;
-    state.recipeLineDrafts = {S:{ingredientId:'',amount:''}, M:{ingredientId:'',amount:''}, L:{ingredientId:'',amount:''}};
+    state.recipeLineDrafts = {S:{ingredientId:'',kind:'raw',amount:''}, M:{ingredientId:'',kind:'raw',amount:''}, L:{ingredientId:'',kind:'raw',amount:''}};
     render();
   },
+  /* The Select's option values are 'raw:<id>' or 'premix:<id>' so a single
+     dropdown can offer both groups — field==='ingredientId' splits that
+     back out into ingredientId + kind on the draft. */
   updateRecipeLineDraft: function(size, field, value){
     if(effectiveStockRole()!=='admin') return;
-    if(field==='amount') value = sanitizeDecimal(value);
-    if(!state.recipeLineDrafts[size]) state.recipeLineDrafts[size] = {ingredientId:'', amount:''};
-    state.recipeLineDrafts[size][field] = value;
+    if(!state.recipeLineDrafts[size]) state.recipeLineDrafts[size] = {ingredientId:'', kind:'raw', amount:''};
+    if(field==='ingredientId'){
+      var parts = String(value).split(':');
+      state.recipeLineDrafts[size].kind = parts[0]==='premix' ? 'premix' : 'raw';
+      state.recipeLineDrafts[size].ingredientId = parts.slice(1).join(':');
+    } else {
+      if(field==='amount') value = sanitizeDecimal(value);
+      state.recipeLineDrafts[size][field] = value;
+    }
     render();
   },
   addRecipeLine: function(itemId, size){
@@ -4800,18 +5074,166 @@ var POS = {
     if(!state.recipes) state.recipes = {};
     if(!state.recipes[itemId]) state.recipes[itemId] = {};
     if(!state.recipes[itemId][size]) state.recipes[itemId][size] = [];
-    var existing = state.recipes[itemId][size].filter(function(rl){return rl.ingredientId===d.ingredientId;})[0];
+    var kind = d.kind==='premix' ? 'premix' : undefined;
+    var existing = state.recipes[itemId][size].filter(function(rl){return rl.ingredientId===d.ingredientId && (rl.kind||'raw')===(kind||'raw');})[0];
     if(existing){ existing.amount = amt; }
-    else { state.recipes[itemId][size].push({ingredientId:d.ingredientId, amount:amt}); }
-    state.recipeLineDrafts[size] = {ingredientId:'', amount:''};
+    else {
+      var newLine = {ingredientId:d.ingredientId, amount:amt};
+      if(kind) newLine.kind = kind;
+      state.recipes[itemId][size].push(newLine);
+    }
+    state.recipeLineDrafts[size] = {ingredientId:'', kind:'raw', amount:''};
     db.collection('pos_recipes').doc('main').set({items: state.recipes}).catch(function(e){ window.alert('Could not save recipe: '+e.message); });
     render();
   },
-  removeRecipeLine: function(itemId, size, ingredientId){
+  removeRecipeLine: function(itemId, size, ingredientId, kind){
     if(effectiveStockRole()!=='admin') return;
     if(!state.recipes || !state.recipes[itemId] || !state.recipes[itemId][size]) return;
-    state.recipes[itemId][size] = state.recipes[itemId][size].filter(function(rl){ return rl.ingredientId!==ingredientId; });
+    state.recipes[itemId][size] = state.recipes[itemId][size].filter(function(rl){ return !(rl.ingredientId===ingredientId && (rl.kind||'raw')===(kind||'raw')); });
     db.collection('pos_recipes').doc('main').set({items: state.recipes}).catch(function(e){ window.alert('Could not update recipe: '+e.message); });
+    render();
+  },
+
+  /* ---- Stock: pre-mix ---- */
+  startNewPremix: function(){
+    var draftId = uid('premix');
+    state.newPremixDraft = {id: draftId, name:'New Pre-Mix', unit:'ml', composition:[]};
+    state.premixCompositionDrafts[draftId] = {ingredientId:'', amount:''};
+    render();
+  },
+  editPremix: function(id){ state.editingPremixId=id; render(); },
+  cancelPremixEdit: function(){ state.editingPremixId=null; state.newPremixDraft=null; render(); },
+  updatePremixDraft: function(id, field, value){
+    var target = id ? (state.premix||[]).filter(function(p){return p.id===id;})[0] : state.newPremixDraft;
+    if(!target) return;
+    target[field] = value;
+    render();
+  },
+  savePremix: function(id){
+    if(id){
+      var target = state.premix.filter(function(p){return p.id===id;})[0];
+      if(!target) return;
+      var name = String(target.name||'').trim();
+      if(!name){ window.alert('Please enter a pre-mix name.'); return; }
+      var dupe = state.premix.some(function(p){ return p.id!==id && String(p.name||'').trim().toLowerCase()===name.toLowerCase(); });
+      if(dupe){ window.alert('A pre-mix with this name already exists. Please use a unique name.'); return; }
+      target.name = name;
+      state.editingPremixId = null;
+    } else {
+      var d = state.newPremixDraft;
+      var name = String(d.name||'').trim();
+      if(!name){ window.alert('Please enter a pre-mix name.'); return; }
+      var dupe = (state.premix||[]).some(function(p){ return String(p.name||'').trim().toLowerCase()===name.toLowerCase(); });
+      if(dupe){ window.alert('A pre-mix with this name already exists. Please use a unique name.'); return; }
+      d.name = name;
+      d.composition = d.composition || [];
+      if(!state.premix) state.premix = [];
+      state.premix.push(d);
+      state.newPremixDraft = null;
+    }
+    db.collection('pos_premix').doc('main').set({items: state.premix}).catch(function(e){ window.alert('Could not save pre-mix: '+e.message); });
+    render();
+  },
+  deletePremix: function(id){
+    if(!window.confirm('Delete this pre-mix ingredient? This cannot be undone.')) return;
+    state.premix = state.premix.filter(function(p){ return p.id!==id; });
+    db.collection('pos_premix').doc('main').set({items: state.premix}).catch(function(e){ window.alert('Could not delete pre-mix: '+e.message); });
+    render();
+  },
+  togglePremixComposition: function(id){
+    state.premixEditingCompositionId = state.premixEditingCompositionId===id ? null : id;
+    if(!state.premixCompositionDrafts[id]) state.premixCompositionDrafts[id] = {ingredientId:'', amount:''};
+    render();
+  },
+  updatePremixCompositionDraft: function(premixId, field, value){
+    if(field==='amount') value = sanitizeDecimal(value);
+    if(!state.premixCompositionDrafts[premixId]) state.premixCompositionDrafts[premixId] = {ingredientId:'', amount:''};
+    state.premixCompositionDrafts[premixId][field] = value;
+    render();
+  },
+  /* Resolves either an already-saved pre-mix (in state.premix) or the
+     not-yet-saved new-pre-mix draft (state.newPremixDraft), so the same
+     add/remove-row functions work identically whether the item exists on
+     the server yet or not. isNew tells the caller whether to persist to
+     Firestore right away (existing item) or just mutate the draft in
+     memory and let the outer Save commit everything together (new item). */
+  _findPremixTarget: function(id){
+    if(state.newPremixDraft && state.newPremixDraft.id===id) return {item: state.newPremixDraft, isNew:true};
+    var existing = (state.premix||[]).filter(function(p){return p.id===id;})[0];
+    return existing ? {item: existing, isNew:false} : null;
+  },
+  addPremixCompositionLine: function(premixId){
+    var d = state.premixCompositionDrafts[premixId] || {};
+    var amt = Number(d.amount);
+    if(!d.ingredientId){ window.alert('Please choose a raw material.'); return; }
+    if(!amt || amt<=0){ window.alert('Enter an amount greater than 0.'); return; }
+    var found = this._findPremixTarget(premixId);
+    if(!found) return;
+    var pm = found.item;
+    if(!pm.composition) pm.composition = [];
+    var existing = pm.composition.filter(function(cl){return cl.ingredientId===d.ingredientId;})[0];
+    if(existing){ existing.amount = amt; }
+    else { pm.composition.push({ingredientId:d.ingredientId, amount:amt}); }
+    state.premixCompositionDrafts[premixId] = {ingredientId:'', amount:''};
+    if(!found.isNew){
+      db.collection('pos_premix').doc('main').set({items: state.premix}).catch(function(e){ window.alert('Could not save pre-mix composition: '+e.message); });
+    }
+    render();
+  },
+  removePremixCompositionLine: function(premixId, ingredientId){
+    var found = this._findPremixTarget(premixId);
+    if(!found || !found.item.composition) return;
+    found.item.composition = found.item.composition.filter(function(cl){ return cl.ingredientId!==ingredientId; });
+    if(!found.isNew){
+      db.collection('pos_premix').doc('main').set({items: state.premix}).catch(function(e){ window.alert('Could not update pre-mix composition: '+e.message); });
+    }
+    render();
+  },
+
+  /* ---- Toppings: composition (links a topping to raw materials / pre-mix
+     for stock deduction; separate from the name/price editor above) ---- */
+  toggleToppingComposition: function(id){
+    state.toppingEditingCompositionId = state.toppingEditingCompositionId===id ? null : id;
+    state.toppingCompositionDraft = {ingredientId:'', kind:'raw', amount:''};
+    render();
+  },
+  updateToppingCompositionDraft: function(field, value){
+    if(!state.toppingCompositionDraft) state.toppingCompositionDraft = {ingredientId:'', kind:'raw', amount:''};
+    if(field==='ingredientId'){
+      var parts = String(value).split(':');
+      state.toppingCompositionDraft.kind = parts[0]==='premix' ? 'premix' : 'raw';
+      state.toppingCompositionDraft.ingredientId = parts.slice(1).join(':');
+    } else {
+      if(field==='amount') value = sanitizeDecimal(value);
+      state.toppingCompositionDraft[field] = value;
+    }
+    render();
+  },
+  addToppingCompositionLine: function(toppingId){
+    var d = state.toppingCompositionDraft || {};
+    var amt = Number(d.amount);
+    if(!d.ingredientId){ window.alert('Please choose an ingredient.'); return; }
+    if(!amt || amt<=0){ window.alert('Enter an amount greater than 0.'); return; }
+    var t = state.toppings.filter(function(x){return x.id===toppingId;})[0];
+    if(!t) return;
+    if(!t.composition) t.composition = [];
+    var kind = d.kind==='premix' ? 'premix' : undefined;
+    var existing = t.composition.filter(function(cl){return cl.ingredientId===d.ingredientId && (cl.kind||'raw')===(kind||'raw');})[0];
+    if(existing){ existing.amount = amt; }
+    else {
+      var newLine = {ingredientId:d.ingredientId, amount:amt};
+      if(kind) newLine.kind = kind;
+      t.composition.push(newLine);
+    }
+    state.toppingCompositionDraft = {ingredientId:'', kind:'raw', amount:''};
+    db.collection('pos_toppings').doc('main').set({items: state.toppings}).catch(function(e){ window.alert('Could not save topping composition: '+e.message); });
+    render();
+  },
+  removeToppingCompositionLine: function(toppingId, ingredientId, kind){
+    var t = state.toppings.filter(function(x){return x.id===toppingId;})[0];
+    if(!t || !t.composition) return;
+    t.composition = t.composition.filter(function(cl){ return !(cl.ingredientId===ingredientId && (cl.kind||'raw')===(kind||'raw')); });
+    db.collection('pos_toppings').doc('main').set({items: state.toppings}).catch(function(e){ window.alert('Could not update topping composition: '+e.message); });
     render();
   },
 
