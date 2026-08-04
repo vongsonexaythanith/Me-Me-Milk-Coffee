@@ -3200,14 +3200,20 @@ function buildHouseStockTab(){
   var privileged = state.trainingMode
     ? (state.trainingRole==='manager' || state.trainingRole==='admin')
     : (state.loggedInRole==='manager' || state.loggedInRole==='admin');
-  var ingredients = state.ingredients || [];
+  var ingredients = (state.ingredients || []).slice().sort(function(a,b){
+    return ingredientSeverityHouseStock(a) - ingredientSeverityHouseStock(b);
+  });
   var rows = ingredients.map(function(ing){
     if(state.editingHouseStockId===ing.id) return buildHouseStockEditForm(ing);
     return '' +
-    '<div class="mgmt-row">' +
+    '<div class="mgmt-row" style="flex-wrap:wrap;row-gap:10px;">' +
       '<span class="em">'+ingredientEmoji(ing.unit)+'</span>' +
       '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+tr('house_stock_qty_label')+': '+formatIngredientAmount(ing.houseStock)+' '+escapeHtml(ing.unit)+'</div></div>' +
       '<div class="acts"><button class="btn btn-outline btn-small" onclick="POS.editHouseStock(\''+ing.id+'\')">'+tr('edit')+'</button></div>' +
+      '<div class="stock-target-grid">' +
+        buildStockTargetBox(ing, 'monthlyTarget', 'monthly_target_label', 'houseStock') +
+        buildAmountPerSetBox(ing) +
+      '</div>' +
     '</div>';
   }).join('');
   var errorBanner = state.stockSyncError ? (
@@ -3582,10 +3588,12 @@ function stockStatusFor(stock, target){
   if(pct <= 0.5) return 'yellow';
   return 'green';
 }
-function buildStockTargetBox(ing, field, labelKey){
+function buildStockTargetBox(ing, field, labelKey, stockField){
+  stockField = stockField || 'stock';
+  var stockValue = ing[stockField];
   var target = ing[field];
-  var status = stockStatusFor(ing.stock, target);
-  var needed = Math.max(0, (Number(target)||0) - (Number(ing.stock)||0));
+  var status = stockStatusFor(stockValue, target);
+  var needed = Math.max(0, (Number(target)||0) - (Number(stockValue)||0));
   var statusHtml;
   if(status===null){
     statusHtml = '<div class="stock-target-status status-none">'+tr('no_target_set')+'</div>';
@@ -3628,6 +3636,14 @@ function ingredientSeverity(ing){
   var wStatus = stockStatusFor(ing.stock, ing.weeklyTarget);
   return wStatus!=null ? STOCK_SEVERITY_RANK[wStatus] : 3;
 }
+/* Same idea, but for House Stock: sorts by MONTHLY target status against
+   houseStock instead of weekly target against stock. Kept as a separate
+   function (rather than parameterizing ingredientSeverity) so each tab's
+   sort rule stays easy to read on its own. */
+function ingredientSeverityHouseStock(ing){
+  var mStatus = stockStatusFor(ing.houseStock, ing.monthlyTarget);
+  return mStatus!=null ? STOCK_SEVERITY_RANK[mStatus] : 3;
+}
 function buildRawMaterialsSubTab(){
   var ingredients = (state.ingredients || []).slice().sort(function(a,b){
     return ingredientSeverity(a) - ingredientSeverity(b);
@@ -3643,9 +3659,7 @@ function buildRawMaterialsSubTab(){
         '<button class="btn btn-danger btn-small" onclick="POS.deleteIngredient(\''+ing.id+'\')">'+tr('delete')+'</button>' +
       '</div>' +
       '<div class="stock-target-grid">' +
-        buildStockTargetBox(ing, 'weeklyTarget', 'weekly_target_label') +
-        buildStockTargetBox(ing, 'monthlyTarget', 'monthly_target_label') +
-        buildAmountPerSetBox(ing) +
+        buildStockTargetBox(ing, 'weeklyTarget', 'weekly_target_label', 'stock') +
       '</div>' +
     '</div>';
   }).join('');
