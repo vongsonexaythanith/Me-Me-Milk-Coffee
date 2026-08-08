@@ -356,7 +356,7 @@ html, body{touch-action:pan-x pan-y;}
 
 /* ---------- Receipt ---------- */
 .receipt-modal{max-width:320px;font-family:'Inter',sans-serif;}
-#receipt-content{font-size:12.5px;}
+#receipt-content{font-size:var(--receipt-print-font-size,12.5px);}
 #receipt-content .r-logo{width:52px;height:52px;object-fit:cover;border-radius:50%;display:block;margin:0 auto 8px;}
 #receipt-content .r-title{text-align:center;font-family:'Fredoka';font-size:17px;margin-bottom:2px;color:var(--caramel-dark);}
 #receipt-content .r-sub{text-align:center;font-size:11px;color:var(--espresso-soft);margin-bottom:2px;}
@@ -566,10 +566,10 @@ html, body{touch-action:pan-x pan-y;}
     padding:0 !important;
     margin:0 auto !important;
     max-height:none !important;
-    max-width:280px !important;
+    max-width:var(--receipt-print-width,280px) !important;
     overflow:visible !important;
   }
-  #receipt-content{width:280px;margin:0 auto;}
+  #receipt-content{width:var(--receipt-print-width,280px);margin:0 auto;}
   .print-only{display:block !important;}
   .receipt-copy-kitchen{
     margin-top:22px;padding-top:18px;border-top:2px dashed #999;
@@ -636,12 +636,41 @@ var DEFAULT_SETTINGS = {
   receiptQrCode: QR_CODE_DATA_URI,
   pageBackgroundOpacity: 20,
   headerBackgroundOpacity: 20,
-  staffNames: {}
+  staffNames: {},
+  printerPaperWidth: "80mm"
 };
 /* Fallback labels shown for any account key not yet given a custom name in
    Settings — e.g. before the shop owner has typed in each team member's
    actual name. */
 var DEFAULT_STAFF_LABELS = {staff1:'Staff 1', staff2:'Staff 2', staff3:'Staff 3', manager:'Manager', admin:'Admin'};
+
+/* Thermal receipt paper widths. "width" is the on-page content width in
+   CSS px (≈ printable area at 96dpi: 58mm paper prints ~48mm wide,
+   80mm paper prints ~72-76mm wide), "font" is scaled down for the
+   narrower roll so the same receipt layout still reads cleanly at ~32
+   characters per line instead of ~48. Applied via CSS custom properties
+   so both the on-screen preview and the actual print output resize
+   together — see #receipt-content and @media print in <style>. */
+var RECEIPT_PAPER_SIZES = {
+  '58mm': {width:200, font:10.5},
+  '80mm': {width:280, font:12.5}
+};
+function applyReceiptPrintWidth(){
+  var key = (state.settings && state.settings.printerPaperWidth) || '80mm';
+  var cfg = RECEIPT_PAPER_SIZES[key] || RECEIPT_PAPER_SIZES['80mm'];
+  document.documentElement.style.setProperty('--receipt-print-width', cfg.width+'px');
+  document.documentElement.style.setProperty('--receipt-print-font-size', cfg.font+'px');
+}
+/* Local (not UTC) calendar-day key, e.g. "2026-08-08" — used to detect
+   when a new day has started so the daily order-number counter can reset
+   to 1 for the first order of each day. */
+function todayDateKey(){
+  var d = new Date();
+  var y = d.getFullYear();
+  var m = String(d.getMonth()+1).padStart(2,'0');
+  var day = String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
 
 var FIREBASE_CONFIG = {
   apiKey: "AIzaSyA47Pgz9Q0gRm2Fe9fTmN0THkYV_Ureq-M",
@@ -745,6 +774,9 @@ var TRANSLATIONS = {
     category_bg_row_hint:'Background for this category page',
     currency_rates:'Currency Exchange Rates', currency_rates_hint:'All prices are stored in Kip (₭). These rates convert to USD and THB on the Order tab — update them whenever the exchange rate moves.',
     usd_rate_label:'₭ per 1 USD', thb_rate_label:'₭ per 1 THB',
+    printer_settings_title:'🖨️ Printer', printer_settings_hint:'Receipts print through your device\'s own print function — the app doesn\'t connect to a printer directly. On iPhone/iPad, tapping Print shows AirPrint printers on your Wi-Fi network automatically; on Android/Windows/Mac it shows whatever printer your device has set up, including Wi-Fi thermal printers added through your device\'s printer settings. Choose the paper width below to match your printer so receipts fit correctly.',
+    paper_size_label:'Receipt Paper Width', paper_58mm_label:'58mm (narrow)', paper_80mm_label:'80mm (standard)',
+    test_print_btn:'🖨️ Test Print', test_print_hint:'Prints a sample receipt so you can check it fits your paper before relying on it for real orders.',
     security_heading:'Security', security_hint:'Lock the screen when you step away from the counter — staff will need the PIN to get back in.',
     lock_screen_now:'Lock Screen Now',
     danger_zone:'Danger Zone', danger_zone_hint:'These actions cannot be undone.',
@@ -891,6 +923,9 @@ var TRANSLATIONS = {
     category_bg_row_hint:'ພື້ນຫຼັງສຳລັບໝວດໝູ່ນີ້',
     currency_rates:'ອັດຕາແລກປ່ຽນສະກຸນເງິນ', currency_rates_hint:'ລາຄາທັງໝົດຖືກເກັບເປັນເງິນກີບ (₭). ອັດຕານີ້ໃຊ້ແປງເປັນ USD ແລະ THB ຢູ່ແທັບສັ່ງເຄື່ອງດື່ມ — ອັບເດດເມື່ອອັດຕາແລກປ່ຽນປ່ຽນແປງ.',
     usd_rate_label:'₭ ຕໍ່ 1 USD', thb_rate_label:'₭ ຕໍ່ 1 THB',
+    printer_settings_title:'🖨️ ເຄື່ອງພິມ', printer_settings_hint:'ໃບບິນຈະພິມຜ່ານຟັງຊັນພິມຂອງອຸປະກອນທ່ານເອງ — ແອັບບໍ່ໄດ້ເຊື່ອມຕໍ່ກັບເຄື່ອງພິມໂດຍກົງ. ໃນ iPhone/iPad, ການກົດພິມຈະສະແດງເຄື່ອງພິມ AirPrint ໃນເຄືອຂ່າຍ Wi-Fi ຂອງທ່ານໂດຍອັດຕະໂນມັດ; ໃນ Android/Windows/Mac ຈະສະແດງເຄື່ອງພິມທີ່ຕັ້ງໄວ້ໃນອຸປະກອນ, ລວມທັງເຄື່ອງພິມຄວາມຮ້ອນ Wi-Fi ທີ່ເພີ່ມຜ່ານການຕັ້ງຄ່າເຄື່ອງພິມຂອງອຸປະກອນ. ເລືອກຄວາມກວ້າງເຈ້ຍຂ້າງລຸ່ມໃຫ້ກົງກັບເຄື່ອງພິມຂອງທ່ານເພື່ອໃຫ້ໃບບິນພໍດີ.',
+    paper_size_label:'ຄວາມກວ້າງເຈ້ຍໃບບິນ', paper_58mm_label:'58mm (ແຄບ)', paper_80mm_label:'80mm (ມາດຕະຖານ)',
+    test_print_btn:'🖨️ ພິມທົດລອງ', test_print_hint:'ພິມໃບບິນຕົວຢ່າງເພື່ອກວດເບິ່ງວ່າພໍດີກັບເຈ້ຍຂອງທ່ານກ່ອນນຳໄປໃຊ້ຈິງ.',
     security_heading:'ຄວາມປອດໄພ', security_hint:'ລັອກໜ້າຈໍເມື່ອທ່ານອອກຈາກເຄົາເຕີ — ພະນັກງານຈະຕ້ອງໃສ່ລະຫັດເພື່ອກັບເຂົ້າມາ.',
     lock_screen_now:'ລັອກໜ້າຈໍດຽວນີ້',
     danger_zone:'ເຂດອັນຕະລາຍ', danger_zone_hint:'ການກະທຳເຫຼົ່ານີ້ບໍ່ສາມາດຍົກເລີກໄດ້.',
@@ -1037,6 +1072,9 @@ var TRANSLATIONS = {
     category_bg_row_hint:'พื้นหลังสำหรับหมวดหมู่นี้',
     currency_rates:'อัตราแลกเปลี่ยนสกุลเงิน', currency_rates_hint:'ราคาทั้งหมดถูกเก็บเป็นเงินกีบ (₭) อัตรานี้ใช้แปลงเป็น USD และ THB ในแท็บสั่งซื้อ — อัปเดตเมื่ออัตราแลกเปลี่ยนเปลี่ยนแปลง',
     usd_rate_label:'₭ ต่อ 1 USD', thb_rate_label:'₭ ต่อ 1 THB',
+    printer_settings_title:'🖨️ เครื่องพิมพ์', printer_settings_hint:'ใบเสร็จจะพิมพ์ผ่านฟังก์ชันพิมพ์ของอุปกรณ์คุณเอง — แอปไม่ได้เชื่อมต่อกับเครื่องพิมพ์โดยตรง บน iPhone/iPad การกดพิมพ์จะแสดงเครื่องพิมพ์ AirPrint ในเครือข่าย Wi-Fi ของคุณโดยอัตโนมัติ ส่วนบน Android/Windows/Mac จะแสดงเครื่องพิมพ์ที่ตั้งค่าไว้ในอุปกรณ์ รวมถึงเครื่องพิมพ์ความร้อน Wi-Fi ที่เพิ่มผ่านการตั้งค่าเครื่องพิมพ์ของอุปกรณ์ เลือกความกว้างกระดาษด้านล่างให้ตรงกับเครื่องพิมพ์ของคุณเพื่อให้ใบเสร็จพอดี',
+    paper_size_label:'ความกว้างกระดาษใบเสร็จ', paper_58mm_label:'58mm (แคบ)', paper_80mm_label:'80mm (มาตรฐาน)',
+    test_print_btn:'🖨️ พิมพ์ทดสอบ', test_print_hint:'พิมพ์ใบเสร็จตัวอย่างเพื่อตรวจสอบว่าพอดีกับกระดาษของคุณก่อนใช้งานจริง',
     security_heading:'ความปลอดภัย', security_hint:'ล็อกหน้าจอเมื่อคุณออกจากเคาน์เตอร์ — พนักงานจะต้องใส่รหัส PIN เพื่อกลับเข้ามา',
     lock_screen_now:'ล็อกหน้าจอตอนนี้',
     danger_zone:'โซนอันตราย', danger_zone_hint:'การกระทำเหล่านี้ไม่สามารถย้อนกลับได้',
@@ -1202,6 +1240,7 @@ var state = {
   splitCash:'',
   splitTransfer:'',
   receiptOrder:null,
+  testPrintMode:false,
   receiptPreview:null,
   refundEvidence:null, // {orderId, photo, reason} — set while capturing evidence and through the approval step
   trainingMode:false,
@@ -1870,6 +1909,7 @@ function doRender(){
   var rootEl = document.getElementById('pos-root');
   if(rootEl) rootEl.classList.toggle('lang-lo', state.language==='lo');
   applyPageBackground();
+  applyReceiptPrintWidth();
   try{
     document.getElementById('app').innerHTML = buildAppHTML();
   }catch(e){
@@ -2569,7 +2609,7 @@ function buildReceiptModal(){
     '<div class="pos-modal receipt-modal">' +
       '<div id="receipt-content">' + buildReceiptCopiesHtml(o, false) + '</div>' +
       '<div class="receipt-actions">' +
-        '<button class="btn btn-ghost" onclick="POS.closeReceipt()">'+tr('new_order')+'</button>' +
+        '<button class="btn btn-ghost" onclick="POS.closeReceipt()">'+(state.testPrintMode ? tr('close_recipe') : tr('new_order'))+'</button>' +
         '<button class="btn btn-primary" onclick="window.print()">'+tr('print_receipt')+'</button>' +
       '</div>' +
     '</div>' +
@@ -4106,6 +4146,20 @@ function buildSettingsTab(){
     '<button class="btn btn-primary" style="width:auto;margin-top:14px;" onclick="POS.saveSettings()">'+tr('save_settings')+'</button>' +
   '</div>' +
   '<div class="section-card">' +
+    '<h2>'+tr('printer_settings_title')+'</h2><p class="hint">'+tr('printer_settings_hint')+'</p>' +
+    '<div class="field-grid">' +
+      '<div class="field"><label>'+tr('paper_size_label')+'</label><select id="pos-set-paperwidth" onchange="POS.updateSettingsForm(\'printerPaperWidth\',this.value)">' +
+        '<option value="58mm" '+(f.printerPaperWidth==='58mm'?'selected':'')+'>'+tr('paper_58mm_label')+'</option>' +
+        '<option value="80mm" '+((!f.printerPaperWidth || f.printerPaperWidth==='80mm')?'selected':'')+'>'+tr('paper_80mm_label')+'</option>' +
+      '</select></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px;">' +
+      '<button class="btn btn-primary" style="width:auto;" onclick="POS.saveSettings()">'+tr('save_settings')+'</button>' +
+      '<button class="btn btn-outline" style="width:auto;" onclick="POS.testPrintReceipt()">'+tr('test_print_btn')+'</button>' +
+    '</div>' +
+    '<p class="hint" style="margin-top:8px;margin-bottom:0;">'+tr('test_print_hint')+'</p>' +
+  '</div>' +
+  '<div class="section-card">' +
     '<h2>'+tr('security_heading')+'</h2><p class="hint">'+tr('security_hint')+'</p>' +
     '<button class="btn btn-secondary" onclick="POS.lockApp()">'+tr('lock_screen_now')+'</button>' +
   '</div>' +
@@ -4301,7 +4355,7 @@ var POS = {
       realDb.collection('training_pos_ingredients').doc('main').set({items: state.ingredients||[]}),
       realDb.collection('training_pos_recipes').doc('main').set({items: state.recipes||{}}),
       realDb.collection('training_pos_premix').doc('main').set({items: state.premix||[]}),
-      realDb.collection('training_pos_meta').doc('counter').set({value: 1}),
+      realDb.collection('training_pos_meta').doc('counter').set({value: 1, date: todayDateKey()}),
       realDb.collection('training_pos_orders').get().then(function(snap){
         if(!snap.docs.length) return null;
         var batch = realDb.batch();
@@ -4970,10 +5024,13 @@ var POS = {
     render();
 
     var counterRef = db.collection('pos_meta').doc('counter');
+    var todayKey = todayDateKey();
     db.runTransaction(function(tx){
       return tx.get(counterRef).then(function(doc){
-        var current = (doc.exists && doc.data().value) || 1;
-        tx.set(counterRef, {value: current+1});
+        var data = doc.exists ? doc.data() : {};
+        var isNewDay = data.date !== todayKey;
+        var current = isNewDay ? 1 : ((Number(data.value)||1));
+        tx.set(counterRef, {value: current+1, date: todayKey});
         return current;
       });
     }).then(function(orderNumber){
@@ -4995,14 +5052,41 @@ var POS = {
       state.splitTransfer = '';
       state.paymentMethod = 'cash';
       state.completingOrder = false;
-      render(function(){ window.print(); });
+      doRender();
+      window.print();
     }).catch(function(e){
       state.completingOrder = false;
       render();
       window.alert('Could not complete the order — check your internet connection and try again.\n('+e.message+')');
     });
   },
-  closeReceipt: function(){ state.receiptOrder=null; render(); },
+  closeReceipt: function(){ state.receiptOrder=null; state.testPrintMode=false; render(); },
+  /* Builds a synthetic sample order (no real order needed) so staff can
+     check a receipt actually fits the selected paper width before
+     relying on it for real checkouts. Reuses the normal receipt modal +
+     print flow exactly like a real order would. */
+  testPrintReceipt: function(){
+    state.receiptOrder = {
+      items: [
+        {qty:2, name:'Thai Milk Tea', size:'M', sugar:50, ice:'normal', toppings:[{name:'Pearl'}], unitPrice:15000},
+        {qty:1, name:'Taro Smoothie', size:'L', sugar:70, ice:'less', toppings:[], unitPrice:20000}
+      ],
+      currency:'LAK',
+      paymentMethod:'cash',
+      timestamp: Date.now(),
+      number: 0,
+      subtotal: 50000,
+      discount: 0,
+      serviceCharge: 0,
+      total: 50000,
+      amountReceived: 50000,
+      change: 0,
+      placedByAccount: null
+    };
+    state.testPrintMode = true;
+    doRender();
+    window.print();
+  },
   reprintOrder: function(id){
     var order = state.orders.filter(function(o){ return o.id===id; })[0];
     if(!order) return;
