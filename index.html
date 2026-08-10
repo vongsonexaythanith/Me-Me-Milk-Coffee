@@ -637,7 +637,10 @@ var DEFAULT_SETTINGS = {
   pageBackgroundOpacity: 20,
   headerBackgroundOpacity: 20,
   staffNames: {},
-  printerPaperWidth: "80mm"
+  printerPaperWidth: "80mm",
+  printerConnectionMode: "system",
+  printerIpAddress: "",
+  printerDeviceId: "local_printer"
 };
 /* Fallback labels shown for any account key not yet given a custom name in
    Settings — e.g. before the shop owner has typed in each team member's
@@ -670,6 +673,146 @@ function todayDateKey(){
   var m = String(d.getMonth()+1).padStart(2,'0');
   var day = String(d.getDate()).padStart(2,'0');
   return y+'-'+m+'-'+day;
+}
+
+/* ================= Epson ePOS-Print (direct WiFi printing) =================
+   Sends receipts straight to an Epson ePOS-Print-capable printer over the
+   local network via SOAP/HTTP, bypassing the OS print dialog entirely.
+   Protocol per Epson's official ePOS-Print XML User's Manual. Requires the
+   printer to be reachable over HTTPS with a trusted certificate — a plain
+   HTTP printer cannot be reached from this HTTPS-hosted app (browsers block
+   that "mixed content" outright, no way around it from here). Text-only
+   receipt: matches buildReceiptContentHtml's content, laid out as a
+   monospaced two-column table (name/value padded to the line width) since
+   ePOS-Print has no simple "space-between" text layout. Logo/QR are not
+   included in this path yet. */
+function eposCharWidth(){
+  return (state.settings && state.settings.printerPaperWidth==='58mm') ? 32 : 48;
+}
+function eposEscapeXml(s){
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+}
+function eposText(s){ return '<text>'+eposEscapeXml(s)+'&#10;</text>'; }
+/* Greedy word-wrap to a fixed character width, so long item names or
+   addresses break onto extra lines instead of being cut off. */
+function eposWrapLines(text, width){
+  var words = String(text==null?'':text).split(' ');
+  var lines = []; var cur = '';
+  words.forEach(function(w){
+    if((cur+' '+w).trim().length > width){ if(cur) lines.push(cur); cur = w; }
+    else cur = (cur ? cur+' ' : '') + w;
+  });
+  if(cur) lines.push(cur);
+  return lines.length ? lines : [''];
+}
+/* Pads/truncates a left+right pair onto one fixed-width line, e.g.
+   "2x Thai Milk Tea            30,000" — the standard two-column layout
+   every ESC/POS text receipt uses since there's no native right-align. */
+function eposPadLine(left, right, width){
+  left = String(left==null?'':left); right = String(right==null?'':right);
+  var space = width - left.length - right.length;
+  if(space < 1){
+    var maxLeft = Math.max(0, width - right.length - 1);
+    left = left.slice(0, maxLeft);
+    space = width - left.length - right.length;
+  }
+  return left + new Array(Math.max(1,space)+1).join(' ') + right;
+}
+function buildEposPrintXml(o){
+  var s = state.settings;
+  var W = eposCharWidth();
+  function buildCopy(isKitchen){
+    var out = '';
+    out += '<text align="center" em="true" width="2" height="2"/>';
+    out += eposText(s.shopName || '');
+    out += '<text em="false" width="1" height="1"/>';
+    if(s.address) eposWrapLines(s.address, W).forEach(function(ln){ out += eposText(ln); });
+    if(s.phone) out += eposText(s.phone);
+    var d = new Date(o.timestamp);
+    var metaLine = tr('order_number')+String(o.number).padStart(4,'0')+' - '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    out += eposText(metaLine);
+    out += eposText(isKitchen ? ('*** '+tr('kitchen_copy_label')+' ***') : tr('customer_copy_label'));
+    out += '<text align="left"/>';
+    out += eposText(new Array(W+1).join('-'));
+    o.items.forEach(function(l){
+      var priceStr = formatMoney(l.unitPrice*l.qty);
+      var nameStr = l.qty+'x '+l.name;
+      var nameLines = eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1));
+      nameLines.forEach(function(ln,i){
+        out += eposText(i===0 ? eposPadLine(ln, priceStr, W) : ln);
+      });
+      var meta = l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice) + (l.toppings.length ? ' '+l.toppings.map(function(t){return t.name;}).join(', ') : '');
+      eposWrapLines(meta, W-2).forEach(function(ln){ out += eposText('  '+ln); });
+    });
+    out += eposText(new Array(W+1).join('-'));
+    out += eposText(eposPadLine(tr('subtotal'), formatMoney(o.subtotal), W));
+    if(o.discount>0) out += eposText(eposPadLine(tr('discount'), '-'+formatMoney(o.discount), W));
+    if(o.serviceCharge>0) out += eposText(eposPadLine(tr('service_charge'), formatMoney(o.serviceCharge), W));
+    out += '<text em="true"/>';
+    out += eposText(eposPadLine(tr('total'), formatMoney(o.total), W));
+    out += '<text em="false"/>';
+    out += eposText(eposPadLine(tr('receipt_payment'), paymentDisplayFor(o), W));
+    if(o.placedByAccount) out += eposText(eposPadLine(tr('served_by_label'), staffNameFor(o.placedByAccount), W));
+    if(o.paymentMethod==='cash'){
+      out += eposText(eposPadLine(tr('cash_received'), formatMoney(o.amountReceived), W));
+      out += eposText(eposPadLine(tr('receipt_change'), formatMoney(o.change), W));
+    }
+    out += '<text align="center"/>';
+    String(s.footerMessage||'').split('\n').forEach(function(line){
+      eposWrapLines(line, W).forEach(function(ln){ out += eposText(ln); });
+    });
+    out += '<feed line="2"/><cut type="feed"/>';
+    return out;
+  }
+  return '<epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">' + buildCopy(false) + buildCopy(true) + '</epos-print>';
+}
+/* POSTs the receipt to the printer's ePOS-Print endpoint. Resolves on a
+   confirmed successful print, rejects with a human-readable reason
+   otherwise (unreachable, wrong IP, untrusted certificate, printer error). */
+function sendEposPrint(order){
+  return new Promise(function(resolve, reject){
+    var s = state.settings || {};
+    var ip = String(s.printerIpAddress||'').trim();
+    if(!ip){ reject(new Error(tr('epos_no_ip_error'))); return; }
+    var devId = String(s.printerDeviceId||'local_printer').trim() || 'local_printer';
+    var url = 'https://'+ip+'/cgi-bin/epos/service.cgi?devid='+encodeURIComponent(devId)+'&timeout=10000';
+    var body = buildEposPrintXml(order);
+    var soap = '<?xml version="1.0" encoding="utf-8"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body>'+body+'</s:Body></s:Envelope>';
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.timeout = 12000;
+    xhr.setRequestHeader('Content-Type', 'text/xml; charset=utf-8');
+    xhr.setRequestHeader('SOAPAction', '""');
+    xhr.onreadystatechange = function(){
+      if(xhr.readyState===4){
+        if(xhr.status===200 && xhr.responseXML){
+          var respEl = xhr.responseXML.getElementsByTagName('response')[0];
+          var success = respEl && /^(1|true)$/.test(respEl.getAttribute('success'));
+          if(success) resolve();
+          else reject(new Error(tr('epos_printer_error_prefix')+(respEl && respEl.getAttribute('code') ? ' ('+respEl.getAttribute('code')+')' : '')));
+        } else {
+          reject(new Error(tr('epos_unreachable_error')));
+        }
+      }
+    };
+    xhr.onerror = function(){ reject(new Error(tr('epos_unreachable_error'))); };
+    xhr.ontimeout = function(){ reject(new Error(tr('epos_timeout_error'))); };
+    xhr.send(soap);
+  });
+}
+/* Single entry point every print trigger in the app goes through: routes
+   to direct ePOS-Print or the OS print dialog based on the Printer
+   settings, and falls back to the print dialog automatically if a direct
+   print attempt fails, so a checkout is never blocked by a printer issue. */
+function triggerPrint(order){
+  if(state.settings && state.settings.printerConnectionMode==='epson_epos'){
+    sendEposPrint(order).catch(function(e){
+      window.alert(tr('epos_print_failed_prefix')+' '+e.message+'\n\n'+tr('epos_print_fallback_hint'));
+      window.print();
+    });
+  } else {
+    window.print();
+  }
 }
 
 var FIREBASE_CONFIG = {
@@ -774,9 +917,18 @@ var TRANSLATIONS = {
     category_bg_row_hint:'Background for this category page',
     currency_rates:'Currency Exchange Rates', currency_rates_hint:'All prices are stored in Kip (₭). These rates convert to USD and THB on the Order tab — update them whenever the exchange rate moves.',
     usd_rate_label:'₭ per 1 USD', thb_rate_label:'₭ per 1 THB',
-    printer_settings_title:'🖨️ Printer', printer_settings_hint:'Receipts print through your device\'s own print function — the app doesn\'t connect to a printer directly. On iPhone/iPad, tapping Print shows AirPrint printers on your Wi-Fi network automatically; on Android/Windows/Mac it shows whatever printer your device has set up, including Wi-Fi thermal printers added through your device\'s printer settings. Choose the paper width below to match your printer so receipts fit correctly.',
+    printer_settings_title:'🖨️ Printer', printer_settings_hint:'Two ways to print: through your device\'s own print function (AirPrint on iPhone/iPad, or whatever printer your device has set up on Android/Windows/Mac), or — for Epson ePOS-Print-capable printers — straight over Wi-Fi with no print dialog at all. Pick the method below and set the paper width to match your printer so receipts fit correctly.',
     paper_size_label:'Receipt Paper Width', paper_58mm_label:'58mm (narrow)', paper_80mm_label:'80mm (standard)',
     test_print_btn:'🖨️ Test Print', test_print_hint:'Prints a sample receipt so you can check it fits your paper before relying on it for real orders.',
+    printer_mode_label:'Printing Method', printer_mode_system:'Device print dialog (AirPrint, etc.)', printer_mode_epson:'Direct Wi-Fi (Epson ePOS-Print)',
+    printer_ip_label:'Printer IP Address', printer_device_id_label:'Device ID (advanced)',
+    printer_epos_hint:'Sends receipts straight to the printer over Wi-Fi — no print dialog. Requires an Epson ePOS-Print-capable printer with a static IP and a trusted HTTPS certificate set up on the printer (see Epson\'s setup guide). Leave Device ID as "local_printer" unless you changed it on the printer.',
+    epos_no_ip_error:'No printer IP address set in Printer settings.',
+    epos_printer_error_prefix:'The printer reported an error.',
+    epos_unreachable_error:'Could not reach the printer. Check the IP address, that the printer is on the same Wi-Fi, and that its HTTPS certificate is trusted on this device.',
+    epos_timeout_error:'The printer did not respond in time.',
+    epos_print_failed_prefix:'Could not print directly to the printer:',
+    epos_print_fallback_hint:'Falling back to your device\'s print dialog instead.',
     security_heading:'Security', security_hint:'Lock the screen when you step away from the counter — staff will need the PIN to get back in.',
     lock_screen_now:'Lock Screen Now',
     danger_zone:'Danger Zone', danger_zone_hint:'These actions cannot be undone.',
@@ -923,9 +1075,18 @@ var TRANSLATIONS = {
     category_bg_row_hint:'ພື້ນຫຼັງສຳລັບໝວດໝູ່ນີ້',
     currency_rates:'ອັດຕາແລກປ່ຽນສະກຸນເງິນ', currency_rates_hint:'ລາຄາທັງໝົດຖືກເກັບເປັນເງິນກີບ (₭). ອັດຕານີ້ໃຊ້ແປງເປັນ USD ແລະ THB ຢູ່ແທັບສັ່ງເຄື່ອງດື່ມ — ອັບເດດເມື່ອອັດຕາແລກປ່ຽນປ່ຽນແປງ.',
     usd_rate_label:'₭ ຕໍ່ 1 USD', thb_rate_label:'₭ ຕໍ່ 1 THB',
-    printer_settings_title:'🖨️ ເຄື່ອງພິມ', printer_settings_hint:'ໃບບິນຈະພິມຜ່ານຟັງຊັນພິມຂອງອຸປະກອນທ່ານເອງ — ແອັບບໍ່ໄດ້ເຊື່ອມຕໍ່ກັບເຄື່ອງພິມໂດຍກົງ. ໃນ iPhone/iPad, ການກົດພິມຈະສະແດງເຄື່ອງພິມ AirPrint ໃນເຄືອຂ່າຍ Wi-Fi ຂອງທ່ານໂດຍອັດຕະໂນມັດ; ໃນ Android/Windows/Mac ຈະສະແດງເຄື່ອງພິມທີ່ຕັ້ງໄວ້ໃນອຸປະກອນ, ລວມທັງເຄື່ອງພິມຄວາມຮ້ອນ Wi-Fi ທີ່ເພີ່ມຜ່ານການຕັ້ງຄ່າເຄື່ອງພິມຂອງອຸປະກອນ. ເລືອກຄວາມກວ້າງເຈ້ຍຂ້າງລຸ່ມໃຫ້ກົງກັບເຄື່ອງພິມຂອງທ່ານເພື່ອໃຫ້ໃບບິນພໍດີ.',
+    printer_settings_title:'🖨️ ເຄື່ອງພິມ', printer_settings_hint:'ມີ 2 ວິທີພິມ: ຜ່ານຟັງຊັນພິມຂອງອຸປະກອນທ່ານເອງ (AirPrint ໃນ iPhone/iPad, ຫຼືເຄື່ອງພິມທີ່ຕັ້ງໄວ້ໃນອຸປະກອນສຳລັບ Android/Windows/Mac), ຫຼື — ສຳລັບເຄື່ອງພິມທີ່ຮອງຮັບ Epson ePOS-Print — ພິມຜ່ານ Wi-Fi ໂດຍກົງບໍ່ຜ່ານໜ້າຕ່າງພິມເລີຍ. ເລືອກວິທີຂ້າງລຸ່ມ ແລະ ຕັ້ງຄວາມກວ້າງເຈ້ຍໃຫ້ກົງກັບເຄື່ອງພິມຂອງທ່ານ.',
     paper_size_label:'ຄວາມກວ້າງເຈ້ຍໃບບິນ', paper_58mm_label:'58mm (ແຄບ)', paper_80mm_label:'80mm (ມາດຕະຖານ)',
     test_print_btn:'🖨️ ພິມທົດລອງ', test_print_hint:'ພິມໃບບິນຕົວຢ່າງເພື່ອກວດເບິ່ງວ່າພໍດີກັບເຈ້ຍຂອງທ່ານກ່ອນນຳໄປໃຊ້ຈິງ.',
+    printer_mode_label:'ວິທີພິມ', printer_mode_system:'ໜ້າຕ່າງພິມຂອງອຸປະກອນ (AirPrint ແລະອື່ນໆ)', printer_mode_epson:'Wi-Fi ໂດຍກົງ (Epson ePOS-Print)',
+    printer_ip_label:'ທີ່ຢູ່ IP ຂອງເຄື່ອງພິມ', printer_device_id_label:'Device ID (ຂັ້ນສູງ)',
+    printer_epos_hint:'ສົ່ງໃບບິນຫາເຄື່ອງພິມຜ່ານ Wi-Fi ໂດຍກົງ — ບໍ່ຜ່ານໜ້າຕ່າງພິມ. ຕ້ອງການເຄື່ອງພິມທີ່ຮອງຮັບ Epson ePOS-Print ທີ່ມີ IP ຄົງທີ່ ແລະໄດ້ຕັ້ງໃບຢັ້ງຢືນ HTTPS ໄວ້ແລ້ວ (ເບິ່ງຄູ່ມືການຕັ້ງຄ່າຂອງ Epson). ປ່ອຍ Device ID ໄວ້ເປັນ "local_printer" ຖ້າບໍ່ໄດ້ປ່ຽນຢູ່ເຄື່ອງພິມ.',
+    epos_no_ip_error:'ຍັງບໍ່ໄດ້ຕັ້ງທີ່ຢູ່ IP ຂອງເຄື່ອງພິມໃນການຕັ້ງຄ່າເຄື່ອງພິມ.',
+    epos_printer_error_prefix:'ເຄື່ອງພິມລາຍງານຂໍ້ຜິດພາດ.',
+    epos_unreachable_error:'ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບເຄື່ອງພິມໄດ້. ກວດເບິ່ງທີ່ຢູ່ IP, ວ່າເຄື່ອງພິມຢູ່ໃນ Wi-Fi ດຽວກັນ, ແລະໃບຢັ້ງຢືນ HTTPS ຂອງມັນໄດ້ຮັບການເຊື່ອຖືຢູ່ອຸປະກອນນີ້.',
+    epos_timeout_error:'ເຄື່ອງພິມບໍ່ຕອບສະໜອງທັນເວລາ.',
+    epos_print_failed_prefix:'ບໍ່ສາມາດພິມກົງໄປຫາເຄື່ອງພິມໄດ້:',
+    epos_print_fallback_hint:'ຈະໃຊ້ໜ້າຕ່າງພິມຂອງອຸປະກອນແທນ.',
     security_heading:'ຄວາມປອດໄພ', security_hint:'ລັອກໜ້າຈໍເມື່ອທ່ານອອກຈາກເຄົາເຕີ — ພະນັກງານຈະຕ້ອງໃສ່ລະຫັດເພື່ອກັບເຂົ້າມາ.',
     lock_screen_now:'ລັອກໜ້າຈໍດຽວນີ້',
     danger_zone:'ເຂດອັນຕະລາຍ', danger_zone_hint:'ການກະທຳເຫຼົ່ານີ້ບໍ່ສາມາດຍົກເລີກໄດ້.',
@@ -1072,9 +1233,18 @@ var TRANSLATIONS = {
     category_bg_row_hint:'พื้นหลังสำหรับหมวดหมู่นี้',
     currency_rates:'อัตราแลกเปลี่ยนสกุลเงิน', currency_rates_hint:'ราคาทั้งหมดถูกเก็บเป็นเงินกีบ (₭) อัตรานี้ใช้แปลงเป็น USD และ THB ในแท็บสั่งซื้อ — อัปเดตเมื่ออัตราแลกเปลี่ยนเปลี่ยนแปลง',
     usd_rate_label:'₭ ต่อ 1 USD', thb_rate_label:'₭ ต่อ 1 THB',
-    printer_settings_title:'🖨️ เครื่องพิมพ์', printer_settings_hint:'ใบเสร็จจะพิมพ์ผ่านฟังก์ชันพิมพ์ของอุปกรณ์คุณเอง — แอปไม่ได้เชื่อมต่อกับเครื่องพิมพ์โดยตรง บน iPhone/iPad การกดพิมพ์จะแสดงเครื่องพิมพ์ AirPrint ในเครือข่าย Wi-Fi ของคุณโดยอัตโนมัติ ส่วนบน Android/Windows/Mac จะแสดงเครื่องพิมพ์ที่ตั้งค่าไว้ในอุปกรณ์ รวมถึงเครื่องพิมพ์ความร้อน Wi-Fi ที่เพิ่มผ่านการตั้งค่าเครื่องพิมพ์ของอุปกรณ์ เลือกความกว้างกระดาษด้านล่างให้ตรงกับเครื่องพิมพ์ของคุณเพื่อให้ใบเสร็จพอดี',
+    printer_settings_title:'🖨️ เครื่องพิมพ์', printer_settings_hint:'มี 2 วิธีในการพิมพ์: ผ่านฟังก์ชันพิมพ์ของอุปกรณ์คุณเอง (AirPrint บน iPhone/iPad หรือเครื่องพิมพ์ที่ตั้งค่าไว้ในอุปกรณ์สำหรับ Android/Windows/Mac) หรือ — สำหรับเครื่องพิมพ์ที่รองรับ Epson ePOS-Print — พิมพ์ผ่าน Wi-Fi โดยตรงโดยไม่ผ่านกล่องโต้ตอบพิมพ์เลย เลือกวิธีด้านล่างและตั้งความกว้างกระดาษให้ตรงกับเครื่องพิมพ์ของคุณ',
     paper_size_label:'ความกว้างกระดาษใบเสร็จ', paper_58mm_label:'58mm (แคบ)', paper_80mm_label:'80mm (มาตรฐาน)',
     test_print_btn:'🖨️ พิมพ์ทดสอบ', test_print_hint:'พิมพ์ใบเสร็จตัวอย่างเพื่อตรวจสอบว่าพอดีกับกระดาษของคุณก่อนใช้งานจริง',
+    printer_mode_label:'วิธีการพิมพ์', printer_mode_system:'กล่องโต้ตอบพิมพ์ของอุปกรณ์ (AirPrint ฯลฯ)', printer_mode_epson:'Wi-Fi โดยตรง (Epson ePOS-Print)',
+    printer_ip_label:'ที่อยู่ IP ของเครื่องพิมพ์', printer_device_id_label:'Device ID (ขั้นสูง)',
+    printer_epos_hint:'ส่งใบเสร็จไปยังเครื่องพิมพ์ผ่าน Wi-Fi โดยตรง — ไม่ผ่านกล่องโต้ตอบพิมพ์ ต้องใช้เครื่องพิมพ์ที่รองรับ Epson ePOS-Print ที่มี IP คงที่และตั้งค่าใบรับรอง HTTPS ที่เชื่อถือได้ไว้แล้ว (ดูคู่มือการตั้งค่าของ Epson) ปล่อย Device ID เป็น "local_printer" หากไม่ได้เปลี่ยนที่เครื่องพิมพ์',
+    epos_no_ip_error:'ยังไม่ได้ตั้งที่อยู่ IP ของเครื่องพิมพ์ในการตั้งค่าเครื่องพิมพ์',
+    epos_printer_error_prefix:'เครื่องพิมพ์รายงานข้อผิดพลาด',
+    epos_unreachable_error:'ไม่สามารถเชื่อมต่อกับเครื่องพิมพ์ได้ ตรวจสอบที่อยู่ IP ว่าเครื่องพิมพ์อยู่ใน Wi-Fi เดียวกัน และใบรับรอง HTTPS ได้รับความเชื่อถือบนอุปกรณ์นี้แล้ว',
+    epos_timeout_error:'เครื่องพิมพ์ไม่ตอบสนองภายในเวลาที่กำหนด',
+    epos_print_failed_prefix:'ไม่สามารถพิมพ์ตรงไปยังเครื่องพิมพ์ได้:',
+    epos_print_fallback_hint:'จะใช้กล่องโต้ตอบพิมพ์ของอุปกรณ์แทน',
     security_heading:'ความปลอดภัย', security_hint:'ล็อกหน้าจอเมื่อคุณออกจากเคาน์เตอร์ — พนักงานจะต้องใส่รหัส PIN เพื่อกลับเข้ามา',
     lock_screen_now:'ล็อกหน้าจอตอนนี้',
     danger_zone:'โซนอันตราย', danger_zone_hint:'การกระทำเหล่านี้ไม่สามารถย้อนกลับได้',
@@ -2610,7 +2780,7 @@ function buildReceiptModal(){
       '<div id="receipt-content">' + buildReceiptCopiesHtml(o, false) + '</div>' +
       '<div class="receipt-actions">' +
         '<button class="btn btn-ghost" onclick="POS.closeReceipt()">'+(state.testPrintMode ? tr('close_recipe') : tr('new_order'))+'</button>' +
-        '<button class="btn btn-primary" onclick="window.print()">'+tr('print_receipt')+'</button>' +
+        '<button class="btn btn-primary" onclick="POS.printCurrentReceipt()">'+tr('print_receipt')+'</button>' +
       '</div>' +
     '</div>' +
   '</div>';
@@ -4152,7 +4322,18 @@ function buildSettingsTab(){
         '<option value="58mm" '+(f.printerPaperWidth==='58mm'?'selected':'')+'>'+tr('paper_58mm_label')+'</option>' +
         '<option value="80mm" '+((!f.printerPaperWidth || f.printerPaperWidth==='80mm')?'selected':'')+'>'+tr('paper_80mm_label')+'</option>' +
       '</select></div>' +
+      '<div class="field"><label>'+tr('printer_mode_label')+'</label><select id="pos-set-printermode" onchange="POS.updateSettingsForm(\'printerConnectionMode\',this.value)">' +
+        '<option value="system" '+((!f.printerConnectionMode || f.printerConnectionMode==='system')?'selected':'')+'>'+tr('printer_mode_system')+'</option>' +
+        '<option value="epson_epos" '+(f.printerConnectionMode==='epson_epos'?'selected':'')+'>'+tr('printer_mode_epson')+'</option>' +
+      '</select></div>' +
     '</div>' +
+    (f.printerConnectionMode==='epson_epos' ? ('' +
+      '<div class="field-grid" style="margin-top:10px;">' +
+        '<div class="field"><label>'+tr('printer_ip_label')+'</label><input id="pos-set-printerip" type="text" placeholder="192.168.1.50" value="'+escapeHtml(f.printerIpAddress||'')+'" oninput="POS.updateSettingsForm(\'printerIpAddress\',this.value)"/></div>' +
+        '<div class="field"><label>'+tr('printer_device_id_label')+'</label><input id="pos-set-printerdevid" type="text" placeholder="local_printer" value="'+escapeHtml(f.printerDeviceId||'')+'" oninput="POS.updateSettingsForm(\'printerDeviceId\',this.value)"/></div>' +
+      '</div>' +
+      '<p class="hint" style="margin-top:8px;">'+tr('printer_epos_hint')+'</p>'
+    ) : '') +
     '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px;">' +
       '<button class="btn btn-primary" style="width:auto;" onclick="POS.saveSettings()">'+tr('save_settings')+'</button>' +
       '<button class="btn btn-outline" style="width:auto;" onclick="POS.testPrintReceipt()">'+tr('test_print_btn')+'</button>' +
@@ -5053,7 +5234,7 @@ var POS = {
       state.paymentMethod = 'cash';
       state.completingOrder = false;
       doRender();
-      window.print();
+      triggerPrint(order);
     }).catch(function(e){
       state.completingOrder = false;
       render();
@@ -5061,6 +5242,7 @@ var POS = {
     });
   },
   closeReceipt: function(){ state.receiptOrder=null; state.testPrintMode=false; render(); },
+  printCurrentReceipt: function(){ if(state.receiptOrder) triggerPrint(state.receiptOrder); },
   /* Builds a synthetic sample order (no real order needed) so staff can
      check a receipt actually fits the selected paper width before
      relying on it for real checkouts. Reuses the normal receipt modal +
@@ -5085,7 +5267,7 @@ var POS = {
     };
     state.testPrintMode = true;
     doRender();
-    window.print();
+    triggerPrint(state.receiptOrder);
   },
   reprintOrder: function(id){
     var order = state.orders.filter(function(o){ return o.id===id; })[0];
