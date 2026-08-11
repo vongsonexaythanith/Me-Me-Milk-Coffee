@@ -816,7 +816,28 @@ function sendEposPrint(order){
    helpers as the ePOS-Print path so both stay laid out identically. */
 var ESCPOS_ESC = '\x1B', ESCPOS_GS = '\x1D';
 function escposAlign(n){ return ESCPOS_ESC+'a'+String.fromCharCode(n); } // 0 left, 1 center, 2 right
-function escposLine(s){ return (s||'')+'\n'; }
+/* This printer's built-in font is a legacy single-byte codepage with no
+   real Unicode support — it can only display glyphs that codepage
+   actually contains (basically plain ASCII on this hardware). Any
+   character outside that — Lao/Thai script, emoji, "smart" typographic
+   punctuation, accented letters — prints as garbage no matter how
+   correctly it's transmitted, because the printer has no picture for
+   that character at all. Common typographic characters are converted to
+   a safe ASCII equivalent; anything else (including Lao/Thai text) is
+   dropped rather than left to print as noise. */
+var ESCPOS_CHAR_MAP = {
+  '\u2013':'-', '\u2014':'-',           // en dash, em dash
+  '\u2018':"'", '\u2019':"'",           // smart single quotes
+  '\u201C':'"', '\u201D':'"',           // smart double quotes
+  '\u2026':'...',                       // ellipsis
+  '\u00B7':'.', '\u2022':'*',           // middle dot, bullet
+  '\u00A0':' '                          // non-breaking space
+};
+function escposSanitize(str){
+  str = String(str==null?'':str).replace(/[\u2013\u2014\u2018\u2019\u201C\u201D\u2026\u00B7\u2022\u00A0]/g, function(ch){ return ESCPOS_CHAR_MAP[ch]; });
+  return str.replace(/[^\x20-\x7E]/g, ''); // drop anything still outside printable ASCII
+}
+function escposLine(s){ return escposSanitize(s)+'\n'; }
 /* Plain-ASCII money format for RawBT/ESC-POS specifically — the ₭ symbol
    (U+20AD) is an obscure Unicode character most budget thermal printer
    fonts simply don't have a glyph for, which corrupted every price line.
@@ -830,6 +851,7 @@ function escposMoney(n){
 function buildEscPosReceipt(o){
   var s = state.settings;
   var W = eposCharWidth();
+  var sz = escposSanitize;
   function buildCopy(isKitchen){
     var out = ESCPOS_ESC+'@'; // initialize printer
     /* No bold (ESC E) or double-size (GS !) here — this printer/RawBT
@@ -839,41 +861,41 @@ function buildEscPosReceipt(o){
        any formatting command beyond the very safe, near-universal align. */
     out += escposAlign(1);
     out += escposLine(new Array(W+1).join('='));
-    out += escposLine(s.shopName || '');
+    out += escposLine(sz(s.shopName || ''));
     out += escposLine(new Array(W+1).join('='));
-    if(s.address) eposWrapLines(s.address, W).forEach(function(ln){ out += escposLine(ln); });
-    if(s.phone) out += escposLine(s.phone);
+    if(s.address) eposWrapLines(sz(s.address), W).forEach(function(ln){ out += escposLine(ln); });
+    if(s.phone) out += escposLine(sz(s.phone));
     var d = new Date(o.timestamp);
-    var metaLine = tr('order_number')+String(o.number).padStart(4,'0')+' - '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    var metaLine = sz(tr('order_number'))+String(o.number).padStart(4,'0')+' - '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     out += escposLine(metaLine);
-    out += escposLine(isKitchen ? ('*** '+tr('kitchen_copy_label')+' ***') : tr('customer_copy_label'));
+    out += escposLine(sz(isKitchen ? ('*** '+tr('kitchen_copy_label')+' ***') : tr('customer_copy_label')));
     out += escposAlign(0);
     out += escposLine(new Array(W+1).join('-'));
     o.items.forEach(function(l){
       var priceStr = escposMoney(l.unitPrice*l.qty);
-      var nameStr = l.qty+'x '+l.name;
+      var nameStr = sz(l.qty+'x '+l.name);
       eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1)).forEach(function(ln,i){
         out += escposLine(i===0 ? eposPadLine(ln, priceStr, W) : ln);
       });
-      var meta = l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice) + (l.toppings.length ? ' '+l.toppings.map(function(t){return t.name;}).join(', ') : '');
+      var meta = sz(l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice) + (l.toppings.length ? ' '+l.toppings.map(function(t){return t.name;}).join(', ') : ''));
       eposWrapLines(meta, W-2).forEach(function(ln){ out += escposLine('  '+ln); });
     });
     out += escposLine(new Array(W+1).join('-'));
-    out += escposLine(eposPadLine(tr('subtotal'), escposMoney(o.subtotal), W));
-    if(o.discount>0) out += escposLine(eposPadLine(tr('discount'), '-'+escposMoney(o.discount), W));
-    if(o.serviceCharge>0) out += escposLine(eposPadLine(tr('service_charge'), escposMoney(o.serviceCharge), W));
+    out += escposLine(eposPadLine(sz(tr('subtotal')), escposMoney(o.subtotal), W));
+    if(o.discount>0) out += escposLine(eposPadLine(sz(tr('discount')), '-'+escposMoney(o.discount), W));
+    if(o.serviceCharge>0) out += escposLine(eposPadLine(sz(tr('service_charge')), escposMoney(o.serviceCharge), W));
     out += escposLine(new Array(W+1).join('='));
-    out += escposLine(eposPadLine(tr('total'), escposMoney(o.total), W));
+    out += escposLine(eposPadLine(sz(tr('total')), escposMoney(o.total), W));
     out += escposLine(new Array(W+1).join('='));
-    out += escposLine(eposPadLine(tr('receipt_payment'), paymentDisplayFor(o), W));
-    if(o.placedByAccount) out += escposLine(eposPadLine(tr('served_by_label'), staffNameFor(o.placedByAccount), W));
+    out += escposLine(eposPadLine(sz(tr('receipt_payment')), sz(paymentDisplayFor(o)), W));
+    if(o.placedByAccount) out += escposLine(eposPadLine(sz(tr('served_by_label')), sz(staffNameFor(o.placedByAccount)), W));
     if(o.paymentMethod==='cash'){
-      out += escposLine(eposPadLine(tr('cash_received'), escposMoney(o.amountReceived), W));
-      out += escposLine(eposPadLine(tr('receipt_change'), escposMoney(o.change), W));
+      out += escposLine(eposPadLine(sz(tr('cash_received')), escposMoney(o.amountReceived), W));
+      out += escposLine(eposPadLine(sz(tr('receipt_change')), escposMoney(o.change), W));
     }
     out += escposAlign(1);
     String(s.footerMessage||'').split('\n').forEach(function(line){
-      eposWrapLines(line, W).forEach(function(ln){ out += escposLine(ln); });
+      eposWrapLines(sz(line), W).forEach(function(ln){ out += escposLine(ln); });
     });
     out += '\n\n\n'+ESCPOS_GS+'V'+String.fromCharCode(1); // feed clear of the cutter, then partial cut
     return out;
@@ -2232,6 +2254,7 @@ function doRender(){
   if(rootEl) rootEl.classList.toggle('lang-lo', state.language==='lo');
   applyPageBackground();
   applyReceiptPrintWidth();
+  recordActivityHeartbeat();
   try{
     document.getElementById('app').innerHTML = buildAppHTML();
   }catch(e){
@@ -6375,22 +6398,54 @@ try{
   firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
 }catch(e){ console.error('Could not set auth persistence', e); }
 
-firebase.auth().onAuthStateChanged(function(user){
-  if(user){
-    state.unlocked = true;
-    render();
-    ensureInitialized();
-  } else {
-    state.unlocked = false;
-    state.loggedInRole = null;
-    state.loggedInAccount = null;
-    state.settingsUnlocked = false;
-    state.settingsForm = null;
-    state.stockUnlocked = false;
-    state.stockUnlockedRole = null;
-    state.adminUnlocked = false;
-    render();
-  }
-});
+/* Mobile browsers frequently preserve sessionStorage (and so the
+   Firebase Auth SESSION-persisted login) even after the app is fully
+   force-closed and reopened — the OS suspends and later restores the
+   exact same browsing session rather than truly ending it, which
+   SESSION persistence alone has no way to detect. To make "the app was
+   actually closed for a while" reliably require the PIN again, a
+   lightweight heartbeat timestamp is kept in localStorage (which
+   persists regardless, but is only ever compared against wall-clock
+   time, not relied on to remember identity) while the app is in active
+   use. On boot, if the gap since the last heartbeat is too large, the
+   restored session is proactively signed out before it gets a chance to
+   silently carry over. */
+var LAST_ACTIVE_KEY = 'pos_last_active_at';
+var STALE_SESSION_MS = 5 * 60 * 1000; // 5 minutes
+function recordActivityHeartbeat(){
+  try { localStorage.setItem(LAST_ACTIVE_KEY, String(Date.now())); } catch(e){}
+}
+function sessionIsStale(){
+  try {
+    var last = Number(localStorage.getItem(LAST_ACTIVE_KEY));
+    if(!last) return false; // no prior heartbeat recorded yet — nothing to distrust
+    return (Date.now() - last) > STALE_SESSION_MS;
+  } catch(e){ return false; }
+}
+function startAuthListener(){
+  recordActivityHeartbeat();
+  firebase.auth().onAuthStateChanged(function(user){
+    if(user){
+      state.unlocked = true;
+      render();
+      ensureInitialized();
+    } else {
+      state.unlocked = false;
+      state.loggedInRole = null;
+      state.loggedInAccount = null;
+      state.settingsUnlocked = false;
+      state.settingsForm = null;
+      state.stockUnlocked = false;
+      state.stockUnlockedRole = null;
+      state.adminUnlocked = false;
+      render();
+    }
+  });
+}
+if(sessionIsStale()){
+  firebase.auth().signOut().catch(function(e){ console.error('Could not clear stale session', e); }).then(startAuthListener, startAuthListener);
+} else {
+  startAuthListener();
+}
 })();
 </script>
