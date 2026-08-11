@@ -963,7 +963,18 @@ function bytesToBase64(bytes){
    raster command can overrun some printers'/RawBT's buffer. */
 async function buildEscPosReceiptImage(order){
   var paperWidthDots = (state.settings && state.settings.printerPaperWidth==='58mm') ? 384 : 576;
+  var imageFontSize = (state.settings && state.settings.printerPaperWidth==='58mm') ? 14 : 16;
   var container = document.createElement('div');
+  /* id="receipt-content" (not just a class) is required here: all the
+     centering, logo circular-crop, and font-size rules in <style> are
+     scoped specifically to "#receipt-content .r-xxx" selectors. Without
+     this exact id, none of that styling applies at all — which is why
+     the logo and header text weren't centered before. Nothing else in
+     the app looks this id up via getElementById, so a second element
+     sharing it (this container, alongside the real visible receipt
+     modal when printing right after checkout) is safe — CSS id selectors
+     match every element with that id, not just one. */
+  container.id = 'receipt-content';
   container.style.position = 'fixed';
   container.style.left = '-9999px';
   container.style.top = '0';
@@ -971,6 +982,7 @@ async function buildEscPosReceiptImage(order){
   container.style.background = '#ffffff';
   container.style.boxSizing = 'border-box';
   container.style.padding = '10px';
+  container.style.fontSize = imageFontSize+'px'; // bigger than the on-screen preview size — that was tuned for a small modal, not a full-width printout
   container.innerHTML = buildReceiptCopiesHtml(order, false);
   document.body.appendChild(container);
   try {
