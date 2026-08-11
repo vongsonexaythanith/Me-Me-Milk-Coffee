@@ -880,11 +880,15 @@ function stringToBase64Utf8(str){
 /* Fires the RawBT intent and hands off to Android — there's no callback to
    confirm RawBT actually opened or printed (intent: navigation gives no
    completion signal), so this resolves as soon as the hand-off is sent,
-   not on an actual print result. */
+   not on an actual print result. The base64 payload is inserted as-is
+   (not URL-encoded): RawBT expects it literal, like a data: URI, and
+   percent-escaping the +, /, = characters that appear throughout any
+   base64 string corrupts the entire decoded byte stream — which is
+   exactly why garbled receipts affected ALL text, not just non-ASCII. */
 function sendToRawBT(order){
   var receipt = buildEscPosReceipt(order);
   var b64 = stringToBase64Utf8(receipt);
-  var url = 'intent:base64,' + encodeURIComponent(b64) + '#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;';
+  var url = 'intent:base64,' + b64 + '#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;';
   window.location.href = url;
 }
 /* Single entry point every print trigger in the app goes through: routes
