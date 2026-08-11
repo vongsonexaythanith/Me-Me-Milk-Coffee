@@ -800,16 +800,107 @@ function sendEposPrint(order){
     xhr.send(soap);
   });
 }
+/* ================= RawBT (Android-only local print bridge) =================
+   RawBT is a free Android app that receives print jobs from a webpage via
+   an `intent:` URL and forwards them to whatever printer (Wi-Fi, Bluetooth,
+   or USB) is configured inside RawBT itself — including printers this app
+   has no direct network path to, like a generic ESC/POS printer with no
+   AirPrint or ePOS-Print support. Only works on Android (Chrome-based
+   browsers); the intent: scheme does nothing on iOS/desktop. Protocol per
+   RawBT's own integration docs (rawbt.ru/start.html, rawbt.ru/intents.html):
+   raw ESC/POS bytes, base64-encoded (base64 because the payload contains
+   binary control bytes, not just text), passed as data on an `intent:` URL
+   naming RawBT's package — Android/Chrome opens RawBT with that data, and
+   RawBT shows its own print confirmation before actually printing, exactly
+   the one-tap "Confirm" flow. Reuses the same char-width/padding/wrap
+   helpers as the ePOS-Print path so both stay laid out identically. */
+var ESCPOS_ESC = '\x1B', ESCPOS_GS = '\x1D';
+function escposAlign(n){ return ESCPOS_ESC+'a'+String.fromCharCode(n); } // 0 left, 1 center, 2 right
+function escposBold(on){ return ESCPOS_ESC+'E'+String.fromCharCode(on?1:0); }
+function escposDoubleSize(on){ return ESCPOS_GS+'!'+String.fromCharCode(on?0x11:0x00); }
+function escposLine(s){ return (s||'')+'\n'; }
+function buildEscPosReceipt(o){
+  var s = state.settings;
+  var W = eposCharWidth();
+  function buildCopy(isKitchen){
+    var out = ESCPOS_ESC+'@'; // initialize printer
+    out += escposAlign(1) + escposBold(true) + escposDoubleSize(true);
+    out += escposLine(s.shopName || '');
+    out += escposDoubleSize(false) + escposBold(false);
+    if(s.address) eposWrapLines(s.address, W).forEach(function(ln){ out += escposLine(ln); });
+    if(s.phone) out += escposLine(s.phone);
+    var d = new Date(o.timestamp);
+    var metaLine = tr('order_number')+String(o.number).padStart(4,'0')+' - '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    out += escposLine(metaLine);
+    out += escposLine(isKitchen ? ('*** '+tr('kitchen_copy_label')+' ***') : tr('customer_copy_label'));
+    out += escposAlign(0);
+    out += escposLine(new Array(W+1).join('-'));
+    o.items.forEach(function(l){
+      var priceStr = formatMoney(l.unitPrice*l.qty);
+      var nameStr = l.qty+'x '+l.name;
+      eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1)).forEach(function(ln,i){
+        out += escposLine(i===0 ? eposPadLine(ln, priceStr, W) : ln);
+      });
+      var meta = l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice) + (l.toppings.length ? ' '+l.toppings.map(function(t){return t.name;}).join(', ') : '');
+      eposWrapLines(meta, W-2).forEach(function(ln){ out += escposLine('  '+ln); });
+    });
+    out += escposLine(new Array(W+1).join('-'));
+    out += escposLine(eposPadLine(tr('subtotal'), formatMoney(o.subtotal), W));
+    if(o.discount>0) out += escposLine(eposPadLine(tr('discount'), '-'+formatMoney(o.discount), W));
+    if(o.serviceCharge>0) out += escposLine(eposPadLine(tr('service_charge'), formatMoney(o.serviceCharge), W));
+    out += escposBold(true);
+    out += escposLine(eposPadLine(tr('total'), formatMoney(o.total), W));
+    out += escposBold(false);
+    out += escposLine(eposPadLine(tr('receipt_payment'), paymentDisplayFor(o), W));
+    if(o.placedByAccount) out += escposLine(eposPadLine(tr('served_by_label'), staffNameFor(o.placedByAccount), W));
+    if(o.paymentMethod==='cash'){
+      out += escposLine(eposPadLine(tr('cash_received'), formatMoney(o.amountReceived), W));
+      out += escposLine(eposPadLine(tr('receipt_change'), formatMoney(o.change), W));
+    }
+    out += escposAlign(1);
+    String(s.footerMessage||'').split('\n').forEach(function(line){
+      eposWrapLines(line, W).forEach(function(ln){ out += escposLine(ln); });
+    });
+    out += '\n\n\n'+ESCPOS_GS+'V'+String.fromCharCode(1); // feed clear of the cutter, then partial cut
+    return out;
+  }
+  return buildCopy(false) + buildCopy(true);
+}
+/* Correct UTF-8-safe base64 encoding: btoa() only accepts single-byte
+   (0x00-0xFF) input, so Lao/Thai/etc. text (which is multi-byte in UTF-8)
+   has to be converted to raw UTF-8 bytes first via TextEncoder — this also
+   leaves the ESC/POS control bytes (all under 0x80) untouched, since UTF-8
+   encodes ASCII/control characters as identical single bytes. */
+function stringToBase64Utf8(str){
+  var bytes = new TextEncoder().encode(str);
+  var binary = '';
+  for(var i=0;i<bytes.length;i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+/* Fires the RawBT intent and hands off to Android — there's no callback to
+   confirm RawBT actually opened or printed (intent: navigation gives no
+   completion signal), so this resolves as soon as the hand-off is sent,
+   not on an actual print result. */
+function sendToRawBT(order){
+  var receipt = buildEscPosReceipt(order);
+  var b64 = stringToBase64Utf8(receipt);
+  var url = 'intent:base64,' + encodeURIComponent(b64) + '#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;';
+  window.location.href = url;
+}
 /* Single entry point every print trigger in the app goes through: routes
-   to direct ePOS-Print or the OS print dialog based on the Printer
-   settings, and falls back to the print dialog automatically if a direct
-   print attempt fails, so a checkout is never blocked by a printer issue. */
+   to direct ePOS-Print, RawBT, or the OS print dialog based on the
+   Printer settings, and falls back to the print dialog automatically if
+   a direct print attempt fails, so a checkout is never blocked by a
+   printer issue. */
 function triggerPrint(order){
-  if(state.settings && state.settings.printerConnectionMode==='epson_epos'){
+  var mode = state.settings && state.settings.printerConnectionMode;
+  if(mode==='epson_epos'){
     sendEposPrint(order).catch(function(e){
       window.alert(tr('epos_print_failed_prefix')+' '+e.message+'\n\n'+tr('epos_print_fallback_hint'));
       window.print();
     });
+  } else if(mode==='rawbt'){
+    sendToRawBT(order);
   } else {
     window.print();
   }
@@ -923,6 +1014,8 @@ var TRANSLATIONS = {
     printer_mode_label:'Printing Method', printer_mode_system:'Device print dialog (AirPrint, etc.)', printer_mode_epson:'Direct Wi-Fi (Epson ePOS-Print)',
     printer_ip_label:'Printer IP Address', printer_device_id_label:'Device ID (advanced)',
     printer_epos_hint:'Sends receipts straight to the printer over Wi-Fi — no print dialog. Requires an Epson ePOS-Print-capable printer with a static IP and a trusted HTTPS certificate set up on the printer (see Epson\'s setup guide). Leave Device ID as "local_printer" unless you changed it on the printer.',
+    printer_mode_rawbt:'RawBT (Android only)',
+    printer_rawbt_hint:'Works with almost any Wi-Fi, Bluetooth, or USB thermal printer — including yours — from an Android phone or tablet. Install the free "RawBT Print Service" app from the Play Store and set up your printer inside it once. Then, printing here opens RawBT with the receipt ready to go — just tap Confirm there to print. This only works on Android; iPhone/iPad staff should use the device print dialog option instead.',
     epos_no_ip_error:'No printer IP address set in Printer settings.',
     epos_printer_error_prefix:'The printer reported an error.',
     epos_unreachable_error:'Could not reach the printer. Check the IP address, that the printer is on the same Wi-Fi, and that its HTTPS certificate is trusted on this device.',
@@ -975,9 +1068,13 @@ var TRANSLATIONS = {
     premix_hint:'Reusable sub-recipes made from raw materials (e.g. Syrup, Cheese Cream). Used in drink recipes and toppings — selling a drink automatically deducts the underlying raw materials.',
     no_premix_yet:'No pre-mix ingredients yet. Add your first one to get started.',
     add_premix:'+ Add Pre-Mix', premix_name_label:'Pre-mix name',
-    premix_composition_title:'Raw Materials Used', premix_composition_hint:'How much of each raw material goes into ONE unit of this pre-mix — this ratio is used to calculate exactly how much raw material is deducted every time a drink using it is sold.',
+    premix_composition_title:'Ingredients Used (per full batch)', premix_composition_hint:'Raw materials and/or other pre-mixes needed to make ONE FULL BATCH (matching the Total Batch Yield above) — e.g. 100g sugar + 50ml water for a 170ml batch of Syrup. Using only part of a batch deducts that same proportion automatically.',
     edit_composition:'Edit Composition', close_composition:'Close', no_composition_set:'No composition set yet.',
     select_component:'Select ingredient…', per_unit_prefix:'per',
+    premix_yield_label:'Total Batch Yield', premix_yield_hint:'How much this composition produces when made as one full batch (e.g. 170ml). Used to work out exactly how much of each ingredient gets deducted when only part of a batch is used.',
+    per_batch_suffix:'per batch', premix_no_yield_warning:'No batch yield set — stock won\'t be deducted for this pre-mix until it is.',
+    ingredients_word:'ingredients', yield_label:'Yield:',
+    premix_cycle_error:'This would create a circular reference — a pre-mix can\'t depend on itself, even indirectly through another pre-mix.',
     premix_group_label:'Pre-Mix', raw_material_group_label:'Raw Materials',
     size_label:'Size', recipe_admin_only_hint:'Only an administrator can edit recipes.',
     weekly_target_label:'Weekly Target', monthly_target_label:'Monthly Target',
@@ -1081,6 +1178,8 @@ var TRANSLATIONS = {
     printer_mode_label:'ວິທີພິມ', printer_mode_system:'ໜ້າຕ່າງພິມຂອງອຸປະກອນ (AirPrint ແລະອື່ນໆ)', printer_mode_epson:'Wi-Fi ໂດຍກົງ (Epson ePOS-Print)',
     printer_ip_label:'ທີ່ຢູ່ IP ຂອງເຄື່ອງພິມ', printer_device_id_label:'Device ID (ຂັ້ນສູງ)',
     printer_epos_hint:'ສົ່ງໃບບິນຫາເຄື່ອງພິມຜ່ານ Wi-Fi ໂດຍກົງ — ບໍ່ຜ່ານໜ້າຕ່າງພິມ. ຕ້ອງການເຄື່ອງພິມທີ່ຮອງຮັບ Epson ePOS-Print ທີ່ມີ IP ຄົງທີ່ ແລະໄດ້ຕັ້ງໃບຢັ້ງຢືນ HTTPS ໄວ້ແລ້ວ (ເບິ່ງຄູ່ມືການຕັ້ງຄ່າຂອງ Epson). ປ່ອຍ Device ID ໄວ້ເປັນ "local_printer" ຖ້າບໍ່ໄດ້ປ່ຽນຢູ່ເຄື່ອງພິມ.',
+    printer_mode_rawbt:'RawBT (ສະເພາະ Android)',
+    printer_rawbt_hint:'ໃຊ້ໄດ້ກັບເຄື່ອງພິມຄວາມຮ້ອນ Wi-Fi, Bluetooth, ຫຼື USB ເກືອບທຸກຊະນິດ — ລວມທັງເຄື່ອງຂອງທ່ານ — ຈາກໂທລະສັບ ຫຼື ແທັບເລັດ Android. ຕິດຕັ້ງແອັບ "RawBT Print Service" ຟຣີຈາກ Play Store ແລະຕັ້ງຄ່າເຄື່ອງພິມພາຍໃນມັນຄັ້ງດຽວ. ຈາກນັ້ນ ການພິມທີ່ນີ້ຈະເປີດ RawBT ພ້ອມໃບບິນ — ພຽງແຕ່ກົດ Confirm ຢູ່ບ່ອນນັ້ນເພື່ອພິມ. ນີ້ໃຊ້ໄດ້ສະເພາະ Android; ພະນັກງານ iPhone/iPad ຄວນໃຊ້ຕົວເລືອກໜ້າຕ່າງພິມຂອງອຸປະກອນແທນ.',
     epos_no_ip_error:'ຍັງບໍ່ໄດ້ຕັ້ງທີ່ຢູ່ IP ຂອງເຄື່ອງພິມໃນການຕັ້ງຄ່າເຄື່ອງພິມ.',
     epos_printer_error_prefix:'ເຄື່ອງພິມລາຍງານຂໍ້ຜິດພາດ.',
     epos_unreachable_error:'ບໍ່ສາມາດເຊື່ອມຕໍ່ກັບເຄື່ອງພິມໄດ້. ກວດເບິ່ງທີ່ຢູ່ IP, ວ່າເຄື່ອງພິມຢູ່ໃນ Wi-Fi ດຽວກັນ, ແລະໃບຢັ້ງຢືນ HTTPS ຂອງມັນໄດ້ຮັບການເຊື່ອຖືຢູ່ອຸປະກອນນີ້.',
@@ -1133,9 +1232,13 @@ var TRANSLATIONS = {
     premix_hint:'ສູດຍ່ອຍທີ່ນຳໃຊ້ຊ້ຳໄດ້ ເຮັດຈາກວັດຖຸດິບ (ເຊັ່ນ: ນ້ຳຫວານ, ຄີມຊີສ). ໃຊ້ໃນສູດເຄື່ອງດື່ມ ແລະ ທັອບປິ້ງ — ການຂາຍເຄື່ອງດື່ມຈະຫັກວັດຖຸດິບທີ່ກ່ຽວຂ້ອງໂດຍອັດຕະໂນມັດ.',
     no_premix_yet:'ຍັງບໍ່ມີພຣີມິກ. ເພີ່ມພຣີມິກທຳອິດຂອງທ່ານເພື່ອເລີ່ມຕົ້ນ.',
     add_premix:'+ ເພີ່ມພຣີມິກ', premix_name_label:'ຊື່ພຣີມິກ',
-    premix_composition_title:'ວັດຖຸດິບທີ່ໃຊ້', premix_composition_hint:'ວັດຖຸດິບແຕ່ລະຢ່າງໃຊ້ເທົ່າໃດຕໍ່ 1 ໜ່ວຍຂອງພຣີມິກນີ້ — ອັດຕາສ່ວນນີ້ຖືກໃຊ້ເພື່ອຄິດໄລ່ວັດຖຸດິບທີ່ຈະຫັກທຸກຄັ້ງທີ່ຂາຍເຄື່ອງດື່ມທີ່ໃຊ້ມັນ.',
+    premix_composition_title:'ວັດຖຸດິບທີ່ໃຊ້ (ຕໍ່ໜຶ່ງຊຸດເຕັມ)', premix_composition_hint:'ວັດຖຸດິບ ແລະ/ຫຼື ພຣີມິກອື່ນທີ່ຕ້ອງການເພື່ອເຮັດໜຶ່ງຊຸດເຕັມ (ໃຫ້ກົງກັບຜົນຜະລິດທັງໝົດຂອງຊຸດຂ້າງເທິງ) — ເຊັ່ນ: ນ້ຳຕານ 100g + ນ້ຳ 50ml ສຳລັບນ້ຳຫວານ 170ml. ການໃຊ້ພຽງບາງສ່ວນຂອງຊຸດຈະຫັກຕາມອັດຕາສ່ວນນັ້ນໂດຍອັດຕະໂນມັດ.',
     edit_composition:'ແກ້ໄຂສ່ວນປະສົມ', close_composition:'ປິດ', no_composition_set:'ຍັງບໍ່ໄດ້ຕັ້ງສ່ວນປະສົມ.',
     select_component:'ເລືອກວັດຖຸດິບ…', per_unit_prefix:'ຕໍ່',
+    premix_yield_label:'ຜົນຜະລິດທັງໝົດຂອງຊຸດ', premix_yield_hint:'ສູດນີ້ຜະລິດໄດ້ເທົ່າໃດເມື່ອເຮັດເປັນໜຶ່ງຊຸດເຕັມ (ເຊັ່ນ: 170ml). ໃຊ້ຄິດໄລ່ວ່າຈະຫັກວັດຖຸດິບແຕ່ລະຢ່າງເທົ່າໃດເມື່ອໃຊ້ພຽງສ່ວນໜຶ່ງຂອງຊຸດ.',
+    per_batch_suffix:'ຕໍ່ຊຸດ', premix_no_yield_warning:'ຍັງບໍ່ໄດ້ຕັ້ງຜົນຜະລິດຂອງຊຸດ — ຈະບໍ່ຫັກສະຕັອກສຳລັບພຣີມິກນີ້ຈົນກວ່າຈະຕັ້ງ.',
+    ingredients_word:'ວັດຖຸດິບ', yield_label:'ຜົນຜະລິດ:',
+    premix_cycle_error:'ອັນນີ້ຈະສ້າງການອ້າງອີງວົນຮອບ — ພຣີມິກບໍ່ສາມາດອີງໃສ່ຕົນເອງໄດ້, ເຖິງແມ່ນຜ່ານພຣີມິກອື່ນ.',
     premix_group_label:'ພຣີມິກ', raw_material_group_label:'ວັດຖຸດິບ',
     size_label:'ຂະໜາດ', recipe_admin_only_hint:'ມີແຕ່ຜູ້ດູແລລະບົບເທົ່ານັ້ນທີ່ສາມາດແກ້ໄຂສູດໄດ້.',
     weekly_target_label:'ເປົ້າໝາຍລາຍອາທິດ', monthly_target_label:'ເປົ້າໝາຍລາຍເດືອນ',
@@ -1239,6 +1342,8 @@ var TRANSLATIONS = {
     printer_mode_label:'วิธีการพิมพ์', printer_mode_system:'กล่องโต้ตอบพิมพ์ของอุปกรณ์ (AirPrint ฯลฯ)', printer_mode_epson:'Wi-Fi โดยตรง (Epson ePOS-Print)',
     printer_ip_label:'ที่อยู่ IP ของเครื่องพิมพ์', printer_device_id_label:'Device ID (ขั้นสูง)',
     printer_epos_hint:'ส่งใบเสร็จไปยังเครื่องพิมพ์ผ่าน Wi-Fi โดยตรง — ไม่ผ่านกล่องโต้ตอบพิมพ์ ต้องใช้เครื่องพิมพ์ที่รองรับ Epson ePOS-Print ที่มี IP คงที่และตั้งค่าใบรับรอง HTTPS ที่เชื่อถือได้ไว้แล้ว (ดูคู่มือการตั้งค่าของ Epson) ปล่อย Device ID เป็น "local_printer" หากไม่ได้เปลี่ยนที่เครื่องพิมพ์',
+    printer_mode_rawbt:'RawBT (Android เท่านั้น)',
+    printer_rawbt_hint:'ใช้ได้กับเครื่องพิมพ์ความร้อน Wi-Fi, Bluetooth หรือ USB เกือบทุกรุ่น — รวมถึงเครื่องของคุณ — จากโทรศัพท์หรือแท็บเล็ต Android ติดตั้งแอป "RawBT Print Service" ฟรีจาก Play Store และตั้งค่าเครื่องพิมพ์ในแอปนั้นครั้งเดียว จากนั้นการพิมพ์ที่นี่จะเปิด RawBT พร้อมใบเสร็จ — แค่แตะ Confirm ที่นั่นเพื่อพิมพ์ ใช้ได้เฉพาะ Android เท่านั้น พนักงานที่ใช้ iPhone/iPad ควรใช้ตัวเลือกกล่องโต้ตอบพิมพ์ของอุปกรณ์แทน',
     epos_no_ip_error:'ยังไม่ได้ตั้งที่อยู่ IP ของเครื่องพิมพ์ในการตั้งค่าเครื่องพิมพ์',
     epos_printer_error_prefix:'เครื่องพิมพ์รายงานข้อผิดพลาด',
     epos_unreachable_error:'ไม่สามารถเชื่อมต่อกับเครื่องพิมพ์ได้ ตรวจสอบที่อยู่ IP ว่าเครื่องพิมพ์อยู่ใน Wi-Fi เดียวกัน และใบรับรอง HTTPS ได้รับความเชื่อถือบนอุปกรณ์นี้แล้ว',
@@ -1291,9 +1396,13 @@ var TRANSLATIONS = {
     premix_hint:'สูตรย่อยที่ใช้ซ้ำได้ ทำจากวัตถุดิบ (เช่น น้ำเชื่อม, ครีมชีส) ใช้ในสูตรเครื่องดื่มและท็อปปิ้ง — การขายเครื่องดื่มจะหักวัตถุดิบที่เกี่ยวข้องโดยอัตโนมัติ',
     no_premix_yet:'ยังไม่มีพรีมิกซ์ เพิ่มพรีมิกซ์แรกของคุณเพื่อเริ่มต้น',
     add_premix:'+ เพิ่มพรีมิกซ์', premix_name_label:'ชื่อพรีมิกซ์',
-    premix_composition_title:'วัตถุดิบที่ใช้', premix_composition_hint:'วัตถุดิบแต่ละอย่างใช้เท่าไรต่อ 1 หน่วยของพรีมิกซ์นี้ — อัตราส่วนนี้ใช้คำนวณวัตถุดิบที่จะถูกหักทุกครั้งที่ขายเครื่องดื่มที่ใช้มัน',
+    premix_composition_title:'วัตถุดิบที่ใช้ (ต่อหนึ่งชุดเต็ม)', premix_composition_hint:'วัตถุดิบและ/หรือพรีมิกซ์อื่นที่ต้องใช้เพื่อทำหนึ่งชุดเต็ม (ให้ตรงกับผลผลิตทั้งหมดของชุดด้านบน) — เช่น น้ำตาล 100g + น้ำ 50ml สำหรับน้ำเชื่อม 170ml การใช้เพียงบางส่วนของชุดจะหักตามสัดส่วนนั้นโดยอัตโนมัติ',
     edit_composition:'แก้ไขส่วนผสม', close_composition:'ปิด', no_composition_set:'ยังไม่ได้ตั้งส่วนผสม',
     select_component:'เลือกวัตถุดิบ…', per_unit_prefix:'ต่อ',
+    premix_yield_label:'ผลผลิตทั้งหมดของชุด', premix_yield_hint:'สูตรนี้ผลิตได้เท่าไรเมื่อทำเป็นหนึ่งชุดเต็ม (เช่น 170ml) ใช้คำนวณว่าจะหักวัตถุดิบแต่ละอย่างเท่าไรเมื่อใช้เพียงบางส่วนของชุด',
+    per_batch_suffix:'ต่อชุด', premix_no_yield_warning:'ยังไม่ได้ตั้งผลผลิตของชุด — จะไม่มีการหักสต็อกสำหรับพรีมิกซ์นี้จนกว่าจะตั้งค่า',
+    ingredients_word:'วัตถุดิบ', yield_label:'ผลผลิต:',
+    premix_cycle_error:'การทำเช่นนี้จะสร้างการอ้างอิงแบบวนซ้ำ — พรีมิกซ์ไม่สามารถอ้างอิงตัวเองได้ แม้จะผ่านพรีมิกซ์อื่นก็ตาม',
     premix_group_label:'พรีมิกซ์', raw_material_group_label:'วัตถุดิบ',
     size_label:'ขนาด', recipe_admin_only_hint:'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถแก้ไขสูตรได้',
     weekly_target_label:'เป้าหมายรายสัปดาห์', monthly_target_label:'เป้าหมายรายเดือน',
@@ -1712,13 +1821,28 @@ function deductStockForOrder(cartLines){
     ing.stock = Math.round(((Number(ing.stock)||0) - amount) * 1000) / 1000;
     ingredientsChanged = true;
   }
-  function applyDeduction(componentId, kind, amount){
+  /* A premix's composition lines are the raw materials (and/or other
+     pre-mixes) needed for ONE FULL BATCH that yields pm.yieldAmount units
+     of the premix. Using `amount` units of it means only
+     amount/yieldAmount of that batch was actually used, so every
+     component gets scaled by that same ratio — e.g. using 30ml out of a
+     170ml syrup batch deducts 30/170 = 17.64% of the sugar/water/salt the
+     full batch recipe calls for. If a component is itself a premix
+     (nested, e.g. a "Matcha" premix built from "Syrup"), the same ratio
+     logic is applied again one level down, recursively, all the way to
+     raw materials. depth guards against a data-entry mistake creating an
+     accidental cycle (the UI itself blocks direct cycles when saving a
+     composition line, but this is a safety net). */
+  function applyDeduction(componentId, kind, amount, depth){
     if(!componentId || !amount) return;
+    depth = depth || 0;
+    if(depth > 8) return;
     if(kind==='premix'){
       var pm = (state.premix||[]).filter(function(p){ return p.id===componentId; })[0];
-      if(!pm || !pm.composition) return;
+      if(!pm || !pm.composition || !(Number(pm.yieldAmount)>0)) return;
+      var ratio = amount / Number(pm.yieldAmount);
       pm.composition.forEach(function(cl){
-        deductRaw(cl.ingredientId, (Number(cl.amount)||0) * amount);
+        applyDeduction(cl.ingredientId, cl.kind, (Number(cl.amount)||0) * ratio, depth+1);
       });
     } else {
       deductRaw(componentId, amount);
@@ -2009,16 +2133,26 @@ function ingredientCostPerBaseUnit(ing){
    quantities used for stock deduction at checkout are used for costing.
    Reads live from state.premix and state.ingredients every time, same as
    the raw-material cost path below. */
-function premixCostPerUnit(premixId){
+/* Cost of one unit (per the pre-mix's own unit, e.g. 1ml of Syrup) = the
+   full-batch cost of its composition (raw materials, and/or nested
+   pre-mixes costed the same recursive way) divided by how much the batch
+   yields. depth guards against an accidental circular reference. */
+function premixCostPerUnit(premixId, depth){
+  depth = depth || 0;
+  if(depth > 8) return 0;
   var pm = (state.premix||[]).filter(function(p){ return p.id===premixId; })[0];
-  if(!pm || !pm.composition || !pm.composition.length) return 0;
-  var cost = 0;
+  if(!pm || !pm.composition || !pm.composition.length || !(Number(pm.yieldAmount)>0)) return 0;
+  var batchCost = 0;
   pm.composition.forEach(function(cl){
+    if(cl.kind==='premix'){
+      batchCost += premixCostPerUnit(cl.ingredientId, depth+1) * (Number(cl.amount)||0);
+      return;
+    }
     var ing = (state.ingredients||[]).filter(function(i){ return i.id===cl.ingredientId; })[0];
     if(!ing) return;
-    cost += ingredientCostPerBaseUnit(ing) * (Number(cl.amount)||0);
+    batchCost += ingredientCostPerBaseUnit(ing) * (Number(cl.amount)||0);
   });
-  return cost;
+  return batchCost / Number(pm.yieldAmount);
 }
 function computeProductCost(menuItemId, size){
   var recipeLines = (state.recipes && state.recipes[menuItemId] && state.recipes[menuItemId][size]) || [];
@@ -3332,6 +3466,24 @@ function resolveStockComponent(id, kind){
   if(kind==='premix') return (state.premix||[]).filter(function(p){ return p.id===id; })[0] || null;
   return (state.ingredients||[]).filter(function(i){ return i.id===id; })[0] || null;
 }
+/* True if premixId's composition tree (directly or transitively, through
+   any level of nested pre-mixes) already includes targetId — including
+   premixId itself. Used to block adding a nested pre-mix component that
+   would create a circular reference (A depends on B which depends on A),
+   which would otherwise send deduction/cost recursion into an infinite
+   loop. depth is a hard backstop in case bad data somehow already has a
+   cycle in it. */
+function premixDependsOn(premixId, targetId, depth){
+  depth = depth || 0;
+  if(depth > 12) return false;
+  if(premixId===targetId) return true;
+  var pm = (state.premix||[]).filter(function(p){ return p.id===premixId; })[0];
+  if(!pm || !pm.composition) return false;
+  return pm.composition.some(function(cl){
+    if(cl.kind!=='premix') return false;
+    return premixDependsOn(cl.ingredientId, targetId, depth+1);
+  });
+}
 function buildStockTab(){
   if(!hasStockAccess()){
     return buildStockPinGate();
@@ -3917,9 +4069,12 @@ function buildPremixSubTab(){
   var rows = premixList.map(function(pm){
     if(state.editingPremixId===pm.id) return buildPremixEditForm(pm);
     var compCount = (pm.composition||[]).length;
-    var subtitle = compCount
-      ? (compCount+' '+tr('raw_material_group_label').toLowerCase()+' · '+tr('per_unit_prefix')+' 1'+escapeHtml(pm.unit))
-      : tr('no_composition_set');
+    var yieldOk = Number(pm.yieldAmount) > 0;
+    var subtitle = !yieldOk
+      ? ('⚠️ '+tr('premix_no_yield_warning'))
+      : (compCount
+          ? (compCount+' '+tr('ingredients_word')+' · '+tr('yield_label')+' '+formatIngredientAmount(pm.yieldAmount)+escapeHtml(pm.unit))
+          : tr('no_composition_set'));
     return '' +
     '<div class="mgmt-row">' +
       '<span class="em">'+ingredientEmoji(pm.unit)+'</span>' +
@@ -3952,6 +4107,7 @@ function buildPremixEditForm(pm){
         '<option value="ml" '+(d.unit==='ml'?'selected':'')+'>'+tr('unit_ml')+'</option>' +
         '<option value="pcs" '+(d.unit==='pcs'?'selected':'')+'>'+tr('unit_pcs')+'</option>' +
       '</select></div>' +
+      '<div class="field"><label>'+tr('premix_yield_label')+'</label><input id="'+idBase+'-yield" type="text" inputmode="decimal" placeholder="0" value="'+(d.yieldAmount?escapeHtml(String(d.yieldAmount)):'')+'" oninput="POS.updatePremixDraft('+idArg+',\'yieldAmount\',this.value)"/><div class="hint" style="margin-top:4px;">'+tr('premix_yield_hint')+'</div></div>' +
     '</div>' +
     buildPremixCompositionEditor(d) +
     '<div style="display:flex;gap:8px;margin-top:8px;">' +
@@ -3960,41 +4116,57 @@ function buildPremixEditForm(pm){
     '</div>' +
   '</div>';
 }
-/* Raw materials + amount needed to make ONE unit of this pre-mix (e.g. 1ml
-   of Syrup). These per-unit amounts are exactly what checkout scales up by
-   however much of the pre-mix a drink actually uses, so what's entered
-   here is used directly for live stock deduction — not a separate batch
-   recipe. The Unit box next to each row is auto-synced to whichever raw
-   material is selected (not independently editable) so a composition line
-   can never end up in a unit that doesn't match how that raw material is
-   actually stocked, which would silently corrupt deductions. */
+/* Raw materials AND/OR other pre-mixes (nested), plus how much of each is
+   needed for ONE FULL BATCH — e.g. a 170ml Syrup batch made from 100g
+   sugar + 50ml water + 5g salt. Using part of that batch (say 30ml)
+   deducts that same proportion (30/170 = 17.64%) of every component —
+   see deductStockForOrder. The pre-mix picker excludes this pre-mix
+   itself and any pre-mix that already depends on it (directly or through
+   further nesting), since either would create a circular reference. The
+   Unit box next to each row is auto-synced to whichever component is
+   selected (not independently editable) so a line can never end up in a
+   unit that doesn't match how that component is actually tracked, which
+   would silently corrupt deductions. */
 function buildPremixCompositionEditor(pm){
   var ingredients = state.ingredients || [];
+  var premixOptions = (state.premix||[]).filter(function(p){
+    return p.id!==pm.id && !premixDependsOn(p.id, pm.id);
+  });
   var lines = pm.composition || [];
+  var yieldOk = Number(pm.yieldAmount) > 0;
   var lineRows = lines.map(function(cl){
-    var ing = ingredients.filter(function(i){ return i.id===cl.ingredientId; })[0];
-    if(!ing) return '';
+    var comp = resolveStockComponent(cl.ingredientId, cl.kind);
+    if(!comp) return '';
+    var tag = cl.kind==='premix' ? (' <span class="hint" style="font-weight:400;">('+tr('premix_group_label')+')</span>') : '';
     return '' +
     '<div class="mgmt-row">' +
-      '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+cl.amount+' '+escapeHtml(ing.unit)+' '+tr('per_unit_prefix')+' 1'+escapeHtml(pm.unit)+'</div></div>' +
-      '<div class="acts"><button class="btn btn-ghost btn-small" onclick="POS.removePremixCompositionLine(\''+pm.id+'\',\''+cl.ingredientId+'\')">'+tr('remove')+'</button></div>' +
+      '<div class="info"><div class="t1">'+escapeHtml(comp.name)+tag+'</div><div class="t2">'+cl.amount+' '+escapeHtml(comp.unit)+' '+tr('per_batch_suffix')+'</div></div>' +
+      '<div class="acts"><button class="btn btn-ghost btn-small" onclick="POS.removePremixCompositionLine(\''+pm.id+'\',\''+cl.ingredientId+'\',\''+(cl.kind||'raw')+'\')">'+tr('remove')+'</button></div>' +
     '</div>';
   }).join('');
-  var draft = state.premixCompositionDrafts[pm.id] || {ingredientId:'',amount:''};
-  var selectedIng = ingredients.filter(function(i){ return i.id===draft.ingredientId; })[0];
-  var ingOptions = ingredients.map(function(ing){
-    return '<option value="'+ing.id+'" '+(draft.ingredientId===ing.id?'selected':'')+'>'+escapeHtml(ing.name)+' ('+escapeHtml(ing.unit)+')</option>';
-  }).join('');
+  var draft = state.premixCompositionDrafts[pm.id] || {ingredientId:'', kind:'raw', amount:''};
+  var selectedComp = resolveStockComponent(draft.ingredientId, draft.kind);
+  var ingOptions = '<optgroup label="'+tr('raw_material_group_label')+'">' +
+    ingredients.map(function(ing){
+      var sel = (draft.kind!=='premix' && draft.ingredientId===ing.id) ? 'selected' : '';
+      return '<option value="raw:'+ing.id+'" '+sel+'>'+escapeHtml(ing.name)+' ('+escapeHtml(ing.unit)+')</option>';
+    }).join('') + '</optgroup>' +
+    (premixOptions.length ? ('<optgroup label="'+tr('premix_group_label')+'">' +
+      premixOptions.map(function(p){
+        var sel = (draft.kind==='premix' && draft.ingredientId===p.id) ? 'selected' : '';
+        return '<option value="premix:'+p.id+'" '+sel+'>'+escapeHtml(p.name)+' ('+escapeHtml(p.unit)+')</option>';
+      }).join('') + '</optgroup>') : '');
   var unitDisplayHtml = '' +
     '<select disabled style="opacity:0.7;">' +
-      (selectedIng
-        ? ('<option>'+(selectedIng.unit==='g'?tr('unit_grams'):selectedIng.unit==='ml'?tr('unit_ml'):tr('unit_pcs'))+'</option>')
+      (selectedComp
+        ? ('<option>'+(selectedComp.unit==='g'?tr('unit_grams'):selectedComp.unit==='ml'?tr('unit_ml'):tr('unit_pcs'))+'</option>')
         : ('<option>'+tr('unit_label')+'</option>')) +
     '</select>';
   return '' +
   '<div class="recipe-size-box">' +
     '<div class="recipe-size-label">'+tr('premix_composition_title')+'</div>' +
     '<p class="hint" style="margin:0 0 8px;">'+tr('premix_composition_hint')+'</p>' +
+    (yieldOk ? '' : '<p class="hint" style="margin:0 0 8px;color:var(--danger);">⚠️ '+tr('premix_no_yield_warning')+'</p>') +
     (lineRows || '<p class="hint" style="margin:0 0 8px;">'+tr('no_composition_set')+'</p>') +
     '<div class="field-grid" style="margin-top:8px;">' +
       '<div class="field"><label>'+tr('select_component')+'</label><select id="pos-premix-comp-'+pm.id+'-ing" onchange="POS.updatePremixCompositionDraft(\''+pm.id+'\',\'ingredientId\',this.value)"><option value="">'+tr('select_component')+'</option>'+ingOptions+'</select></div>' +
@@ -4325,6 +4497,7 @@ function buildSettingsTab(){
       '<div class="field"><label>'+tr('printer_mode_label')+'</label><select id="pos-set-printermode" onchange="POS.updateSettingsForm(\'printerConnectionMode\',this.value)">' +
         '<option value="system" '+((!f.printerConnectionMode || f.printerConnectionMode==='system')?'selected':'')+'>'+tr('printer_mode_system')+'</option>' +
         '<option value="epson_epos" '+(f.printerConnectionMode==='epson_epos'?'selected':'')+'>'+tr('printer_mode_epson')+'</option>' +
+        '<option value="rawbt" '+(f.printerConnectionMode==='rawbt'?'selected':'')+'>'+tr('printer_mode_rawbt')+'</option>' +
       '</select></div>' +
     '</div>' +
     (f.printerConnectionMode==='epson_epos' ? ('' +
@@ -4334,6 +4507,7 @@ function buildSettingsTab(){
       '</div>' +
       '<p class="hint" style="margin-top:8px;">'+tr('printer_epos_hint')+'</p>'
     ) : '') +
+    (f.printerConnectionMode==='rawbt' ? ('<p class="hint" style="margin-top:10px;">'+tr('printer_rawbt_hint')+'</p>') : '') +
     '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px;">' +
       '<button class="btn btn-primary" style="width:auto;" onclick="POS.saveSettings()">'+tr('save_settings')+'</button>' +
       '<button class="btn btn-outline" style="width:auto;" onclick="POS.testPrintReceipt()">'+tr('test_print_btn')+'</button>' +
@@ -5466,8 +5640,8 @@ var POS = {
   /* ---- Stock: pre-mix ---- */
   startNewPremix: function(){
     var draftId = uid('premix');
-    state.newPremixDraft = {id: draftId, name:'New Pre-Mix', unit:'ml', composition:[]};
-    state.premixCompositionDrafts[draftId] = {ingredientId:'', amount:''};
+    state.newPremixDraft = {id: draftId, name:'New Pre-Mix', unit:'ml', yieldAmount:0, composition:[]};
+    state.premixCompositionDrafts[draftId] = {ingredientId:'', kind:'raw', amount:''};
     render();
   },
   editPremix: function(id){ state.editingPremixId=id; render(); },
@@ -5475,6 +5649,7 @@ var POS = {
   updatePremixDraft: function(id, field, value){
     var target = id ? (state.premix||[]).filter(function(p){return p.id===id;})[0] : state.newPremixDraft;
     if(!target) return;
+    if(field==='yieldAmount') value = sanitizeDecimal(value);
     target[field] = value;
     render();
   },
@@ -5487,6 +5662,7 @@ var POS = {
       var dupe = state.premix.some(function(p){ return p.id!==id && String(p.name||'').trim().toLowerCase()===name.toLowerCase(); });
       if(dupe){ window.alert('A pre-mix with this name already exists. Please use a unique name.'); return; }
       target.name = name;
+      target.yieldAmount = Number(target.yieldAmount)||0;
       state.editingPremixId = null;
     } else {
       var d = state.newPremixDraft;
@@ -5495,6 +5671,7 @@ var POS = {
       var dupe = (state.premix||[]).some(function(p){ return String(p.name||'').trim().toLowerCase()===name.toLowerCase(); });
       if(dupe){ window.alert('A pre-mix with this name already exists. Please use a unique name.'); return; }
       d.name = name;
+      d.yieldAmount = Number(d.yieldAmount)||0;
       d.composition = d.composition || [];
       if(!state.premix) state.premix = [];
       state.premix.push(d);
@@ -5509,10 +5686,19 @@ var POS = {
     db.collection('pos_premix').doc('main').set({items: state.premix}).catch(function(e){ window.alert('Could not delete pre-mix: '+e.message); });
     render();
   },
+  /* The Select's option values are 'raw:<id>' or 'premix:<id>' (same
+     combined-dropdown pattern as Recipes/Toppings) so field==='ingredientId'
+     splits that back out into ingredientId + kind on the draft. */
   updatePremixCompositionDraft: function(premixId, field, value){
-    if(field==='amount') value = sanitizeDecimal(value);
-    if(!state.premixCompositionDrafts[premixId]) state.premixCompositionDrafts[premixId] = {ingredientId:'', amount:''};
-    state.premixCompositionDrafts[premixId][field] = value;
+    if(!state.premixCompositionDrafts[premixId]) state.premixCompositionDrafts[premixId] = {ingredientId:'', kind:'raw', amount:''};
+    if(field==='ingredientId'){
+      var parts = String(value).split(':');
+      state.premixCompositionDrafts[premixId].kind = parts[0]==='premix' ? 'premix' : 'raw';
+      state.premixCompositionDrafts[premixId].ingredientId = parts.slice(1).join(':');
+    } else {
+      if(field==='amount') value = sanitizeDecimal(value);
+      state.premixCompositionDrafts[premixId][field] = value;
+    }
     render();
   },
   /* Resolves either an already-saved pre-mix (in state.premix) or the
@@ -5529,25 +5715,36 @@ var POS = {
   addPremixCompositionLine: function(premixId){
     var d = state.premixCompositionDrafts[premixId] || {};
     var amt = Number(d.amount);
-    if(!d.ingredientId){ window.alert('Please choose a raw material.'); return; }
+    if(!d.ingredientId){ window.alert('Please choose an ingredient.'); return; }
     if(!amt || amt<=0){ window.alert('Enter an amount greater than 0.'); return; }
+    if(d.kind==='premix'){
+      if(d.ingredientId===premixId || premixDependsOn(d.ingredientId, premixId)){
+        window.alert(tr('premix_cycle_error'));
+        return;
+      }
+    }
     var found = this._findPremixTarget(premixId);
     if(!found) return;
     var pm = found.item;
     if(!pm.composition) pm.composition = [];
-    var existing = pm.composition.filter(function(cl){return cl.ingredientId===d.ingredientId;})[0];
+    var kind = d.kind==='premix' ? 'premix' : undefined;
+    var existing = pm.composition.filter(function(cl){return cl.ingredientId===d.ingredientId && (cl.kind||'raw')===(kind||'raw');})[0];
     if(existing){ existing.amount = amt; }
-    else { pm.composition.push({ingredientId:d.ingredientId, amount:amt}); }
-    state.premixCompositionDrafts[premixId] = {ingredientId:'', amount:''};
+    else {
+      var newLine = {ingredientId:d.ingredientId, amount:amt};
+      if(kind) newLine.kind = kind;
+      pm.composition.push(newLine);
+    }
+    state.premixCompositionDrafts[premixId] = {ingredientId:'', kind:'raw', amount:''};
     if(!found.isNew){
       db.collection('pos_premix').doc('main').set({items: state.premix}).catch(function(e){ window.alert('Could not save pre-mix composition: '+e.message); });
     }
     render();
   },
-  removePremixCompositionLine: function(premixId, ingredientId){
+  removePremixCompositionLine: function(premixId, ingredientId, kind){
     var found = this._findPremixTarget(premixId);
     if(!found || !found.item.composition) return;
-    found.item.composition = found.item.composition.filter(function(cl){ return cl.ingredientId!==ingredientId; });
+    found.item.composition = found.item.composition.filter(function(cl){ return !(cl.ingredientId===ingredientId && (cl.kind||'raw')===(kind||'raw')); });
     if(!found.isNew){
       db.collection('pos_premix').doc('main').set({items: state.premix}).catch(function(e){ window.alert('Could not update pre-mix composition: '+e.message); });
     }
