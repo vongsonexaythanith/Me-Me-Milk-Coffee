@@ -199,6 +199,13 @@ html, body{touch-action:pan-x pan-y;}
 /* ---------- Layout ---------- */
 .pos-main{padding:20px 24px 60px;max-width:1400px;margin:0 auto;}
 .order-layout{display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start;}
+/* Grid items default to min-width:auto (their content's intrinsic minimum
+   width), which silently overrides "1fr" track sizing whenever a child's
+   natural width is wider than the track — stretching the whole column,
+   and everything inside it, past the viewport on mobile regardless of any
+   flex-wrap or minmax() rules further down. This is what was actually
+   causing the chip row and menu grid to overflow together. */
+.order-layout > *{min-width:0;}
 @media (max-width:920px){
   .order-layout{grid-template-columns:1fr;}
   .order-layout > .cart-panel{order:-1;}
@@ -381,7 +388,7 @@ html, body{touch-action:pan-x pan-y;}
 .receipt-modal{max-width:320px;font-family:'Inter',sans-serif;}
 #receipt-content{font-size:var(--receipt-print-font-size,12.5px);}
 #receipt-content .r-logo{width:52px;height:52px;object-fit:cover;border-radius:50%;display:block;margin:0 auto 8px;}
-#receipt-content.pos-print-capture .r-logo{width:88px;height:88px;margin:0 auto 12px;}
+#receipt-content.pos-print-capture .r-logo{width:124px;height:124px;margin:0 auto 16px;}
 #receipt-content .r-title{text-align:center;font-family:'Fredoka';font-size:17px;margin-bottom:2px;color:var(--caramel-dark);}
 #receipt-content .r-sub{text-align:center;font-size:11px;color:var(--espresso-soft);margin-bottom:2px;}
 #receipt-content .r-meta{text-align:center;font-size:11px;color:var(--espresso-soft);margin-bottom:10px;}
@@ -398,6 +405,7 @@ html, body{touch-action:pan-x pan-y;}
 .r-footer{text-align:center;margin-top:14px;font-size:12px;color:var(--espresso-soft);white-space:pre-line;}
 .r-qr{text-align:center;margin-top:12px;}
 .r-qr img{max-width:150px;width:100%;height:auto;display:inline-block;}
+#receipt-content.pos-print-capture .r-qr img{max-width:230px;}
 .receipt-actions{display:flex;gap:8px;margin-top:16px;}
 .receipt-actions .btn{flex:1;}
 
@@ -594,6 +602,8 @@ html, body{touch-action:pan-x pan-y;}
     overflow:visible !important;
   }
   #receipt-content{width:var(--receipt-print-width,280px);margin:0 auto;}
+  .r-logo{width:104px !important;height:104px !important;margin:0 auto 14px !important;}
+  .r-qr img{max-width:200px !important;}
   .print-only{display:block !important;}
   .receipt-copy-kitchen{
     margin-top:22px;padding-top:18px;border-top:2px dashed #999;
@@ -702,8 +712,8 @@ var DEFAULT_STAFF_LABELS = {staff1:'Staff 1', staff2:'Staff 2', staff3:'Staff 3'
    so both the on-screen preview and the actual print output resize
    together — see #receipt-content and @media print in <style>. */
 var RECEIPT_PAPER_SIZES = {
-  '58mm': {width:200, font:10.5},
-  '80mm': {width:280, font:12.5}
+  '58mm': {width:200, font:12},
+  '80mm': {width:280, font:14}
 };
 function applyReceiptPrintWidth(){
   var key = (state.settings && state.settings.printerPaperWidth) || '80mm';
@@ -783,7 +793,7 @@ function buildEposPrintXml(o){
     out += eposText(new Array(W+1).join('-'));
     o.items.forEach(function(l){
       var priceStr = formatMoney(l.unitPrice*l.qty);
-      var nameStr = l.qty+'x '+l.name;
+      var nameStr = l.qty+'x '+cartLineName(l);
       var nameLines = eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1));
       nameLines.forEach(function(ln,i){
         out += eposText(i===0 ? eposPadLine(ln, priceStr, W) : ln);
@@ -920,7 +930,7 @@ function buildEscPosReceipt(o){
     out += escposLine(new Array(W+1).join('-'));
     o.items.forEach(function(l){
       var priceStr = escposMoney(l.unitPrice*l.qty);
-      var nameStr = sz(l.qty+'x '+l.name);
+      var nameStr = sz(l.qty+'x '+cartLineName(l));
       eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1)).forEach(function(ln,i){
         out += escposLine(i===0 ? eposPadLine(ln, priceStr, W) : ln);
       });
@@ -987,7 +997,7 @@ function bytesToBase64(bytes){
    raster command can overrun some printers'/RawBT's buffer. */
 async function buildEscPosReceiptImage(order){
   var paperWidthDots = (state.settings && state.settings.printerPaperWidth==='58mm') ? 384 : 576;
-  var imageFontSize = (state.settings && state.settings.printerPaperWidth==='58mm') ? 14 : 16;
+  var imageFontSize = (state.settings && state.settings.printerPaperWidth==='58mm') ? 18 : 20;
   var container = document.createElement('div');
   /* id="receipt-content" (not just a class) is required here: all the
      centering, logo circular-crop, and font-size rules in <style> are
@@ -1008,17 +1018,61 @@ async function buildEscPosReceiptImage(order){
   container.style.boxSizing = 'border-box';
   container.style.padding = '10px';
   container.style.fontSize = imageFontSize+'px'; // bigger than the on-screen preview size — that was tuned for a small modal, not a full-width printout
+  /* This container is appended straight to document.body (see below),
+     outside #pos-root entirely — so it never inherits the app's own
+     "font-family:'Noto Sans Lao'" rule (#pos-root.lang-lo), which only
+     applies inside that tree. Set it explicitly here so a Lao-language
+     receipt actually uses the same embedded font as the rest of the app,
+     not just whatever generic font the browser falls back to for Lao
+     script. */
+  if(state.language==='lo'){
+    container.style.fontFamily = "'Noto Sans Lao','Inter',sans-serif";
+  }
   container.innerHTML = buildReceiptCopiesHtml(order, false);
+  /* buildReceiptCopiesHtml hides the kitchen copy (and the customer-copy
+     label) behind .print-only, which only becomes visible via the
+     @media print rule during a real browser print. html2canvas just
+     screenshots the DOM as currently rendered — it never triggers an
+     actual print event — so without this, the captured image would
+     silently contain only one unlabeled copy instead of both. */
+  Array.prototype.forEach.call(container.querySelectorAll('.print-only'), function(el){
+    el.style.display = 'block';
+  });
+  var kitchenCopyEl = container.querySelector('.receipt-copy-kitchen');
+  if(kitchenCopyEl){
+    kitchenCopyEl.style.marginTop = '22px';
+    kitchenCopyEl.style.paddingTop = '18px';
+    kitchenCopyEl.style.borderTop = '2px dashed #999';
+  }
   document.body.appendChild(container);
   try {
+    /* html2canvas has long-standing, widely-reported bugs with custom/
+       embedded fonts (including this exact "loaded but rendered with the
+       wrong font" symptom) — see html2canvas issues #1940, #1666, #3198.
+       document.fonts.ready alone isn't reliable here since it only waits
+       for whatever's already in the load queue, not necessarily the exact
+       weight/style this container needs. Explicitly loading that spec, and
+       re-applying the font-family inside onclone (html2canvas renders
+       from an internal DOM clone, and inline styles don't always survive
+       that cloning step), are the two established workarounds. */
+    if(state.language==='lo' && document.fonts && document.fonts.load){
+      try { await document.fonts.load(imageFontSize+'px "Noto Sans Lao"'); } catch(e){}
+      try { await document.fonts.load('bold '+imageFontSize+'px "Noto Sans Lao"'); } catch(e){}
+    }
     if(document.fonts && document.fonts.ready){ try { await document.fonts.ready; } catch(e){} }
     await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+    await new Promise(function(r){ setTimeout(r, 150); });
     var canvas = await html2canvas(container, {
       backgroundColor: '#ffffff',
       width: paperWidthDots,
       windowWidth: paperWidthDots,
       scale: 1,
-      useCORS: true
+      useCORS: true,
+      onclone: function(clonedDoc){
+        if(state.language!=='lo') return;
+        var clonedEl = clonedDoc.getElementById('receipt-content');
+        if(clonedEl) clonedEl.style.fontFamily = "'Noto Sans Lao','Inter',sans-serif";
+      }
     });
     var w = canvas.width, h = canvas.height;
     var ctx = canvas.getContext('2d');
@@ -1129,7 +1183,7 @@ var DEFAULT_INGREDIENTS = [];
 var DEFAULT_RECIPES = {};
 var DEFAULT_PREMIX = [];
 
-var SUGAR_LEVELS = [0,25,50,75,100];
+var SUGAR_LEVELS = [0,25,50,75,100,125];
 var ICE_LEVELS = [
   {id:'none', label:'No Ice'},
   {id:'less', label:'Less Ice'},
@@ -1248,6 +1302,8 @@ var TRANSLATIONS = {
     recipes_hint:'Set how much of each ingredient goes into one drink. This powers automatic stock deduction whenever an order is completed.',
     edit_recipe:'Edit Recipe', close_recipe:'Close', no_recipe_set:'No recipe set yet.',
     select_ingredient:'Select ingredient…', amount_label:'Amount', add_line:'+ Add',
+    scales_with_sugar_label:'Scales with sugar level (e.g. Syrup) — deducted amount adjusts with the customer\'s chosen sweetness',
+    scales_with_sugar_badge:'Scales with sugar',
     no_ingredients_yet:'No ingredients yet. Add your first ingredient to get started.',
     stock_restricted_hint:'Stock can only be viewed or changed with a manager or administrator PIN.',
     stock_gate_hint:'This area is restricted. Enter the manager or admin PIN to view and manage stock.',
@@ -1415,6 +1471,8 @@ var TRANSLATIONS = {
     recipes_hint:'ຕັ້ງຄ່າວ່າແຕ່ລະວັດຖຸດິບໃຊ້ເທົ່າໃດຕໍ່ເຄື່ອງດື່ມໜຶ່ງແກ້ວ. ນີ້ຄືສິ່ງທີ່ຄວບຄຸມການຫັກສະຕັອກອັດຕະໂນມັດເມື່ອອໍເດີສຳເລັດ.',
     edit_recipe:'ແກ້ໄຂສູດ', close_recipe:'ປິດ', no_recipe_set:'ຍັງບໍ່ໄດ້ຕັ້ງສູດ.',
     select_ingredient:'ເລືອກວັດຖຸດິບ…', amount_label:'ຈຳນວນ', add_line:'+ ເພີ່ມ',
+    scales_with_sugar_label:'ປ່ຽນຕາມລະດັບນ້ຳຕານ (ເຊັ່ນ: ນ້ຳຫວານ) — ຈຳນວນທີ່ຫັກຈະປັບຕາມລະດັບຄວາມຫວານທີ່ລູກຄ້າເລືອກ',
+    scales_with_sugar_badge:'ປ່ຽນຕາມນ້ຳຕານ',
     no_ingredients_yet:'ຍັງບໍ່ມີວັດຖຸດິບ. ເພີ່ມວັດຖຸດິບທຳອິດຂອງທ່ານເພື່ອເລີ່ມຕົ້ນ.',
     stock_restricted_hint:'ສະຕັອກສາມາດເບິ່ງ ຫຼື ປ່ຽນໄດ້ດ້ວຍລະຫັດຜູ້ຈັດການ ຫຼື ຜູ້ດູແລລະບົບເທົ່ານັ້ນ.',
     stock_gate_hint:'ພື້ນທີ່ນີ້ຖືກຈຳກັດ. ໃສ່ລະຫັດຜູ້ຈັດການ ຫຼື ຜູ້ດູແລລະບົບເພື່ອເບິ່ງ ແລະ ຈັດການສະຕັອກ.',
@@ -1582,6 +1640,8 @@ var TRANSLATIONS = {
     recipes_hint:'ตั้งค่าว่าแต่ละวัตถุดิบใช้เท่าไรต่อเครื่องดื่มหนึ่งแก้ว นี่คือสิ่งที่ควบคุมการหักสต็อกอัตโนมัติเมื่อออเดอร์เสร็จสมบูรณ์',
     edit_recipe:'แก้ไขสูตร', close_recipe:'ปิด', no_recipe_set:'ยังไม่ได้ตั้งสูตร',
     select_ingredient:'เลือกวัตถุดิบ…', amount_label:'จำนวน', add_line:'+ เพิ่ม',
+    scales_with_sugar_label:'ปรับตามระดับความหวาน (เช่น น้ำเชื่อม) — ปริมาณที่หักจะปรับตามความหวานที่ลูกค้าเลือก',
+    scales_with_sugar_badge:'ปรับตามความหวาน',
     no_ingredients_yet:'ยังไม่มีวัตถุดิบ เพิ่มวัตถุดิบแรกของคุณเพื่อเริ่มต้น',
     stock_restricted_hint:'สต็อกสามารถดูหรือเปลี่ยนแปลงได้ด้วยรหัส PIN ผู้จัดการหรือผู้ดูแลระบบเท่านั้น',
     stock_gate_hint:'พื้นที่นี้ถูกจำกัด ป้อนรหัส PIN ผู้จัดการหรือผู้ดูแลระบบเพื่อดูและจัดการสต็อก',
@@ -2044,13 +2104,26 @@ function deductStockForOrder(cartLines){
       deductRaw(componentId, amount);
     }
   }
+  /* Sugar-level scaling is tagged once on the ingredient/pre-mix itself
+     (Pre-Mix tab — e.g. Syrup), not per recipe line: every recipe or
+     topping that references a tagged component automatically scales by
+     the customer's chosen Sugar Level (0/25/50/75/100/125%) divided by
+     100, on top of the normal per-drink quantity — 50% deducts half the
+     syrup a standard (100%) drink would, 0% deducts none. Untagged
+     components (tea base, milk, ice, etc.) always deduct the full recipe
+     amount regardless of sugar level. */
+  function sugarMultiplier(componentId, kind, line){
+    var comp = resolveStockComponent(componentId, kind);
+    return (comp && comp.scalesWithSugar) ? ((Number(line.sugar)||0) / 100) : 1;
+  }
   cartLines.forEach(function(line){
     if(state.recipes){
       var itemRecipes = state.recipes[line.menuItemId];
       var recipeLines = itemRecipes && itemRecipes[line.size];
       if(recipeLines && recipeLines.length){
         recipeLines.forEach(function(rl){
-          applyDeduction(rl.ingredientId, rl.kind, (Number(rl.amount)||0) * line.qty);
+          var multiplier = line.qty * sugarMultiplier(rl.ingredientId, rl.kind, line);
+          applyDeduction(rl.ingredientId, rl.kind, (Number(rl.amount)||0) * multiplier);
         });
       }
     }
@@ -2059,7 +2132,8 @@ function deductStockForOrder(cartLines){
         var topping = state.toppings.filter(function(t){ return t.id===lt.id; })[0];
         if(!topping || !topping.composition || !topping.composition.length) return;
         topping.composition.forEach(function(cl){
-          applyDeduction(cl.ingredientId, cl.kind, (Number(cl.amount)||0) * line.qty);
+          var multiplier = line.qty * sugarMultiplier(cl.ingredientId, cl.kind, line);
+          applyDeduction(cl.ingredientId, cl.kind, (Number(cl.amount)||0) * multiplier);
         });
       });
     }
@@ -3046,7 +3120,7 @@ function buildReceiptContentHtml(o, isPreview){
   var s = state.settings;
   var itemsHtml = o.items.map(function(l){
     var meta = l.size+' · '+l.sugar+'% '+tr('sugar_word')+' · '+iceLabel(l.ice) + (l.toppings.length? ' · '+l.toppings.map(function(t){return t.name;}).join(', ') : '');
-    return '<div class="r-item"><div><div class="r-name">'+l.qty+'x '+escapeHtml(l.name)+'</div><div class="r-sub-line">'+escapeHtml(meta)+'</div></div><div>'+formatMoney(l.unitPrice*l.qty)+'</div></div>';
+    return '<div class="r-item"><div><div class="r-name">'+l.qty+'x '+escapeHtml(cartLineName(l))+'</div><div class="r-sub-line">'+escapeHtml(meta)+'</div></div><div>'+formatMoney(l.unitPrice*l.qty)+'</div></div>';
   }).join('');
   var isForeign = !!(o.currency && o.currency!=='LAK');
   var cashRowsHtml = '';
@@ -3383,9 +3457,10 @@ function buildHistoryTab(){
   var presentCurrencies = currencyOrder.filter(function(c){ return revenueByCurrency[c]!==undefined; });
   if(!presentCurrencies.length) presentCurrencies = ['LAK'];
   var count = filtered.length;
-  var tally = {};
-  filteredForRevenue.forEach(function(o){ o.items.forEach(function(l){ tally[l.name]=(tally[l.name]||0)+l.qty; }); });
-  var topItem = Object.keys(tally).sort(function(a,b){return tally[b]-tally[a];})[0] || '—';
+  var tally = {}; var tallyNames = {};
+  filteredForRevenue.forEach(function(o){ o.items.forEach(function(l){ var key=l.menuItemId||l.name; tally[key]=(tally[key]||0)+l.qty; tallyNames[key]=cartLineName(l); }); });
+  var topKey = Object.keys(tally).sort(function(a,b){return tally[b]-tally[a];})[0];
+  var topItem = topKey ? (tallyNames[topKey]||topKey) : '—';
 
   var rangeChips = [['today',tr('today')],['week',tr('last_7_days')],['all',tr('all_time')],['custom',tr('custom_range')]].map(function(r){
     return '<button class="chip '+(state.historyRange===r[0]?'active':'')+'" onclick="POS.setHistoryRange(\''+r[0]+'\')">'+r[1]+'</button>';
@@ -3510,9 +3585,12 @@ function buildTopItemsChart(orders){
   }
   var tally = {};
   orders.forEach(function(o){
-    o.items.forEach(function(l){ tally[l.name] = (tally[l.name]||0) + l.qty; });
+    o.items.forEach(function(l){ var key=l.menuItemId||l.name; tally[key]=(tally[key]||0)+l.qty; });
   });
-  var entries = Object.keys(tally).map(function(name){ return {name:name, qty:tally[name]}; });
+  var entries = Object.keys(tally).map(function(key){
+    var menuItem = state.menu.filter(function(m){ return m.id===key; })[0];
+    return {name: menuItem ? itemDisplayName(menuItem) : key, qty:tally[key], menuItem:menuItem};
+  });
   entries.sort(function(a,b){ return b.qty - a.qty; });
   entries = entries.slice(0, 8);
 
@@ -3539,7 +3617,7 @@ function buildBestSellersPodium(top3){
     var e = top3[idx];
     if(!e) return '';
     var meta = rankMeta[idx];
-    var menuItem = state.menu.filter(function(m){ return m.name===e.name; })[0];
+    var menuItem = e.menuItem;
     var visual = menuItem && menuItem.photo
       ? '<img class="podium-photo" style="width:'+meta.photoSize+'px;height:'+meta.photoSize+'px;" src="'+menuItem.photo+'" alt=""/>'
       : '<div class="podium-photo podium-emoji '+meta.cls+'" style="width:'+meta.photoSize+'px;height:'+meta.photoSize+'px;font-size:'+Math.round(meta.photoSize*0.46)+'px;">'+(menuItem?menuItem.emoji:'🧋')+'</div>';
@@ -3573,7 +3651,7 @@ function buildTopItemsBarList(entries){
   var rowsHtml = entries.map(function(e, idx){
     var y = top + idx*(rowH+rowGap);
     var barLen = Math.max(2, plotW * (e.qty / maxQty));
-    var menuItem = state.menu.filter(function(m){ return m.name===e.name; })[0];
+    var menuItem = e.menuItem;
     var cat = menuItem ? menuItem.category : e.name;
     var accent = categoryVar(colorForCategory(cat));
     var shortName = e.name.length > 15 ? e.name.slice(0,14)+'…' : e.name;
@@ -3606,7 +3684,7 @@ function buildOrderRow(o){
   var detail = '';
   if(expanded){
     var lines = o.items.map(function(l){
-      return '<div class="di"><span>'+l.qty+'x '+escapeHtml(l.name)+' ('+l.size+')</span><span>'+formatForeignAmount(fromLAK(l.unitPrice*l.qty, cur), cur)+'</span></div>';
+      return '<div class="di"><span>'+l.qty+'x '+escapeHtml(cartLineName(l))+' ('+l.size+')</span><span>'+formatForeignAmount(fromLAK(l.unitPrice*l.qty, cur), cur)+'</span></div>';
     }).join('');
     var refundDetailHtml = '';
     if(o.refunded){
@@ -4272,10 +4350,11 @@ function buildPremixSubTab(){
       : (compCount
           ? (compCount+' '+tr('ingredients_word')+' · '+tr('yield_label')+' '+formatIngredientAmount(pm.yieldAmount)+escapeHtml(pm.unit))
           : tr('no_composition_set'));
+    var sugarBadge = pm.scalesWithSugar ? ('<div style="font-size:12.5px;font-weight:600;color:var(--caramel-dark);margin-top:2px;">🍬 '+tr('scales_with_sugar_badge')+'</div>') : '';
     return '' +
     '<div class="mgmt-row">' +
       '<span class="em">'+ingredientEmoji(pm.unit)+'</span>' +
-      '<div class="info"><div class="t1">'+escapeHtml(pm.name)+'</div><div class="t2">'+subtitle+'</div></div>' +
+      '<div class="info"><div class="t1">'+escapeHtml(pm.name)+'</div><div class="t2">'+subtitle+'</div>'+sugarBadge+'</div>' +
       '<div class="acts">' +
         '<button class="btn btn-outline btn-small" onclick="POS.editPremix(\''+pm.id+'\')">'+tr('edit')+'</button>' +
         '<button class="btn btn-danger btn-small" onclick="POS.deletePremix(\''+pm.id+'\')">'+tr('delete')+'</button>' +
@@ -4306,6 +4385,10 @@ function buildPremixEditForm(pm){
       '</select></div>' +
       '<div class="field"><label>'+tr('premix_yield_label')+'</label><input id="'+idBase+'-yield" type="text" inputmode="decimal" placeholder="0" value="'+(d.yieldAmount?escapeHtml(String(d.yieldAmount)):'')+'" oninput="POS.updatePremixDraft('+idArg+',\'yieldAmount\',this.value)"/><div class="hint" style="margin-top:4px;">'+tr('premix_yield_hint')+'</div></div>' +
     '</div>' +
+    '<label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-weight:600;font-size:13px;">' +
+      '<input type="checkbox" '+(d.scalesWithSugar?'checked':'')+' onchange="POS.updatePremixDraft('+idArg+',\'scalesWithSugar\',this.checked)"/>' +
+      '🍬 '+tr('scales_with_sugar_label') +
+    '</label>' +
     buildPremixCompositionEditor(d) +
     '<div style="display:flex;gap:8px;margin-top:8px;">' +
       '<button class="btn btn-primary" style="width:auto;margin-top:0;" onclick="POS.savePremix('+idArg+')">'+tr('save')+'</button>' +
@@ -4407,10 +4490,16 @@ function buildRecipesSubTab(){
           var comp = resolveStockComponent(rl.ingredientId, rl.kind);
           if(!comp) return '';
           var tag = rl.kind==='premix' ? (' <span class="hint" style="font-weight:400;">('+tr('premix_group_label')+')</span>') : '';
+          /* Sugar-level scaling is now tagged on the ingredient/pre-mix
+             itself (see Pre-Mix tab), not per recipe line — this is just a
+             read-only indicator carried over from that tag, not something
+             editable here. */
+          var sugarBadge = comp.scalesWithSugar ? ('<div style="width:100%;font-size:12.5px;font-weight:600;color:var(--caramel-dark);margin-top:4px;">🍬 '+tr('scales_with_sugar_badge')+'</div>') : '';
           return '' +
-          '<div class="mgmt-row">' +
+          '<div class="mgmt-row" style="flex-wrap:wrap;row-gap:2px;">' +
             '<div class="info"><div class="t1">'+escapeHtml(comp.name)+tag+'</div><div class="t2">'+rl.amount+' '+escapeHtml(comp.unit)+'</div></div>' +
             (canEdit ? '<div class="acts"><button class="btn btn-ghost btn-small" onclick="POS.removeRecipeLine(\''+m.id+'\',\''+sz+'\',\''+rl.ingredientId+'\',\''+(rl.kind||'raw')+'\')">'+tr('remove')+'</button></div>' : '') +
+            sugarBadge +
           '</div>';
         }).join('');
         var draft = (state.recipeLineDrafts[sz]) || {ingredientId:'', kind:'raw', amount:''};
@@ -4513,7 +4602,7 @@ function buildDeletedOrderRow(o){
       '<div class="ototal">'+orderPaidDisplay(o)+'</div>' +
     '</div>' +
     '<div class="order-detail">' +
-      o.items.map(function(l){ return '<div class="di"><span>'+l.qty+'x '+escapeHtml(l.name)+' ('+l.size+')</span><span>'+formatForeignAmount(fromLAK(l.unitPrice*l.qty, cur), cur)+'</span></div>'; }).join('') +
+      o.items.map(function(l){ return '<div class="di"><span>'+l.qty+'x '+escapeHtml(cartLineName(l))+' ('+l.size+')</span><span>'+formatForeignAmount(fromLAK(l.unitPrice*l.qty, cur), cur)+'</span></div>'; }).join('') +
       '<div class="dactions">' +
         '<button class="btn btn-primary btn-small" style="width:auto;" '+(busy?'disabled':'')+' onclick="POS.restoreOrder(\''+o.id+'\')">'+(busy?tr('restoring'):tr('restore_order'))+'</button>' +
       '</div>' +
