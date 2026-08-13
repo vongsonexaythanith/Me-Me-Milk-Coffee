@@ -207,6 +207,14 @@ html, body{touch-action:pan-x pan-y;}
    causing the chip row and menu grid to overflow together. */
 .order-layout > *{min-width:0;}
 @media (max-width:920px){
+  /* .pos-nav's border-radius:999px renders as a clean pill on desktop
+     because all tabs fit on one row. On mobile it wraps to several rows
+     of uneven width, and that same huge radius applied to the whole
+     multi-row block creates a lopsided, bulging shape rather than a
+     rectangle — which is what made the active tab's highlight look
+     off-balance. A modest fixed radius looks correct at any row count. */
+  .pos-nav{border-radius:18px;}
+  .pos-nav button{border-radius:12px;}
   .order-layout{grid-template-columns:1fr;}
   .order-layout > .cart-panel{order:-1;}
   /* Collapsed by default on mobile so it doesn't block the menu while
@@ -798,7 +806,7 @@ function buildEposPrintXml(o){
       nameLines.forEach(function(ln,i){
         out += eposText(i===0 ? eposPadLine(ln, priceStr, W) : ln);
       });
-      var meta = l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice) + (l.toppings.length ? ' '+l.toppings.map(function(t){return t.name;}).join(', ') : '');
+      var meta = l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice) + (l.toppings.length ? ' '+l.toppings.map(cartLineToppingName).join(', ') : '');
       eposWrapLines(meta, W-2).forEach(function(ln){ out += eposText('  '+ln); });
     });
     out += eposText(new Array(W+1).join('-'));
@@ -934,7 +942,7 @@ function buildEscPosReceipt(o){
       eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1)).forEach(function(ln,i){
         out += escposLine(i===0 ? eposPadLine(ln, priceStr, W) : ln);
       });
-      var meta = sz(l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice) + (l.toppings.length ? ' '+l.toppings.map(function(t){return t.name;}).join(', ') : ''));
+      var meta = sz(l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice) + (l.toppings.length ? ' '+l.toppings.map(cartLineToppingName).join(', ') : ''));
       eposWrapLines(meta, W-2).forEach(function(ln){ out += escposLine('  '+ln); });
     });
     out += escposLine(new Array(W+1).join('-'));
@@ -1281,8 +1289,8 @@ var TRANSLATIONS = {
     name_en_label:'Name (English)', name_lo_label:'Name (Lao)', name_th_label:'Name (Thai)',
     category_label:'Category', emoji_label:'Emoji', photo_label:'Photo',
     small_price_label:'Small price', medium_price_label:'Medium price', large_price_label:'Large price',
-    clear_all_history_title:'Clear ALL order history?', clear_all_history_sub:'This permanently removes every saved order for every device. Enter the manager PIN to confirm.',
-    delete_order_title:'Delete this order?', delete_order_sub:'This permanently removes the order for every device. Enter the manager PIN to confirm.',
+    clear_all_history_title:'Clear ALL order history?', clear_all_history_sub:'Every saved order moves to the Deleted tab (admin can restore it) rather than being permanently removed. Enter the manager or admin PIN to confirm.',
+    delete_order_title:'Delete this order?', delete_order_sub:'The order moves to the Deleted tab (admin can restore it) rather than being permanently removed. Enter the manager or admin PIN to confirm.',
     manager_pin_placeholder:'Manager PIN', incorrect_manager_pin:'Incorrect manager PIN',
     sugar_word:'sugar',
     topping_name_label:'Name', extra_price_label:'Extra price',
@@ -1450,8 +1458,8 @@ var TRANSLATIONS = {
     name_en_label:'ຊື່ (ອັງກິດ)', name_lo_label:'ຊື່ (ລາວ)', name_th_label:'ຊື່ (ໄທ)',
     category_label:'ໝວດໝູ່', emoji_label:'ອີໂມຈິ', photo_label:'ຮູບພາບ',
     small_price_label:'ລາຄາຂະໜາດນ້ອຍ', medium_price_label:'ລາຄາຂະໜາດກາງ', large_price_label:'ລາຄາຂະໜາດໃຫຍ່',
-    clear_all_history_title:'ລ້າງປະຫວັດອໍເດີທັງໝົດ?', clear_all_history_sub:'ນີ້ຈະລຶບອໍເດີທີ່ບັນທຶກໄວ້ທັງໝົດຖາວອນສຳລັບທຸກອຸປະກອນ. ໃສ່ລະຫັດຜູ້ຈັດການເພື່ອຢືນຢັນ.',
-    delete_order_title:'ລຶບອໍເດີນີ້?', delete_order_sub:'ນີ້ຈະລຶບອໍເດີນີ້ຖາວອນສຳລັບທຸກອຸປະກອນ. ໃສ່ລະຫັດຜູ້ຈັດການເພື່ອຢືນຢັນ.',
+    clear_all_history_title:'ລ້າງປະຫວັດອໍເດີທັງໝົດ?', clear_all_history_sub:'ອໍເດີທີ່ບັນທຶກໄວ້ທັງໝົດຈະຍ້າຍໄປແທັບ Deleted (ແອັດມິນສາມາດກູ້ຄືນໄດ້) ແທນທີ່ຈະຖືກລຶບຖາວອນ. ໃສ່ລະຫັດຜູ້ຈັດການ ຫຼື ແອັດມິນເພື່ອຢືນຢັນ.',
+    delete_order_title:'ລຶບອໍເດີນີ້?', delete_order_sub:'ອໍເດີນີ້ຈະຍ້າຍໄປແທັບ Deleted (ແອັດມິນສາມາດກູ້ຄືນໄດ້) ແທນທີ່ຈະຖືກລຶບຖາວອນ. ໃສ່ລະຫັດຜູ້ຈັດການ ຫຼື ແອັດມິນເພື່ອຢືນຢັນ.',
     manager_pin_placeholder:'ລະຫັດຜູ້ຈັດການ', incorrect_manager_pin:'ລະຫັດຜູ້ຈັດການຜິດ',
     sugar_word:'ນ້ຳຕານ',
     topping_name_label:'ຊື່', extra_price_label:'ລາຄາເພີ່ມ',
@@ -1619,8 +1627,8 @@ var TRANSLATIONS = {
     name_en_label:'ชื่อ (อังกฤษ)', name_lo_label:'ชื่อ (ลาว)', name_th_label:'ชื่อ (ไทย)',
     category_label:'หมวดหมู่', emoji_label:'อีโมจิ', photo_label:'รูปภาพ',
     small_price_label:'ราคาขนาดเล็ก', medium_price_label:'ราคาขนาดกลาง', large_price_label:'ราคาขนาดใหญ่',
-    clear_all_history_title:'ล้างประวัติออเดอร์ทั้งหมด?', clear_all_history_sub:'การดำเนินการนี้จะลบออเดอร์ที่บันทึกไว้ทั้งหมดอย่างถาวรสำหรับทุกอุปกรณ์ ป้อนรหัส PIN ผู้จัดการเพื่อยืนยัน',
-    delete_order_title:'ลบออเดอร์นี้?', delete_order_sub:'การดำเนินการนี้จะลบออเดอร์นี้อย่างถาวรสำหรับทุกอุปกรณ์ ป้อนรหัส PIN ผู้จัดการเพื่อยืนยัน',
+    clear_all_history_title:'ล้างประวัติออเดอร์ทั้งหมด?', clear_all_history_sub:'ออเดอร์ที่บันทึกไว้ทั้งหมดจะย้ายไปแท็บ Deleted (แอดมินสามารถกู้คืนได้) แทนที่จะถูกลบถาวร ป้อนรหัส PIN ผู้จัดการหรือแอดมินเพื่อยืนยัน',
+    delete_order_title:'ลบออเดอร์นี้?', delete_order_sub:'ออเดอร์นี้จะย้ายไปแท็บ Deleted (แอดมินสามารถกู้คืนได้) แทนที่จะถูกลบถาวร ป้อนรหัส PIN ผู้จัดการหรือแอดมินเพื่อยืนยัน',
     manager_pin_placeholder:'รหัส PIN ผู้จัดการ', incorrect_manager_pin:'รหัส PIN ผู้จัดการไม่ถูกต้อง',
     sugar_word:'น้ำตาล',
     topping_name_label:'ชื่อ', extra_price_label:'ราคาเพิ่ม',
@@ -1730,6 +1738,7 @@ var state = {
                          // which specific account logged in, recorded on every order
   pinFailCount:0,
   pinLockedUntil:null,
+  pinLockoutLevel:0, // 0 = not yet locked out; 1+ = how many lockouts in a row, controls escalating duration
   pinInput:'',
   pinError:false,
   pinChecking:false,
@@ -2159,8 +2168,16 @@ function sanitizeDecimal(v){
    More than 8 wrong attempts in a row suspends PIN entry for 10 minutes.
    Persisted to localStorage so refreshing the page can't be used to get
    around it. */
-var PIN_MAX_ATTEMPTS = 8;
-var PIN_LOCKOUT_MS = 10*60*1000;
+var PIN_MAX_ATTEMPTS = 5;
+/* First lockout is short (1 min); every lockout after that — as long as
+   the user keeps failing without ever succeeding in between — escalates
+   to 5 min and stays there (doesn't keep climbing further). A successful
+   PIN entry resets this back to the start (see registerPinSuccess). */
+var PIN_LOCKOUT_LEVELS_MS = [60*1000, 5*60*1000];
+function lockoutDurationForLevel(level){
+  var idx = Math.min(level, PIN_LOCKOUT_LEVELS_MS.length-1);
+  return PIN_LOCKOUT_LEVELS_MS[idx];
+}
 function loadPinLockState(){
   try{
     var raw = window.localStorage.getItem('pos_pin_lock');
@@ -2168,13 +2185,15 @@ function loadPinLockState(){
     var parsed = JSON.parse(raw);
     state.pinFailCount = parsed.failCount || 0;
     state.pinLockedUntil = parsed.lockedUntil || null;
+    state.pinLockoutLevel = parsed.lockoutLevel || 0;
   }catch(e){ /* localStorage unavailable — fail open, in-memory only */ }
 }
 function savePinLockState(){
   try{
     window.localStorage.setItem('pos_pin_lock', JSON.stringify({
       failCount: state.pinFailCount,
-      lockedUntil: state.pinLockedUntil
+      lockedUntil: state.pinLockedUntil,
+      lockoutLevel: state.pinLockoutLevel
     }));
   }catch(e){}
 }
@@ -2188,14 +2207,17 @@ function pinLockoutMinutesLeft(){
 function registerPinFailure(){
   state.pinFailCount = (state.pinFailCount||0) + 1;
   if(state.pinFailCount > PIN_MAX_ATTEMPTS){
-    state.pinLockedUntil = Date.now() + PIN_LOCKOUT_MS;
+    var duration = lockoutDurationForLevel(state.pinLockoutLevel||0);
+    state.pinLockedUntil = Date.now() + duration;
     state.pinFailCount = 0;
+    state.pinLockoutLevel = (state.pinLockoutLevel||0) + 1;
   }
   savePinLockState();
 }
 function registerPinSuccess(){
   state.pinFailCount = 0;
   state.pinLockedUntil = null;
+  state.pinLockoutLevel = 0;
   savePinLockState();
 }
 function buildPinLockoutNotice(){
@@ -2252,6 +2274,22 @@ function itemDisplayName(m){
 function cartLineName(l){
   var m = state.menu.filter(function(mi){ return mi.id===l.menuItemId; })[0];
   return m ? itemDisplayName(m) : l.name;
+}
+function toppingDisplayName(t){
+  if(!t) return '';
+  if(state.language==='lo' && t.nameLo && t.nameLo.trim()) return t.nameLo;
+  if(state.language==='th' && t.nameTh && t.nameTh.trim()) return t.nameTh;
+  return t.name;
+}
+/* Cart lines and saved orders only store a topping snapshot ({id,name,
+   price}) taken at add-to-cart time, not the full topping object — so
+   this looks the topping back up by id against the CURRENT state.toppings
+   (same pattern as cartLineName for drinks) to get a live, correctly
+   translated name, falling back to the frozen snapshot name only if that
+   topping no longer exists (e.g. it was since deleted). */
+function cartLineToppingName(lt){
+  var t = (state.toppings||[]).filter(function(x){ return x.id===lt.id; })[0];
+  return t ? toppingDisplayName(t) : lt.name;
 }
 function categoryVar(name){
   if(name==='taro') return 'var(--taro)';
@@ -2968,7 +3006,7 @@ function buildCartPanel(){
   } else {
     linesHtml = state.cart.map(function(l, idx){
       var meta = l.size + ' · ' + l.sugar + '% ' + tr('sugar_word') + ' · ' + iceLabel(l.ice);
-      if(l.toppings.length) meta += ' · ' + l.toppings.map(function(t){return t.name;}).join(', ');
+      if(l.toppings.length) meta += ' · ' + l.toppings.map(cartLineToppingName).join(', ');
       return '' +
       '<div class="cart-line">' +
         '<div class="cart-line-top">' +
@@ -3055,7 +3093,7 @@ function buildItemModal(){
   }).join('');
   var toppingBtns = state.toppings.map(function(t){
     var on = mo.toppingIds.indexOf(t.id)>-1;
-    return '<button class="opt-pill '+(on?'active':'')+'" onclick="POS.modalToggleTopping(\''+t.id+'\')">'+escapeHtml(t.name)+' <span class="pill-extra">+'+formatMoneyAs(t.price, cur)+'</span></button>';
+    return '<button class="opt-pill '+(on?'active':'')+'" onclick="POS.modalToggleTopping(\''+t.id+'\')">'+escapeHtml(toppingDisplayName(t))+' <span class="pill-extra">+'+formatMoneyAs(t.price, cur)+'</span></button>';
   }).join('');
 
   var basePrice = m.prices[mo.size] || 0;
@@ -3119,7 +3157,7 @@ function paymentDisplayFor(o){
 function buildReceiptContentHtml(o, isPreview){
   var s = state.settings;
   var itemsHtml = o.items.map(function(l){
-    var meta = l.size+' · '+l.sugar+'% '+tr('sugar_word')+' · '+iceLabel(l.ice) + (l.toppings.length? ' · '+l.toppings.map(function(t){return t.name;}).join(', ') : '');
+    var meta = l.size+' · '+l.sugar+'% '+tr('sugar_word')+' · '+iceLabel(l.ice) + (l.toppings.length? ' · '+l.toppings.map(cartLineToppingName).join(', ') : '');
     return '<div class="r-item"><div><div class="r-name">'+l.qty+'x '+escapeHtml(cartLineName(l))+'</div><div class="r-sub-line">'+escapeHtml(meta)+'</div></div><div>'+formatMoney(l.unitPrice*l.qty)+'</div></div>';
   }).join('');
   var isForeign = !!(o.currency && o.currency!=='LAK');
@@ -3365,15 +3403,18 @@ function buildItemEditForm(m){
 function buildToppingEditForm(t){
   var d = t || state.newToppingDraft;
   var isNew = !t;
+  var idArg = isNew ? 'null' : '\''+t.id+'\'';
   return '' +
   '<div class="section-card" style="background:var(--cream-dark);box-shadow:none;">' +
     '<div class="field-grid">' +
-      '<div class="field"><label>'+tr('topping_name_label')+'</label><input id="pos-top-name" type="text" value="'+escapeHtml(d.name)+'" oninput="POS.updateToppingDraft('+(isNew?'null':'\''+t.id+'\'')+',\'name\',this.value)"/></div>' +
-      '<div class="field"><label>'+tr('extra_price_label')+'</label><input id="pos-top-price" type="text" inputmode="numeric" value="'+(d.price||'')+'" oninput="POS.updateToppingDraft('+(isNew?'null':'\''+t.id+'\'')+',\'price\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('name_en_label')+'</label><input id="pos-top-name" type="text" value="'+escapeHtml(d.name)+'" oninput="POS.updateToppingDraft('+idArg+',\'name\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('name_lo_label')+'</label><input id="pos-top-name-lo" type="text" value="'+escapeHtml(d.nameLo||'')+'" placeholder="ຊື່ພາສາລາວ" oninput="POS.updateToppingDraft('+idArg+',\'nameLo\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('name_th_label')+'</label><input id="pos-top-name-th" type="text" value="'+escapeHtml(d.nameTh||'')+'" placeholder="ชื่อภาษาไทย" oninput="POS.updateToppingDraft('+idArg+',\'nameTh\',this.value)"/></div>' +
+      '<div class="field"><label>'+tr('extra_price_label')+'</label><input id="pos-top-price" type="text" inputmode="numeric" value="'+(d.price||'')+'" oninput="POS.updateToppingDraft('+idArg+',\'price\',this.value)"/></div>' +
     '</div>' +
     buildToppingCompositionEditor(d) +
     '<div style="display:flex;gap:8px;margin-top:8px;">' +
-      '<button class="btn btn-primary" style="width:auto;margin-top:0;" onclick="POS.saveTopping('+(isNew?'null':'\''+t.id+'\'')+')">'+tr('save')+'</button>' +
+      '<button class="btn btn-primary" style="width:auto;margin-top:0;" onclick="POS.saveTopping('+idArg+')">'+tr('save')+'</button>' +
       '<button class="btn btn-ghost" onclick="POS.cancelToppingEdit()">'+tr('cancel')+'</button>' +
     '</div>' +
   '</div>';
@@ -6486,7 +6527,7 @@ var POS = {
   setHistoryCustomTo: function(v){ state.historyCustomTo=v; state.historyRange='custom'; render(); },
   toggleOrder: function(id){ state.expandedOrderId = state.expandedOrderId===id?null:id; render(); },
   deleteOrder: function(id){
-    POS.requestManagerApproval('deleteOrder', id);
+    POS.requestManagerApproval('deleteOrder', id, 'either');
   },
   /* ---- Refund: camera evidence step, then hands off to manager approval ---- */
   startRefundEvidence: function(orderId){
@@ -6588,7 +6629,7 @@ var POS = {
     POS.requestManagerApproval('resetMenu', null, 'admin');
   },
   clearHistory: function(){
-    POS.requestManagerApproval('clearHistory', null, 'admin');
+    POS.requestManagerApproval('clearHistory', null, 'either');
   }
 };
 window.POS = POS;
