@@ -406,11 +406,12 @@ html, body{touch-action:pan-x pan-y;}
 }
 .r-divider{border-top:1.5px dashed var(--border);margin:10px 0;}
 .r-item{display:flex;justify-content:space-between;margin-bottom:4px;gap:8px;}
-.r-item .r-name{font-weight:600;font-size:0.9em;}
-.r-item .r-sub-line{font-size:0.8em;color:var(--espresso-soft);}
+.r-item .r-name{font-weight:600;font-size:0.8em;}
+.r-item .r-item-price{font-size:0.8em;}
+.r-item .r-sub-line{font-size:0.7em;color:var(--espresso-soft);}
 .r-row{display:flex;justify-content:space-between;font-size:1.05em;margin-bottom:3px;}
-.r-row.big{font-weight:700;font-size:1.25em;margin-top:6px;}
-.r-footer{text-align:center;margin-top:14px;font-size:1.05em;color:var(--espresso-soft);white-space:pre-line;}
+.r-row.big{font-weight:700;font-size:1.15em;margin-top:6px;}
+.r-footer{text-align:center;margin-top:14px;font-size:0.95em;color:var(--espresso-soft);white-space:pre-line;}
 .r-qr{text-align:center;margin-top:12px;}
 .r-qr img{max-width:150px;width:100%;height:auto;display:inline-block;}
 #receipt-content.pos-print-capture .r-qr img{max-width:230px;}
@@ -3169,7 +3170,7 @@ function buildReceiptContentHtml(o, isPreview){
   var s = state.settings;
   var itemsHtml = o.items.map(function(l){
     var meta = l.size+' · '+l.sugar+'% '+tr('sugar_word')+' · '+iceLabel(l.ice) + (l.toppings.length? ' · '+l.toppings.map(cartLineToppingName).join(', ') : '');
-    return '<div class="r-item"><div><div class="r-name">'+l.qty+'x '+escapeHtml(cartLineName(l))+'</div><div class="r-sub-line">'+escapeHtml(meta)+'</div></div><div>'+formatMoney(l.unitPrice*l.qty)+'</div></div>';
+    return '<div class="r-item"><div><div class="r-name">'+l.qty+'x '+escapeHtml(cartLineName(l))+'</div><div class="r-sub-line">'+escapeHtml(meta)+'</div></div><div class="r-item-price">'+formatMoney(l.unitPrice*l.qty)+'</div></div>';
   }).join('');
   var isForeign = !!(o.currency && o.currency!=='LAK');
   var cashRowsHtml = '';
