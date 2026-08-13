@@ -1061,7 +1061,15 @@ async function buildEscPosReceiptImage(order){
       try { await document.fonts.load('bold '+imageFontSize+'px "Noto Sans Lao"'); } catch(e){}
     }
     if(document.fonts && document.fonts.ready){ try { await document.fonts.ready; } catch(e){} }
-    await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+    /* Uses setTimeout, not requestAnimationFrame, deliberately: rAF only
+       fires while the tab is visible/focused, and stops completely the
+       moment it isn't (screen dimming, switching apps briefly, anything
+       — all extremely common right after tapping "complete order" on a
+       phone). If that happened here, the whole print pipeline would hang
+       forever waiting for a frame that never comes, with no error at all
+       — which matches "nothing happens, no error" exactly. setTimeout
+       keeps firing regardless of visibility, so this can't get stuck. */
+    await new Promise(function(r){ setTimeout(r, 50); });
     await new Promise(function(r){ setTimeout(r, 150); });
     var canvas = await html2canvas(container, {
       backgroundColor: '#ffffff',
@@ -1118,7 +1126,14 @@ function sendToRawBT(order){
     window.location.href = url;
   }
   if(state.settings && state.settings.printerRawbtImageMode){
-    buildEscPosReceiptImage(order).then(function(bytes){
+    /* Bounded safety net: if rendering ever stalls for any reason —
+       including inside html2canvas's own internals, which aren't fully
+       under this code's control — this guarantees a visible error after
+       15s instead of a silent, indefinite hang with nothing shown. */
+    var timeout = new Promise(function(resolve, reject){
+      setTimeout(function(){ reject(new Error(tr('rawbt_image_timeout_error'))); }, 15000);
+    });
+    Promise.race([buildEscPosReceiptImage(order), timeout]).then(function(bytes){
       fire(bytesToBase64(bytes));
     }).catch(function(e){
       console.error('Could not render receipt image', e);
@@ -1266,6 +1281,7 @@ var TRANSLATIONS = {
     epos_print_failed_prefix:'Could not print directly to the printer:',
     epos_print_fallback_hint:'Falling back to your device\'s print dialog instead.',
     rawbt_image_render_failed:'Could not render the receipt as an image:',
+    rawbt_image_timeout_error:'Timed out rendering the receipt (took too long — try again, or turn off "Print as image" in Printer settings).',
     security_heading:'Security', security_hint:'Lock the screen when you step away from the counter — staff will need the PIN to get back in.',
     lock_screen_now:'Lock Screen Now',
     danger_zone:'Danger Zone', danger_zone_hint:'These actions cannot be undone.',
@@ -1435,6 +1451,7 @@ var TRANSLATIONS = {
     epos_print_failed_prefix:'ບໍ່ສາມາດພິມກົງໄປຫາເຄື່ອງພິມໄດ້:',
     epos_print_fallback_hint:'ຈະໃຊ້ໜ້າຕ່າງພິມຂອງອຸປະກອນແທນ.',
     rawbt_image_render_failed:'ບໍ່ສາມາດສ້າງຮູບພາບໃບບິນໄດ້:',
+    rawbt_image_timeout_error:'ໝົດເວລາໃນການສ້າງຮູບໃບບິນ (ໃຊ້ເວລາດົນເກີນໄປ — ລອງໃໝ່, ຫຼືປິດ "ພິມເປັນຮູບພາບ" ໃນການຕັ້ງຄ່າເຄື່ອງພິມ).',
     security_heading:'ຄວາມປອດໄພ', security_hint:'ລັອກໜ້າຈໍເມື່ອທ່ານອອກຈາກເຄົາເຕີ — ພະນັກງານຈະຕ້ອງໃສ່ລະຫັດເພື່ອກັບເຂົ້າມາ.',
     lock_screen_now:'ລັອກໜ້າຈໍດຽວນີ້',
     danger_zone:'ເຂດອັນຕະລາຍ', danger_zone_hint:'ການກະທຳເຫຼົ່ານີ້ບໍ່ສາມາດຍົກເລີກໄດ້.',
@@ -1604,6 +1621,7 @@ var TRANSLATIONS = {
     epos_print_failed_prefix:'ไม่สามารถพิมพ์ตรงไปยังเครื่องพิมพ์ได้:',
     epos_print_fallback_hint:'จะใช้กล่องโต้ตอบพิมพ์ของอุปกรณ์แทน',
     rawbt_image_render_failed:'ไม่สามารถสร้างรูปภาพใบเสร็จได้:',
+    rawbt_image_timeout_error:'หมดเวลาในการสร้างรูปภาพใบเสร็จ (ใช้เวลานานเกินไป — ลองใหม่อีกครั้ง หรือปิด "พิมพ์เป็นรูปภาพ" ในการตั้งค่าเครื่องพิมพ์)',
     security_heading:'ความปลอดภัย', security_hint:'ล็อกหน้าจอเมื่อคุณออกจากเคาน์เตอร์ — พนักงานจะต้องใส่รหัส PIN เพื่อกลับเข้ามา',
     lock_screen_now:'ล็อกหน้าจอตอนนี้',
     danger_zone:'โซนอันตราย', danger_zone_hint:'การกระทำเหล่านี้ไม่สามารถย้อนกลับได้',
