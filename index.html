@@ -612,11 +612,6 @@ html, body{touch-action:pan-x pan-y;}
   #receipt-content{width:var(--receipt-print-width,280px);margin:0 auto;}
   .r-logo{width:104px !important;height:104px !important;margin:0 auto 14px !important;}
   .r-qr img{max-width:200px !important;}
-  .print-only{display:block !important;}
-  .receipt-copy-kitchen{
-    margin-top:22px;padding-top:18px;border-top:2px dashed #999;
-    page-break-before:always;
-  }
 }
 </style>
 
@@ -829,7 +824,7 @@ function buildEposPrintXml(o){
     out += '<feed line="2"/><cut type="feed"/>';
     return out;
   }
-  return '<epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">' + buildCopy(false) + buildCopy(true) + '</epos-print>';
+  return '<epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">' + buildCopy(false) + '</epos-print>';
 }
 /* POSTs the receipt to the printer's ePOS-Print endpoint. Resolves on a
    confirmed successful print, rejects with a human-readable reason
@@ -965,7 +960,7 @@ function buildEscPosReceipt(o){
     out += '\n\n\n'+ESCPOS_GS+'V'+String.fromCharCode(1); // feed clear of the cutter, then partial cut
     return out;
   }
-  return buildCopy(false) + buildCopy(true);
+  return buildCopy(false);
 }
 /* Correct UTF-8-safe base64 encoding: btoa() only accepts single-byte
    (0x00-0xFF) input, so Lao/Thai/etc. text (which is multi-byte in UTF-8)
@@ -1050,21 +1045,6 @@ async function buildEscPosReceiptImage(order){
     container.style.fontFamily = "'Noto Sans Lao','Inter',sans-serif";
   }
   container.innerHTML = buildReceiptCopiesHtml(order, false);
-  /* buildReceiptCopiesHtml hides the kitchen copy (and the customer-copy
-     label) behind .print-only, which only becomes visible via the
-     @media print rule during a real browser print. html2canvas just
-     screenshots the DOM as currently rendered — it never triggers an
-     actual print event — so without this, the captured image would
-     silently contain only one unlabeled copy instead of both. */
-  Array.prototype.forEach.call(container.querySelectorAll('.print-only'), function(el){
-    el.style.display = 'block';
-  });
-  var kitchenCopyEl = container.querySelector('.receipt-copy-kitchen');
-  if(kitchenCopyEl){
-    kitchenCopyEl.style.marginTop = '22px';
-    kitchenCopyEl.style.paddingTop = '18px';
-    kitchenCopyEl.style.borderTop = '2px dashed #999';
-  }
   document.body.appendChild(container);
   try {
     /* html2canvas has long-standing, widely-reported bugs with custom/
