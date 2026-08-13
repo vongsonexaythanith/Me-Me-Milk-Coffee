@@ -396,7 +396,7 @@ html, body{touch-action:pan-x pan-y;}
 .receipt-modal{max-width:320px;font-family:'Inter',sans-serif;}
 #receipt-content{font-size:var(--receipt-print-font-size,12.5px);}
 #receipt-content .r-logo{width:52px;height:52px;object-fit:cover;border-radius:50%;display:block;margin:0 auto 8px;}
-#receipt-content.pos-print-capture .r-logo{width:124px;height:124px;margin:0 auto 16px;}
+#receipt-content.pos-print-capture .r-logo{width:248px;height:248px;margin:0 auto 20px;}
 #receipt-content .r-title{text-align:center;font-family:'Fredoka';font-size:17px;margin-bottom:2px;color:var(--caramel-dark);}
 #receipt-content .r-sub{text-align:center;font-size:11px;color:var(--espresso-soft);margin-bottom:2px;}
 #receipt-content .r-meta{text-align:center;font-size:11px;color:var(--espresso-soft);margin-bottom:10px;}
@@ -413,7 +413,7 @@ html, body{touch-action:pan-x pan-y;}
 .r-footer{text-align:center;margin-top:14px;font-size:12px;color:var(--espresso-soft);white-space:pre-line;}
 .r-qr{text-align:center;margin-top:12px;}
 .r-qr img{max-width:150px;width:100%;height:auto;display:inline-block;}
-#receipt-content.pos-print-capture .r-qr img{max-width:230px;}
+#receipt-content.pos-print-capture .r-qr img{max-width:460px;}
 .receipt-actions{display:flex;gap:8px;margin-top:16px;}
 .receipt-actions .btn{flex:1;}
 
@@ -1005,7 +1005,20 @@ function bytesToBase64(bytes){
    raster command can overrun some printers'/RawBT's buffer. */
 async function buildEscPosReceiptImage(order){
   var paperWidthDots = (state.settings && state.settings.printerPaperWidth==='58mm') ? 384 : 576;
-  var imageFontSize = (state.settings && state.settings.printerPaperWidth==='58mm') ? 18 : 20;
+  /* The font size here must be picked in proportion to paperWidthDots to
+     match the on-screen preview's shape — the preview renders at a small
+     "display" width (e.g. 280px for 80mm) purely for on-screen
+     readability, while the print canvas uses the real thermal dot width
+     (e.g. 576px), a very different scale. A hardcoded pixel size here
+     (previously 18-20px) has no fixed relationship to either scale — it
+     came out proportionally SMALLER relative to the print canvas's width
+     than the preview's font is relative to ITS width, so the same text
+     wrapped into fewer lines and the whole receipt printed shorter
+     relative to its width ("wider/stubbier") than the preview showed.
+     Computing it to match the exact same font-to-width ratio as the
+     preview reproduces the same shape at print resolution. */
+  var previewSpec = RECEIPT_PAPER_SIZES[(state.settings && state.settings.printerPaperWidth) || '80mm'] || RECEIPT_PAPER_SIZES['80mm'];
+  var imageFontSize = Math.round(previewSpec.font * (paperWidthDots / previewSpec.width));
   var container = document.createElement('div');
   /* id="receipt-content" (not just a class) is required here: all the
      centering, logo circular-crop, and font-size rules in <style> are
