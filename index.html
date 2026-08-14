@@ -701,7 +701,8 @@ var DEFAULT_SETTINGS = {
   printerConnectionMode: "system",
   printerIpAddress: "",
   printerDeviceId: "local_printer",
-  printerRawbtImageMode: false
+  printerRawbtImageMode: false,
+  categoryTranslations: {} // { "CategoryName": {lo:"...", th:"..."} }
 };
 /* Fallback labels shown for any account key not yet given a custom name in
    Settings — e.g. before the shop owner has typed in each team member's
@@ -802,7 +803,7 @@ function buildEposPrintXml(o){
       nameLines.forEach(function(ln,i){
         out += eposText(i===0 ? eposPadLine(ln, priceStr, W) : ln);
       });
-      var meta = l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice) + (l.toppings.length ? ' '+l.toppings.map(cartLineToppingName).join(', ') : '');
+      var meta = l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice) + (l.toppings.length ? ' '+l.toppings.map(cartLineToppingDisplay).join(', ') : '');
       eposWrapLines(meta, W-2).forEach(function(ln){ out += eposText('  '+ln); });
     });
     out += eposText(new Array(W+1).join('-'));
@@ -938,7 +939,7 @@ function buildEscPosReceipt(o){
       eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1)).forEach(function(ln,i){
         out += escposLine(i===0 ? eposPadLine(ln, priceStr, W) : ln);
       });
-      var meta = sz(l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice) + (l.toppings.length ? ' '+l.toppings.map(cartLineToppingName).join(', ') : ''));
+      var meta = sz(l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice) + (l.toppings.length ? ' '+l.toppings.map(cartLineToppingDisplay).join(', ') : ''));
       eposWrapLines(meta, W-2).forEach(function(ln){ out += escposLine('  '+ln); });
     });
     out += escposLine(new Array(W+1).join('-'));
@@ -1320,6 +1321,8 @@ var TRANSLATIONS = {
     recipes_hint:'Set how much of each ingredient goes into one drink. This powers automatic stock deduction whenever an order is completed.',
     edit_recipe:'Edit Recipe', close_recipe:'Close', no_recipe_set:'No recipe set yet.',
     select_ingredient:'Select ingredient…', amount_label:'Amount', add_line:'+ Add',
+    sort_az:'A–Z', sort_chrono:'Newest', duplicate:'Duplicate', copy_suffix:' (Copy)',
+    copy_to_size_prefix:'Copy to', copy_recipe_overwrite_confirm:'Size {size} already has a recipe — replace it with this one?',
     scales_with_sugar_label:'Scales with sugar level (e.g. Syrup) — deducted amount adjusts with the customer\'s chosen sweetness',
     scales_with_sugar_badge:'Scales with sugar',
     no_ingredients_yet:'No ingredients yet. Add your first ingredient to get started.',
@@ -1490,6 +1493,8 @@ var TRANSLATIONS = {
     recipes_hint:'ຕັ້ງຄ່າວ່າແຕ່ລະວັດຖຸດິບໃຊ້ເທົ່າໃດຕໍ່ເຄື່ອງດື່ມໜຶ່ງແກ້ວ. ນີ້ຄືສິ່ງທີ່ຄວບຄຸມການຫັກສະຕັອກອັດຕະໂນມັດເມື່ອອໍເດີສຳເລັດ.',
     edit_recipe:'ແກ້ໄຂສູດ', close_recipe:'ປິດ', no_recipe_set:'ຍັງບໍ່ໄດ້ຕັ້ງສູດ.',
     select_ingredient:'ເລືອກວັດຖຸດິບ…', amount_label:'ຈຳນວນ', add_line:'+ ເພີ່ມ',
+    sort_az:'ກ-ຮ', sort_chrono:'ໃໝ່ສຸດ', duplicate:'ສຳເນົາ', copy_suffix:' (ສຳເນົາ)',
+    copy_to_size_prefix:'ສຳເນົາໄປຂະໜາດ', copy_recipe_overwrite_confirm:'ຂະໜາດ {size} ມີສູດຢູ່ແລ້ວ — ແທນທີ່ດ້ວຍອັນນີ້ບໍ?',
     scales_with_sugar_label:'ປ່ຽນຕາມລະດັບນ້ຳຕານ (ເຊັ່ນ: ນ້ຳຫວານ) — ຈຳນວນທີ່ຫັກຈະປັບຕາມລະດັບຄວາມຫວານທີ່ລູກຄ້າເລືອກ',
     scales_with_sugar_badge:'ປ່ຽນຕາມນ້ຳຕານ',
     no_ingredients_yet:'ຍັງບໍ່ມີວັດຖຸດິບ. ເພີ່ມວັດຖຸດິບທຳອິດຂອງທ່ານເພື່ອເລີ່ມຕົ້ນ.',
@@ -1660,6 +1665,8 @@ var TRANSLATIONS = {
     recipes_hint:'ตั้งค่าว่าแต่ละวัตถุดิบใช้เท่าไรต่อเครื่องดื่มหนึ่งแก้ว นี่คือสิ่งที่ควบคุมการหักสต็อกอัตโนมัติเมื่อออเดอร์เสร็จสมบูรณ์',
     edit_recipe:'แก้ไขสูตร', close_recipe:'ปิด', no_recipe_set:'ยังไม่ได้ตั้งสูตร',
     select_ingredient:'เลือกวัตถุดิบ…', amount_label:'จำนวน', add_line:'+ เพิ่ม',
+    sort_az:'ก-ฮ', sort_chrono:'ใหม่สุด', duplicate:'ทำสำเนา', copy_suffix:' (สำเนา)',
+    copy_to_size_prefix:'คัดลอกไปขนาด', copy_recipe_overwrite_confirm:'ขนาด {size} มีสูตรอยู่แล้ว — แทนที่ด้วยอันนี้หรือไม่?',
     scales_with_sugar_label:'ปรับตามระดับความหวาน (เช่น น้ำเชื่อม) — ปริมาณที่หักจะปรับตามความหวานที่ลูกค้าเลือก',
     scales_with_sugar_badge:'ปรับตามความหวาน',
     no_ingredients_yet:'ยังไม่มีวัตถุดิบ เพิ่มวัตถุดิบแรกของคุณเพื่อเริ่มต้น',
@@ -1787,6 +1794,7 @@ var state = {
   mobileCartOpen:false,
   search:'',
   activeCategory:'All',
+  sortPrefs:{menu:'az', toppings:'az', premix:'az', ingredients:'severity'}, // 'az' (alphabetical) | 'chrono' (creation order, oldest first); ingredients defaults to 'severity' (existing stock-urgency sort)
   orderView:'categories', // 'categories' | 'items'
   orderCurrency:'LAK',
   modal:null,          // {itemId, size, sugar, ice, toppingIds:[], qty}
@@ -2277,6 +2285,18 @@ function colorForCategory(cat){
   for(var i=0;i<cat.length;i++){ hash += cat.charCodeAt(i); }
   return CATEGORY_PALETTE[hash % CATEGORY_PALETTE.length];
 }
+/* Categories are just plain strings (pulled from menu items' .category
+   field, or state.settings.categories) — not a separate entity with their
+   own id — so translations are kept in a lookup map keyed by that exact
+   string (state.settings.categoryTranslations) rather than as a field on
+   a category "object". */
+function categoryDisplayName(cat){
+  var t = state.settings && state.settings.categoryTranslations && state.settings.categoryTranslations[cat];
+  if(!t) return cat;
+  if(state.language==='lo' && t.lo && t.lo.trim()) return t.lo;
+  if(state.language==='th' && t.th && t.th.trim()) return t.th;
+  return cat;
+}
 function itemDisplayName(m){
   if(!m) return '';
   if(state.language==='lo' && m.nameLo && m.nameLo.trim()) return m.nameLo;
@@ -2302,6 +2322,15 @@ function toppingDisplayName(t){
 function cartLineToppingName(lt){
   var t = (state.toppings||[]).filter(function(x){ return x.id===lt.id; })[0];
   return t ? toppingDisplayName(t) : lt.name;
+}
+/* Same lookup as cartLineToppingName, but appends the topping's own price
+   in parentheses — e.g. "Pearl (+15,000)" — so the price of each topping
+   is itemized right next to it, instead of only being folded invisibly
+   into the line's total price. */
+function cartLineToppingDisplay(lt){
+  var name = cartLineToppingName(lt);
+  var priceStr = '+' + Math.round(Number(lt.price)||0).toLocaleString('en-US');
+  return name+' ('+priceStr+')';
 }
 function categoryVar(name){
   if(name==='taro') return 'var(--taro)';
@@ -2820,7 +2849,8 @@ function buildOrderTab(){
   state.menu.forEach(function(m){ if(categories.indexOf(m.category)===-1) categories.push(m.category); });
 
   var chips = categories.map(function(c){
-    return '<button class="chip '+(state.activeCategory===c?'active':'')+'" onclick="POS.setCategory(\''+escapeHtml(c).replace(/'/g,"\\'")+'\')">'+escapeHtml(c)+'</button>';
+    var label = c==='All' ? tr('all_items') : categoryDisplayName(c);
+    return '<button class="chip '+(state.activeCategory===c?'active':'')+'" onclick="POS.setCategory(\''+escapeHtml(c).replace(/'/g,"\\'")+'\')">'+escapeHtml(label)+'</button>';
   }).join('');
 
   var currencyChips = [['LAK','₭ LAK'],['USD','$ USD'],['THB','฿ THB']].map(function(c){
@@ -2886,7 +2916,7 @@ function buildCategoryPicker(){
       : '<div class="cat-card-photo cat-card-photo-emoji" style="--accent:'+accent+'"><span class="emoji">'+(byCat[cat][0] ? byCat[cat][0].emoji : '🧋')+'</span></div>';
     return '<button class="cat-card" style="--accent:'+accent+'" onclick="POS.selectCategory(\''+cat.replace(/'/g,"\\'")+'\')">' +
       visual +
-      '<p class="cat-card-name">'+escapeHtml(cat)+'</p>' +
+      '<p class="cat-card-name">'+escapeHtml(categoryDisplayName(cat))+'</p>' +
       '<p class="cat-card-count">'+byCat[cat].length+' '+tr('items_suffix')+'</p>' +
     '</button>';
   }).join('');
@@ -3018,7 +3048,7 @@ function buildCartPanel(){
   } else {
     linesHtml = state.cart.map(function(l, idx){
       var meta = l.size + ' · ' + l.sugar + '% ' + tr('sugar_word') + ' · ' + iceLabel(l.ice);
-      if(l.toppings.length) meta += ' · ' + l.toppings.map(cartLineToppingName).join(', ');
+      if(l.toppings.length) meta += ' · ' + l.toppings.map(cartLineToppingDisplay).join(', ');
       return '' +
       '<div class="cart-line">' +
         '<div class="cart-line-top">' +
@@ -3169,7 +3199,7 @@ function paymentDisplayFor(o){
 function buildReceiptContentHtml(o, isPreview){
   var s = state.settings;
   var itemsHtml = o.items.map(function(l){
-    var meta = l.size+' · '+l.sugar+'% '+tr('sugar_word')+' · '+iceLabel(l.ice) + (l.toppings.length? ' · '+l.toppings.map(cartLineToppingName).join(', ') : '');
+    var meta = l.size+' · '+l.sugar+'% '+tr('sugar_word')+' · '+iceLabel(l.ice) + (l.toppings.length? ' · '+l.toppings.map(cartLineToppingDisplay).join(', ') : '');
     return '<div class="r-item"><div><div class="r-name">'+l.qty+'x '+escapeHtml(cartLineName(l))+'</div><div class="r-sub-line">'+escapeHtml(meta)+'</div></div><div class="r-item-price">'+formatMoney(l.unitPrice*l.qty)+'</div></div>';
   }).join('');
   var isForeign = !!(o.currency && o.currency!=='LAK');
@@ -3260,7 +3290,7 @@ function buildMenuTab(){
   var byCat = {};
   state.menu.forEach(function(m){ (byCat[m.category] = byCat[m.category]||[]).push(m); });
   var itemsHtml = Object.keys(byCat).map(function(cat){
-    var rows = byCat[cat].map(function(m){
+    var rows = sortEntities(byCat[cat], (state.sortPrefs&&state.sortPrefs.menu)||'az', function(m){return m.name;}).map(function(m){
       if(state.editingItemId===m.id) return buildItemEditForm(m);
       var priceStr = ['S','M','L'].map(function(sz){ return m.prices[sz] ? (sz+': '+formatMoney(m.prices[sz])) : ''; }).filter(Boolean).join('   ');
       var thumb = m.photo ? '<img class="em-photo" src="'+m.photo+'" alt=""/>' : '<span class="em">'+m.emoji+'</span>';
@@ -3277,6 +3307,7 @@ function buildMenuTab(){
         '<div class="acts">' +
           '<button class="btn '+(unavailable?'btn-primary':'btn-outline')+' btn-small" onclick="POS.toggleItemAvailability(\''+m.id+'\')">'+(unavailable?tr('mark_available'):tr('mark_unavailable'))+'</button>' +
           '<button class="btn btn-outline btn-small" onclick="POS.editItem(\''+m.id+'\')">'+tr('edit')+'</button>' +
+          '<button class="btn btn-outline btn-small" onclick="POS.duplicateItem(\''+m.id+'\')">'+tr('duplicate')+'</button>' +
           '<button class="btn btn-danger btn-small" onclick="POS.deleteItem(\''+m.id+'\')">'+tr('delete')+'</button>' +
         '</div>' +
       '</div>';
@@ -3286,7 +3317,7 @@ function buildMenuTab(){
 
   var newItemForm = state.newItemDraft ? buildItemEditForm(null) : '<button class="btn btn-outline" onclick="POS.startNewItem()">'+tr('add_new_drink')+'</button>';
 
-  var toppingsHtml = state.toppings.map(function(t){
+  var toppingsHtml = sortEntities(state.toppings, (state.sortPrefs&&state.sortPrefs.toppings)||'az', function(t){return t.name;}).map(function(t){
     if(state.editingToppingId===t.id) return buildToppingEditForm(t);
     var compSummary = (t.composition && t.composition.length) ? t.composition.map(function(cl){
       var comp = resolveStockComponent(cl.ingredientId, cl.kind);
@@ -3298,6 +3329,7 @@ function buildMenuTab(){
       '<div class="info"><div class="t1">'+escapeHtml(t.name)+'</div><div class="t2">+'+formatMoney(t.price)+(compSummary?' · '+compSummary:'')+'</div></div>' +
       '<div class="acts">' +
         '<button class="btn btn-outline btn-small" onclick="POS.editTopping(\''+t.id+'\')">'+tr('edit')+'</button>' +
+        '<button class="btn btn-outline btn-small" onclick="POS.duplicateTopping(\''+t.id+'\')">'+tr('duplicate')+'</button>' +
         '<button class="btn btn-danger btn-small" onclick="POS.deleteTopping(\''+t.id+'\')">'+tr('delete')+'</button>' +
       '</div>' +
     '</div>';
@@ -3317,11 +3349,16 @@ function buildMenuTab(){
         '</div>' +
       '</div>';
     }
+    var catT = (state.settings.categoryTranslations && state.settings.categoryTranslations[cat]) || {};
     return '' +
-    '<div class="mgmt-row">' +
+    '<div class="mgmt-row" style="flex-wrap:wrap;row-gap:8px;">' +
       '<div class="info"><div class="t1">'+escapeHtml(cat)+'</div><div class="t2">'+count+' '+tr('items_suffix')+'</div></div>' +
       '<div class="acts">' +
         '<button class="btn btn-outline btn-small" onclick="POS.startRenameCategory(\''+cat.replace(/'/g,"\\'")+'\')">'+tr('rename')+'</button>' +
+      '</div>' +
+      '<div class="field-grid" style="width:100%;">' +
+        '<div class="field"><label>'+tr('name_lo_label')+'</label><input type="text" value="'+escapeHtml(catT.lo||'')+'" placeholder="ຊື່ພາສາລາວ" onblur="POS.saveCategoryTranslation(\''+cat.replace(/'/g,"\\'")+'\',\'lo\',this.value)"/></div>' +
+        '<div class="field"><label>'+tr('name_th_label')+'</label><input type="text" value="'+escapeHtml(catT.th||'')+'" placeholder="ชื่อภาษาไทย" onblur="POS.saveCategoryTranslation(\''+cat.replace(/'/g,"\\'")+'\',\'th\',this.value)"/></div>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -3359,11 +3396,13 @@ function buildMenuTab(){
   '</div>' +
   '<div class="section-card">' +
     '<h2>'+tr('menu_items_title')+'</h2><p class="hint">'+tr('menu_items_hint')+'</p>' +
+    buildSortToggle('menu') +
     itemsHtml +
     '<div style="margin-top:12px;">'+newItemForm+'</div>' +
   '</div>' +
   '<div class="section-card">' +
     '<h2>'+tr('toppings_addons_title')+'</h2><p class="hint">'+tr('toppings_addons_hint')+'</p>' +
+    buildSortToggle('toppings') +
     toppingsHtml +
     '<div style="margin-top:12px;">'+newToppingForm+'</div>' +
   '</div>';
@@ -3801,6 +3840,28 @@ function resolveStockComponent(id, kind){
    which would otherwise send deduction/cost recursion into an infinite
    loop. depth is a hard backstop in case bad data somehow already has a
    cycle in it. */
+/* Shared sort helper for every management list (Menu, Toppings, Pre-Mix,
+   Raw Materials): 'chrono' relies on uid()'s ids embedding a base36
+   timestamp right after the prefix (uid = prefix+'_'+Date.now()toString(36)+random),
+   so plain string comparison on id already sorts by creation order without
+   needing a separate stored timestamp field. */
+function sortEntities(list, sortMode, nameFn){
+  var arr = (list||[]).slice();
+  if(sortMode==='chrono'){
+    arr.sort(function(a,b){ return (b.id||'').localeCompare(a.id||''); });
+  } else {
+    arr.sort(function(a,b){ return (nameFn(a)||'').toLowerCase().localeCompare((nameFn(b)||'').toLowerCase()); });
+  }
+  return arr;
+}
+function buildSortToggle(key){
+  var mode = (state.sortPrefs && state.sortPrefs[key]) || 'az';
+  return '' +
+  '<div style="display:flex;gap:6px;margin-bottom:10px;">' +
+    '<button class="btn btn-small '+(mode==='az'?'btn-primary':'btn-outline')+'" style="width:auto;" onclick="POS.setSortMode(\''+key+'\',\'az\')">'+tr('sort_az')+'</button>' +
+    '<button class="btn btn-small '+(mode==='chrono'?'btn-primary':'btn-outline')+'" style="width:auto;" onclick="POS.setSortMode(\''+key+'\',\'chrono\')">'+tr('sort_chrono')+'</button>' +
+  '</div>';
+}
 function premixDependsOn(premixId, targetId, depth){
   depth = depth || 0;
   if(depth > 12) return false;
@@ -4335,9 +4396,13 @@ function ingredientSeverityHouseStock(ing){
   return mStatus!=null ? STOCK_SEVERITY_RANK[mStatus] : 3;
 }
 function buildRawMaterialsSubTab(){
-  var ingredients = (state.ingredients || []).slice().sort(function(a,b){
-    return ingredientSeverity(a) - ingredientSeverity(b);
-  });
+  var ingSortMode = (state.sortPrefs && state.sortPrefs.ingredients) || 'severity';
+  var ingredients = (state.ingredients || []).slice();
+  if(ingSortMode==='az' || ingSortMode==='chrono'){
+    ingredients = sortEntities(ingredients, ingSortMode, function(i){return i.name;});
+  } else {
+    ingredients.sort(function(a,b){ return ingredientSeverity(a) - ingredientSeverity(b); });
+  }
   var rows = ingredients.map(function(ing){
     if(state.editingIngredientId===ing.id) return buildIngredientEditForm(ing);
     return '' +
@@ -4357,6 +4422,7 @@ function buildRawMaterialsSubTab(){
   return '' +
   '<div class="section-card">' +
     '<h2>'+tr('stock_raw_materials')+'</h2><p class="hint">'+tr('raw_materials_hint')+'</p>' +
+    buildSortToggle('ingredients') +
     (rows || '<p class="hint" style="margin-top:0;">'+tr('no_ingredients_yet')+'</p>') +
     '<div style="margin-top:12px;">'+newForm+'</div>' +
   '</div>';
@@ -4393,7 +4459,7 @@ function buildDepositStockSubTab(){
 
 /* ================= PRE-MIX ================= */
 function buildPremixSubTab(){
-  var premixList = state.premix || [];
+  var premixList = sortEntities(state.premix, (state.sortPrefs&&state.sortPrefs.premix)||'az', function(pm){return pm.name;});
   var rows = premixList.map(function(pm){
     if(state.editingPremixId===pm.id) return buildPremixEditForm(pm);
     var compCount = (pm.composition||[]).length;
@@ -4410,6 +4476,7 @@ function buildPremixSubTab(){
       '<div class="info"><div class="t1">'+escapeHtml(pm.name)+'</div><div class="t2">'+subtitle+'</div>'+sugarBadge+'</div>' +
       '<div class="acts">' +
         '<button class="btn btn-outline btn-small" onclick="POS.editPremix(\''+pm.id+'\')">'+tr('edit')+'</button>' +
+        '<button class="btn btn-outline btn-small" onclick="POS.duplicatePremix(\''+pm.id+'\')">'+tr('duplicate')+'</button>' +
         '<button class="btn btn-danger btn-small" onclick="POS.deletePremix(\''+pm.id+'\')">'+tr('delete')+'</button>' +
       '</div>' +
     '</div>';
@@ -4418,6 +4485,7 @@ function buildPremixSubTab(){
   return '' +
   '<div class="section-card">' +
     '<h2>'+tr('stock_premix')+'</h2><p class="hint">'+tr('premix_hint')+'</p>' +
+    buildSortToggle('premix') +
     (rows || '<p class="hint" style="margin-top:0;">'+tr('no_premix_yet')+'</p>') +
     '<div style="margin-top:12px;">'+newForm+'</div>' +
   '</div>';
@@ -4573,11 +4641,20 @@ function buildRecipesSubTab(){
           '</div>' +
           '<button class="btn btn-outline btn-small" style="margin-top:8px;" onclick="POS.addRecipeLine(\''+m.id+'\',\''+sz+'\')">'+tr('add_line')+'</button>'
         ) : '';
+        var copyControls = (canEdit && lines.length && sizes.length>1) ? ('' +
+          '<div style="display:flex;gap:6px;align-items:center;margin-top:10px;">' +
+            '<select id="pos-recipe-copyto-'+m.id+'-'+sz+'" style="flex:1;min-width:0;">' +
+              sizes.filter(function(s){return s!==sz;}).map(function(s){ return '<option value="'+s+'">'+tr('copy_to_size_prefix')+' '+s+'</option>'; }).join('') +
+            '</select>' +
+            '<button class="btn btn-outline btn-small" style="width:auto;flex-shrink:0;" onclick="POS.copyRecipeToSize(\''+m.id+'\',\''+sz+'\',document.getElementById(\'pos-recipe-copyto-'+m.id+'-'+sz+'\').value)">'+tr('duplicate')+'</button>' +
+          '</div>'
+        ) : '';
         return '' +
         '<div class="recipe-size-box">' +
           '<div class="recipe-size-label">'+tr('size_label')+' '+sz+'</div>' +
           (lineRows || '<p class="hint" style="margin:0 0 8px;">'+tr('no_recipe_set')+'</p>') +
           addFormHtml +
+          copyControls +
         '</div>';
       }).join('');
       editorHtml = '<div class="recipe-size-grid">' + sizeBoxes + '</div>';
@@ -5642,6 +5719,11 @@ var POS = {
     render();
   },
   setSearch: function(v){ state.search=v; render(); },
+  setSortMode: function(key, mode){
+    if(!state.sortPrefs) state.sortPrefs = {};
+    state.sortPrefs[key] = mode;
+    render();
+  },
 
   openItem: function(itemId){
     var m = state.menu.filter(function(i){return i.id===itemId;})[0];
@@ -5995,6 +6077,20 @@ var POS = {
     db.collection('pos_recipes').doc('main').set({items: state.recipes}).catch(function(e){ window.alert('Could not update recipe: '+e.message); });
     render();
   },
+  /* Copies one size's whole recipe (all lines) onto another size, e.g.
+     M -> S or M -> L, saving a rebuild-from-scratch when sizes share
+     mostly the same recipe. Overwrites the target size's existing recipe
+     lines entirely — confirms first if the target already has any. */
+  copyRecipeToSize: function(itemId, fromSize, toSize){
+    if(effectiveStockRole()!=='admin') return;
+    if(!toSize || toSize===fromSize) return;
+    if(!state.recipes || !state.recipes[itemId] || !state.recipes[itemId][fromSize] || !state.recipes[itemId][fromSize].length) return;
+    var targetHasLines = state.recipes[itemId][toSize] && state.recipes[itemId][toSize].length;
+    if(targetHasLines && !window.confirm(tr('copy_recipe_overwrite_confirm').replace('{size}', toSize))) return;
+    state.recipes[itemId][toSize] = JSON.parse(JSON.stringify(state.recipes[itemId][fromSize]));
+    db.collection('pos_recipes').doc('main').set({items: state.recipes}).catch(function(e){ window.alert('Could not copy recipe: '+e.message); });
+    render();
+  },
 
   /* ---- Stock: pre-mix ---- */
   startNewPremix: function(){
@@ -6043,6 +6139,22 @@ var POS = {
     if(!window.confirm('Delete this pre-mix ingredient? This cannot be undone.')) return;
     state.premix = state.premix.filter(function(p){ return p.id!==id; });
     db.collection('pos_premix').doc('main').set({items: state.premix}).catch(function(e){ window.alert('Could not delete pre-mix: '+e.message); });
+    render();
+  },
+  /* Deep-copies a pre-mix under a new id, appending "(Copy)" to its name.
+     Composition lines referencing raw materials or other pre-mixes carry
+     over unchanged — nested pre-mix references still point at the SAME
+     underlying pre-mix(es), not copies of those, which is the correct
+     behavior (duplicating "Matcha" shouldn't also duplicate "Syrup"). */
+  duplicatePremix: function(id){
+    var pm = (state.premix||[]).filter(function(p){return p.id===id;})[0];
+    if(!pm) return;
+    var copy = JSON.parse(JSON.stringify(pm));
+    copy.id = uid('premix');
+    copy.name = (pm.name||'') + tr('copy_suffix');
+    if(!state.premix) state.premix = [];
+    state.premix.push(copy);
+    db.collection('pos_premix').doc('main').set({items: state.premix}).catch(function(e){ window.alert('Could not save pre-mix: '+e.message); });
     render();
   },
   /* The Select's option values are 'raw:<id>' or 'premix:<id>' (same
@@ -6232,6 +6344,13 @@ var POS = {
     reader.onerror = function(){ window.alert('Could not read that file.'); };
     reader.readAsDataURL(file);
   },
+  saveCategoryTranslation: function(cat, field, value){
+    if(!state.settings.categoryTranslations) state.settings.categoryTranslations = {};
+    if(!state.settings.categoryTranslations[cat]) state.settings.categoryTranslations[cat] = {};
+    state.settings.categoryTranslations[cat][field] = value;
+    db.collection('pos_settings').doc('main').set(state.settings).catch(function(e){ window.alert('Could not save category translation: '+e.message); });
+    render();
+  },
   removeCategoryPhoto: function(cat){
     if(!state.settings.categoryPhotos) return;
     delete state.settings.categoryPhotos[cat];
@@ -6272,6 +6391,10 @@ var POS = {
     if(state.settings.categoryBackgroundPhotos && state.settings.categoryBackgroundPhotos[oldName]!==undefined){
       state.settings.categoryBackgroundPhotos[newName] = state.settings.categoryBackgroundPhotos[oldName];
       delete state.settings.categoryBackgroundPhotos[oldName];
+    }
+    if(state.settings.categoryTranslations && state.settings.categoryTranslations[oldName]!==undefined){
+      state.settings.categoryTranslations[newName] = state.settings.categoryTranslations[oldName];
+      delete state.settings.categoryTranslations[oldName];
     }
     if(state.activeCategory===oldName) state.activeCategory=newName;
     state.editingCategoryName = null;
@@ -6492,6 +6615,28 @@ var POS = {
     db.collection('pos_menu').doc('main').set({items: state.menu}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
     render();
   },
+  /* Deep-copies a menu item under a new id, appending "(Copy)" to every
+     filled-in name field (EN/Lao/Thai) so it's obviously a duplicate to
+     rename, and carries its recipe over too — recipes are keyed by menu
+     item id (state.recipes[itemId]), so without this the copy would
+     silently start with no recipe for any size. */
+  duplicateItem: function(id){
+    var m = state.menu.filter(function(i){return i.id===id;})[0];
+    if(!m) return;
+    var copy = JSON.parse(JSON.stringify(m));
+    copy.id = uid('item');
+    copy.name = (m.name||'') + tr('copy_suffix');
+    if(m.nameLo) copy.nameLo = m.nameLo + tr('copy_suffix');
+    if(m.nameTh) copy.nameTh = m.nameTh + tr('copy_suffix');
+    state.menu.push(copy);
+    db.collection('pos_menu').doc('main').set({items: state.menu}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
+    if(state.recipes && state.recipes[id]){
+      if(!state.recipes) state.recipes = {};
+      state.recipes[copy.id] = JSON.parse(JSON.stringify(state.recipes[id]));
+      db.collection('pos_recipes').doc('main').set({items: state.recipes}).catch(function(e){ window.alert('Could not copy recipe: '+e.message); });
+    }
+    render();
+  },
   toggleItemAvailability: function(id){
     var m = state.menu.filter(function(i){return i.id===id;})[0];
     if(!m) return;
@@ -6505,6 +6650,20 @@ var POS = {
     render();
   },
   editTopping: function(id){ state.editingToppingId=id; state.toppingCompositionDraft = {ingredientId:'', kind:'raw', amount:''}; render(); },
+  /* Deep-copies a topping under a new id, appending "(Copy)" to every
+     filled-in name field. */
+  duplicateTopping: function(id){
+    var t = state.toppings.filter(function(x){return x.id===id;})[0];
+    if(!t) return;
+    var copy = JSON.parse(JSON.stringify(t));
+    copy.id = uid('top');
+    copy.name = (t.name||'') + tr('copy_suffix');
+    if(t.nameLo) copy.nameLo = t.nameLo + tr('copy_suffix');
+    if(t.nameTh) copy.nameTh = t.nameTh + tr('copy_suffix');
+    state.toppings.push(copy);
+    db.collection('pos_toppings').doc('main').set({items: state.toppings}).catch(function(e){ window.alert('Could not save toppings: '+e.message); });
+    render();
+  },
   cancelToppingEdit: function(){ state.editingToppingId=null; state.newToppingDraft=null; render(); },
   updateToppingDraft: function(id, field, value){
     var target = id ? state.toppings.filter(function(t){return t.id===id;})[0] : state.newToppingDraft;
