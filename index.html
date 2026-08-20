@@ -4641,12 +4641,15 @@ function buildRecipesSubTab(){
           '</div>' +
           '<button class="btn btn-outline btn-small" style="margin-top:8px;" onclick="POS.addRecipeLine(\''+m.id+'\',\''+sz+'\')">'+tr('add_line')+'</button>'
         ) : '';
-        var copyControls = (canEdit && lines.length && sizes.length>1) ? ('' +
-          '<div style="display:flex;gap:6px;align-items:center;margin-top:10px;">' +
-            '<select id="pos-recipe-copyto-'+m.id+'-'+sz+'" style="flex:1;min-width:0;">' +
-              sizes.filter(function(s){return s!==sz;}).map(function(s){ return '<option value="'+s+'">'+tr('copy_to_size_prefix')+' '+s+'</option>'; }).join('') +
+        var copyControls = (canEdit && lines.length) ? ('' +
+          '<div style="display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap;">' +
+            '<select id="pos-recipe-copyitem-'+m.id+'-'+sz+'" style="flex:2;min-width:110px;">' +
+              state.menu.map(function(mi){ return '<option value="'+mi.id+'" '+(mi.id===m.id?'selected':'')+'>'+escapeHtml(mi.name)+'</option>'; }).join('') +
             '</select>' +
-            '<button class="btn btn-outline btn-small" style="width:auto;flex-shrink:0;" onclick="POS.copyRecipeToSize(\''+m.id+'\',\''+sz+'\',document.getElementById(\'pos-recipe-copyto-'+m.id+'-'+sz+'\').value)">'+tr('duplicate')+'</button>' +
+            '<select id="pos-recipe-copytosize-'+m.id+'-'+sz+'" style="flex:1;min-width:60px;">' +
+              ['S','M','L'].map(function(s){ return '<option value="'+s+'">'+tr('size_label')+' '+s+'</option>'; }).join('') +
+            '</select>' +
+            '<button class="btn btn-outline btn-small" style="width:auto;flex-shrink:0;" onclick="POS.copyRecipeToTarget(\''+m.id+'\',\''+sz+'\',document.getElementById(\'pos-recipe-copyitem-'+m.id+'-'+sz+'\').value,document.getElementById(\'pos-recipe-copytosize-'+m.id+'-'+sz+'\').value)">'+tr('duplicate')+'</button>' +
           '</div>'
         ) : '';
         return '' +
@@ -6077,17 +6080,26 @@ var POS = {
     db.collection('pos_recipes').doc('main').set({items: state.recipes}).catch(function(e){ window.alert('Could not update recipe: '+e.message); });
     render();
   },
-  /* Copies one size's whole recipe (all lines) onto another size, e.g.
-     M -> S or M -> L, saving a rebuild-from-scratch when sizes share
-     mostly the same recipe. Overwrites the target size's existing recipe
-     lines entirely — confirms first if the target already has any. */
-  copyRecipeToSize: function(itemId, fromSize, toSize){
+  /* Duplicates one size's whole recipe (all lines) onto any target menu
+     item + size — same item, different size (e.g. M -> S) or a
+     completely different item's recipe entirely, saving a
+     rebuild-from-scratch when items/sizes share a similar recipe.
+     Overwrites the target's existing recipe lines entirely — confirms
+     first if the target already has any. A no-op if source and target
+     are literally the same item+size. */
+  copyRecipeToTarget: function(fromItemId, fromSize, toItemId, toSize){
     if(effectiveStockRole()!=='admin') return;
-    if(!toSize || toSize===fromSize) return;
-    if(!state.recipes || !state.recipes[itemId] || !state.recipes[itemId][fromSize] || !state.recipes[itemId][fromSize].length) return;
-    var targetHasLines = state.recipes[itemId][toSize] && state.recipes[itemId][toSize].length;
-    if(targetHasLines && !window.confirm(tr('copy_recipe_overwrite_confirm').replace('{size}', toSize))) return;
-    state.recipes[itemId][toSize] = JSON.parse(JSON.stringify(state.recipes[itemId][fromSize]));
+    if(!toItemId || !toSize) return;
+    if(fromItemId===toItemId && fromSize===toSize) return;
+    if(!state.recipes || !state.recipes[fromItemId] || !state.recipes[fromItemId][fromSize] || !state.recipes[fromItemId][fromSize].length) return;
+    if(!state.recipes[toItemId]) state.recipes[toItemId] = {};
+    var targetHasLines = state.recipes[toItemId][toSize] && state.recipes[toItemId][toSize].length;
+    if(targetHasLines){
+      var targetItem = state.menu.filter(function(mi){return mi.id===toItemId;})[0];
+      var targetLabel = (targetItem ? itemDisplayName(targetItem) : '') + ' ' + toSize;
+      if(!window.confirm(tr('copy_recipe_overwrite_confirm').replace('{size}', targetLabel))) return;
+    }
+    state.recipes[toItemId][toSize] = JSON.parse(JSON.stringify(state.recipes[fromItemId][fromSize]));
     db.collection('pos_recipes').doc('main').set({items: state.recipes}).catch(function(e){ window.alert('Could not copy recipe: '+e.message); });
     render();
   },
