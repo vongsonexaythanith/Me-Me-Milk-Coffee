@@ -1322,6 +1322,18 @@ var TRANSLATIONS = {
     edit_recipe:'Edit Recipe', close_recipe:'Close', no_recipe_set:'No recipe set yet.',
     select_ingredient:'Select ingredient…', amount_label:'Amount', add_line:'+ Add',
     sort_az:'A–Z', sort_chrono:'Newest', duplicate:'Duplicate', copy_suffix:' (Copy)',
+    location_setup_title:'Set Up This Device', location_setup_hint:'Which location will this device be used at? This only needs to be set once — every order, stock, and menu change from this device will belong to that location, kept completely separate from any other location.',
+    location_admin_pin_prompt:'Enter that location\'s admin PIN to confirm.',
+    location_title:'Location', location_hint_prefix:'This device is set to:', change_location_btn:'Change Location',
+    change_location_confirm:'Change this device\'s location? You\'ll need to set it up again and sign in with that location\'s PIN.',
+    change_location_master_only_hint:'Only the original Donkoi admin account can change a device\'s location.',
+    remote_monitoring_title:'Remote Monitoring', remote_monitoring_hint:'View another location\'s live orders, revenue, and stock without visiting it or changing this device\'s own location.',
+    remote_viewing_prefix:'Remotely viewing', remote_viewing_suffix:'— this device\'s own data is untouched.',
+    stop_remote_viewing:'Stop Remote Viewing', view_remotely_prefix:'View',
+    copy_stock_setup_title:'Copy Stock Setup', copy_stock_setup_hint:'Copy Raw Materials and Pre-Mix from this location to another — names, units, costs, and weekly/monthly targets carry over, but actual stock and house stock quantities start at 0 (each location\'s real inventory is its own). This replaces the target location\'s existing Raw Materials and Pre-Mix entirely.',
+    copy_stock_setup_confirm:'Copy Raw Materials and Pre-Mix to {location}? This will replace everything currently there.',
+    copy_stock_setup_success:'Raw Materials and Pre-Mix copied to {location}.', copying_ellipsis:'Copying…', copy_to_prefix:'Copy to',
+    rename_locations_title:'Rename Locations', rename_locations_hint:'Change what each location is called. The new name appears everywhere automatically — including the device setup screen — with no reload needed.',
     copy_to_size_prefix:'Copy to', copy_recipe_overwrite_confirm:'Size {size} already has a recipe — replace it with this one?',
     scales_with_sugar_label:'Scales with sugar level (e.g. Syrup) — deducted amount adjusts with the customer\'s chosen sweetness',
     scales_with_sugar_badge:'Scales with sugar',
@@ -1494,6 +1506,18 @@ var TRANSLATIONS = {
     edit_recipe:'ແກ້ໄຂສູດ', close_recipe:'ປິດ', no_recipe_set:'ຍັງບໍ່ໄດ້ຕັ້ງສູດ.',
     select_ingredient:'ເລືອກວັດຖຸດິບ…', amount_label:'ຈຳນວນ', add_line:'+ ເພີ່ມ',
     sort_az:'ກ-ຮ', sort_chrono:'ໃໝ່ສຸດ', duplicate:'ສຳເນົາ', copy_suffix:' (ສຳເນົາ)',
+    location_setup_title:'ຕັ້ງຄ່າອຸປະກອນນີ້', location_setup_hint:'ອຸປະກອນນີ້ຈະໃຊ້ຢູ່ສາຂາໃດ? ຕັ້ງຄ່າຄັ້ງດຽວເທົ່ານັ້ນ — ອໍເດີ, ສະຕັອກ, ແລະການປ່ຽນແປງເມນູຈາກອຸປະກອນນີ້ຈະເປັນຂອງສາຂານັ້ນ, ແຍກອອກຈາກສາຂາອື່ນຢ່າງສົມບູນ.',
+    location_admin_pin_prompt:'ໃສ່ລະຫັດແອັດມິນຂອງສາຂານັ້ນເພື່ອຢືນຢັນ.',
+    location_title:'ສາຂາ', location_hint_prefix:'ອຸປະກອນນີ້ຕັ້ງເປັນ:', change_location_btn:'ປ່ຽນສາຂາ',
+    change_location_confirm:'ປ່ຽນສາຂາຂອງອຸປະກອນນີ້ບໍ? ທ່ານຈະຕ້ອງຕັ້ງຄ່າໃໝ່ ແລະ ເຂົ້າສູ່ລະບົບດ້ວຍລະຫັດຂອງສາຂານັ້ນ.',
+    change_location_master_only_hint:'ມີແຕ່ບັນຊີແອັດມິນ Donkoi ຕົ້ນສະບັບເທົ່ານັ້ນທີ່ສາມາດປ່ຽນສາຂາຂອງອຸປະກອນໄດ້.',
+    remote_monitoring_title:'ການເຝົ້າຕິດຕາມທາງໄກ', remote_monitoring_hint:'ເບິ່ງອໍເດີ, ລາຍຮັບ, ແລະສະຕັອກແບບສົດຂອງສາຂາອື່ນໂດຍບໍ່ຕ້ອງໄປຢ້ຽມຢາມ ຫຼື ປ່ຽນສາຂາຂອງອຸປະກອນນີ້.',
+    remote_viewing_prefix:'ກຳລັງເບິ່ງທາງໄກ', remote_viewing_suffix:'— ຂໍ້ມູນຂອງອຸປະກອນນີ້ບໍ່ຖືກກະທົບ.',
+    stop_remote_viewing:'ຢຸດການເບິ່ງທາງໄກ', view_remotely_prefix:'ເບິ່ງ',
+    copy_stock_setup_title:'ສຳເນົາການຕັ້ງຄ່າສະຕັອກ', copy_stock_setup_hint:'ສຳເນົາວັດຖຸດິບ ແລະ ນ້ຳຫວານປະສົມລ່ວງໜ້າຈາກສາຂານີ້ໄປສາຂາອື່ນ — ຊື່, ຫົວໜ່ວຍ, ຕົ້ນທຶນ, ແລະເປົ້າໝາຍລາຍອາທິດ/ລາຍເດືອນຈະຖືກສຳເນົາໄປ ແຕ່ຈຳນວນສະຕັອກຮ້ານ ແລະ ສະຕັອກສາງຈິງຈະເລີ່ມຕົ້ນທີ່ 0 (ສະຕັອກຈິງຂອງແຕ່ລະສາຂາເປັນຂອງສາຂານັ້ນເອງ). ນີ້ຈະແທນທີ່ວັດຖຸດິບ ແລະ ນ້ຳຫວານປະສົມລ່ວງໜ້າຂອງສາຂາເປົ້າໝາຍທັງໝົດ.',
+    copy_stock_setup_confirm:'ສຳເນົາວັດຖຸດິບ ແລະ ນ້ຳຫວານປະສົມລ່ວງໜ້າໄປ {location} ບໍ? ນີ້ຈະແທນທີ່ທຸກຢ່າງທີ່ມີຢູ່ໃນປັດຈຸບັນ.',
+    copy_stock_setup_success:'ສຳເນົາວັດຖຸດິບ ແລະ ນ້ຳຫວານປະສົມລ່ວງໜ້າໄປ {location} ແລ້ວ.', copying_ellipsis:'ກຳລັງສຳເນົາ…', copy_to_prefix:'ສຳເນົາໄປ',
+    rename_locations_title:'ປ່ຽນຊື່ສາຂາ', rename_locations_hint:'ປ່ຽນຊື່ທີ່ໃຊ້ເອີ້ນແຕ່ລະສາຂາ. ຊື່ໃໝ່ຈະປາກົດຢູ່ທຸກບ່ອນໂດຍອັດຕະໂນມັດ — ລວມທັງໜ້າຕັ້ງຄ່າອຸປະກອນ — ໂດຍບໍ່ຕ້ອງໂຫຼດຫນ້າໃໝ່.',
     copy_to_size_prefix:'ສຳເນົາໄປຂະໜາດ', copy_recipe_overwrite_confirm:'ຂະໜາດ {size} ມີສູດຢູ່ແລ້ວ — ແທນທີ່ດ້ວຍອັນນີ້ບໍ?',
     scales_with_sugar_label:'ປ່ຽນຕາມລະດັບນ້ຳຕານ (ເຊັ່ນ: ນ້ຳຫວານ) — ຈຳນວນທີ່ຫັກຈະປັບຕາມລະດັບຄວາມຫວານທີ່ລູກຄ້າເລືອກ',
     scales_with_sugar_badge:'ປ່ຽນຕາມນ້ຳຕານ',
@@ -1666,6 +1690,18 @@ var TRANSLATIONS = {
     edit_recipe:'แก้ไขสูตร', close_recipe:'ปิด', no_recipe_set:'ยังไม่ได้ตั้งสูตร',
     select_ingredient:'เลือกวัตถุดิบ…', amount_label:'จำนวน', add_line:'+ เพิ่ม',
     sort_az:'ก-ฮ', sort_chrono:'ใหม่สุด', duplicate:'ทำสำเนา', copy_suffix:' (สำเนา)',
+    location_setup_title:'ตั้งค่าอุปกรณ์นี้', location_setup_hint:'อุปกรณ์นี้จะใช้ที่สาขาใด? ตั้งค่าเพียงครั้งเดียว — ออเดอร์ สต็อก และการเปลี่ยนแปลงเมนูจากอุปกรณ์นี้จะเป็นของสาขานั้น แยกจากสาขาอื่นโดยสมบูรณ์',
+    location_admin_pin_prompt:'ป้อนรหัส PIN แอดมินของสาขานั้นเพื่อยืนยัน',
+    location_title:'สาขา', location_hint_prefix:'อุปกรณ์นี้ตั้งเป็น:', change_location_btn:'เปลี่ยนสาขา',
+    change_location_confirm:'เปลี่ยนสาขาของอุปกรณ์นี้หรือไม่? คุณจะต้องตั้งค่าใหม่และเข้าสู่ระบบด้วยรหัส PIN ของสาขานั้น',
+    change_location_master_only_hint:'เฉพาะบัญชีแอดมิน Donkoi ดั้งเดิมเท่านั้นที่สามารถเปลี่ยนสาขาของอุปกรณ์ได้',
+    remote_monitoring_title:'การเฝ้าติดตามระยะไกล', remote_monitoring_hint:'ดูออเดอร์ รายได้ และสต็อกแบบสดของสาขาอื่นโดยไม่ต้องไปเยี่ยมชมหรือเปลี่ยนสาขาของอุปกรณ์นี้',
+    remote_viewing_prefix:'กำลังดูระยะไกล', remote_viewing_suffix:'— ข้อมูลของอุปกรณ์นี้ไม่ได้รับผลกระทบ',
+    stop_remote_viewing:'หยุดการดูระยะไกล', view_remotely_prefix:'ดู',
+    copy_stock_setup_title:'คัดลอกการตั้งค่าสต็อก', copy_stock_setup_hint:'คัดลอกวัตถุดิบและพรีมิกซ์จากสาขานี้ไปยังสาขาอื่น — ชื่อ หน่วย ต้นทุน และเป้าหมายรายสัปดาห์/รายเดือนจะถูกคัดลอกไป แต่จำนวนสต็อกร้านและสต็อกคลังจริงจะเริ่มต้นที่ 0 (สต็อกจริงของแต่ละสาขาเป็นของสาขานั้นเอง) การดำเนินการนี้จะแทนที่วัตถุดิบและพรีมิกซ์ที่มีอยู่ของสาขาปลายทางทั้งหมด',
+    copy_stock_setup_confirm:'คัดลอกวัตถุดิบและพรีมิกซ์ไปยัง {location} หรือไม่? การดำเนินการนี้จะแทนที่ทุกอย่างที่มีอยู่ในปัจจุบัน',
+    copy_stock_setup_success:'คัดลอกวัตถุดิบและพรีมิกซ์ไปยัง {location} แล้ว', copying_ellipsis:'กำลังคัดลอก…', copy_to_prefix:'คัดลอกไป',
+    rename_locations_title:'เปลี่ยนชื่อสาขา', rename_locations_hint:'เปลี่ยนชื่อที่ใช้เรียกแต่ละสาขา ชื่อใหม่จะปรากฏทุกที่โดยอัตโนมัติ — รวมถึงหน้าตั้งค่าอุปกรณ์ — โดยไม่ต้องโหลดหน้าใหม่',
     copy_to_size_prefix:'คัดลอกไปขนาด', copy_recipe_overwrite_confirm:'ขนาด {size} มีสูตรอยู่แล้ว — แทนที่ด้วยอันนี้หรือไม่?',
     scales_with_sugar_label:'ปรับตามระดับความหวาน (เช่น น้ำเชื่อม) — ปริมาณที่หักจะปรับตามความหวานที่ลูกค้าเลือก',
     scales_with_sugar_badge:'ปรับตามความหวาน',
@@ -1737,16 +1773,111 @@ function tr(key){
   return (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]!=null) ? TRANSLATIONS[lang][key] : (TRANSLATIONS.en[key]!=null ? TRANSLATIONS.en[key] : key);
 }
 
+/* ================= LOCATIONS =================
+   Each location has its own Firestore collection prefix (so its data is
+   completely separate from any other location's — Donkoi, the original
+   location, stays unprefixed so existing production data keeps working
+   with zero migration) and its own set of Auth accounts (so PINs are
+   fully independent per location, not shared). To add a location: add an
+   entry here, then create its 5 accounts in Firebase Console →
+   Authentication using the exact emails listed, and add its manager/admin
+   UIDs to the Firestore security rules (same pattern as the existing
+   two). */
+/* Only this ONE specific account — the original Donkoi admin — can
+   reassign a device's location. This is checked by UID, not by role, so
+   Location 2's admin (or any future location's admin) being an "admin"
+   is not enough on its own; location changes stay centralized to a
+   single person regardless of how many locations exist. */
+var MASTER_ADMIN_UID = "ZvjCZc0Vx9YjzQ6pfeI8PZUSAvm2";
+var LOCATIONS = {
+  main: {
+    key: 'main',
+    name: 'Donkoi',
+    prefix: '', // unprefixed — this is the original, already-live location
+    emails: {
+      staff1: 'staff@memetea-pos.com',
+      staff2: 'staff2@memetea-pos.com',
+      staff3: 'staff3@memetea-pos.com',
+      manager: 'manager@memetea-pos.com',
+      admin: 'admin@memetea-pos.com'
+    }
+  },
+  loc2: {
+    key: 'loc2',
+    name: 'Location 2',
+    prefix: 'loc2_',
+    emails: {
+      staff1: 'staff-loc2@memetea-pos.com',
+      staff2: 'staff2-loc2@memetea-pos.com',
+      staff3: 'staff3-loc2@memetea-pos.com',
+      manager: 'manager-loc2@memetea-pos.com',
+      admin: 'admin-loc2@memetea-pos.com'
+    }
+  }
+};
+var LOCATION_STORAGE_KEY = 'pos_active_location';
+/* Location display names ("Donkoi", "Location 2") are editable at
+   runtime (Settings -> Rename Locations, master-admin-only), which means
+   they can't just be the hardcoded defaults above forever. They're kept
+   in ONE shared, unprefixed Firestore document — NOT under any
+   location's own prefix — because this needs to be readable on the
+   location picker screen itself, which appears before any location has
+   been chosen and before anyone has logged in. Started unconditionally
+   at boot (see BOOTSTRAP section), independent of auth/location state. */
+function setupLocationNamesListener(){
+  realDb.collection('pos_locations_meta').doc('main').onSnapshot(function(doc){
+    if(doc.exists && doc.data().names){
+      var names = doc.data().names;
+      Object.keys(LOCATIONS).forEach(function(k){
+        if(names[k] && names[k].trim()) LOCATIONS[k].name = names[k];
+      });
+    }
+    render();
+  }, function(err){
+    console.error('Could not load location names', err);
+  });
+}
+/* Which location THIS PHYSICAL DEVICE is assigned to — persisted in
+   localStorage so it's set once (via the admin-PIN-gated setup screen)
+   and survives across reloads. It's only re-triggered if the device's
+   storage is actually cleared (or an admin explicitly changes it via
+   Settings), not on every ordinary reload. */
+function getActiveLocationKey(){
+  try { return window.localStorage.getItem(LOCATION_STORAGE_KEY) || null; } catch(e){ return null; }
+}
+function getActiveLocation(){
+  return LOCATIONS[getActiveLocationKey()] || LOCATIONS.main;
+}
+/* The master admin can temporarily VIEW another location's live data
+   (Settings -> Remote Monitoring) without touching their own device's
+   permanent location assignment — this is what actually makes "monitor
+   another branch without visiting it" possible. Everyone else, and the
+   master admin whenever they haven't activated it, just sees their own
+   device's assigned location as normal. */
+function getEffectiveLocation(){
+  if(state.remoteViewLocation && state.currentUid===MASTER_ADMIN_UID){
+    return LOCATIONS[state.remoteViewLocation] || getActiveLocation();
+  }
+  return getActiveLocation();
+}
 /* ================= LOGIN ACCOUNTS =================
-   These two email addresses must exactly match the two users you create
-   under Firebase Console → Authentication → Users. The PIN each person
-   types is that account's password — it is never stored in this file,
-   which is what makes this real, server-checked protection. */
-var STAFF_EMAIL = "staff@memetea-pos.com";
-var STAFF_EMAIL_2 = "staff2@memetea-pos.com";
-var STAFF_EMAIL_3 = "staff3@memetea-pos.com";
-var MANAGER_EMAIL = "manager@memetea-pos.com";
-var ADMIN_EMAIL = "admin@memetea-pos.com";
+   These email addresses must exactly match accounts you create under
+   Firebase Console → Authentication → Users, for whichever location is
+   currently active on this device. The PIN each person types is that
+   account's password — it is never stored in this file, which is what
+   makes this real, server-checked protection. Reassigned by
+   applyLocationConfig() whenever the active location is set/changed, so
+   every login attempt after that point uses the right location's accounts. */
+var STAFF_EMAIL, STAFF_EMAIL_2, STAFF_EMAIL_3, MANAGER_EMAIL, ADMIN_EMAIL;
+function applyLocationConfig(){
+  var loc = getActiveLocation();
+  STAFF_EMAIL = loc.emails.staff1;
+  STAFF_EMAIL_2 = loc.emails.staff2;
+  STAFF_EMAIL_3 = loc.emails.staff3;
+  MANAGER_EMAIL = loc.emails.manager;
+  ADMIN_EMAIL = loc.emails.admin;
+}
+applyLocationConfig();
 
 /* ================= STATE ================= */
 var state = {
@@ -1795,6 +1926,13 @@ var state = {
   search:'',
   activeCategory:'All',
   sortPrefs:{menu:'az', toppings:'az', premix:'az', ingredients:'severity'}, // 'az' (alphabetical) | 'chrono' (creation order, oldest first); ingredients defaults to 'severity' (existing stock-urgency sort)
+  currentUid:null, // set by startAuthListener whenever signed in
+  remoteViewLocation:null, // master-admin-only: key of a location being temporarily viewed remotely, or null when viewing this device's own location
+  copyStockSetupBusy:false,
+  locationPinTarget:null, // key of the location whose admin PIN is currently being verified on the setup screen, or null
+  locationPinInput:'',
+  locationPinError:false,
+  locationPinChecking:false,
   orderView:'categories', // 'categories' | 'items'
   orderCurrency:'LAK',
   modal:null,          // {itemId, size, sugar, ice, toppingIds:[], qty}
@@ -1883,6 +2021,15 @@ var deletedOrdersUnsub = null;
 // without disturbing whatever account is actually logged into the main session.
 var trainingCheckApp = firebase.initializeApp(FIREBASE_CONFIG, "trainingCheckApp");
 
+// A fifth isolated app instance used only to verify a location's ADMIN PIN
+// specifically, when a device is being set to that location (see the
+// Location Setup screen). This is a real security gate, not just a UI
+// step: it stops anyone who clears this device's local storage (which
+// bypasses the master-admin-only "Change Location" control in Settings
+// entirely) from being able to just tap a location and start operating as
+// it — they still need that specific location's actual admin PIN.
+var locationCheckApp = firebase.initializeApp(FIREBASE_CONFIG, "locationCheckApp");
+
 /* ---- Training Mode ----
    Every read/write in the whole app goes through db / managerDb / adminDb.
    Wrapping them in this proxy means Training Mode needs no changes anywhere
@@ -1896,7 +2043,8 @@ var trainingCheckApp = firebase.initializeApp(FIREBASE_CONFIG, "trainingCheckApp
 function makeDbProxy(realFirestore){
   return {
     collection: function(name){
-      var actualName = state.trainingMode ? ('training_'+name) : name;
+      var actualName = getEffectiveLocation().prefix + name;
+      if(state.trainingMode) actualName = 'training_' + actualName;
       return realFirestore.collection(actualName);
     },
     batch: function(){ return realFirestore.batch(); },
@@ -2617,6 +2765,9 @@ function render(afterRender){
 
 /* ================= APP SHELL ================= */
 function buildAppHTML(){
+  if(!getActiveLocationKey()){
+    return buildLocationSetupScreen();
+  }
   if(!state.unlocked){
     return buildLoginScreen();
   }
@@ -2629,6 +2780,7 @@ function buildAppHTML(){
   var html = '';
   html += buildHeader();
   if(state.trainingMode) html += buildTrainingBanner();
+  if(state.remoteViewLocation) html += buildRemoteViewBanner();
   html += '<div class="pos-main">';
   if(state.tab==='order') html += buildOrderTab();
   else if(state.tab==='history') html += buildHistoryTab();
@@ -2652,6 +2804,15 @@ function buildTrainingBanner(){
   '<div class="training-banner">' +
     '<span>🎓 '+tr('training_mode_active')+'</span>' +
     '<button class="btn btn-small" onclick="POS.quitTrainingMode()">'+tr('quit_training')+'</button>' +
+  '</div>';
+}
+function buildRemoteViewBanner(){
+  var loc = LOCATIONS[state.remoteViewLocation];
+  if(!loc) return '';
+  return '' +
+  '<div class="training-banner" style="background:var(--taro);">' +
+    '<span>🔭 '+tr('remote_viewing_prefix')+' '+escapeHtml(loc.name)+' '+tr('remote_viewing_suffix')+'</span>' +
+    '<button class="btn btn-small" onclick="POS.stopRemoteView()">'+tr('stop_remote_viewing')+'</button>' +
   '</div>';
 }
 function buildTrainingPinGate(){
@@ -2691,7 +2852,7 @@ function buildHeader(){
     return '<button class="'+(state.tab===td[0]?'active':'')+'" onclick="POS.setTab(\''+td[0]+'\')">'+tr(td[1])+'</button>';
   }).join('');
   var syncHtml = state.syncStatus==='synced' ? '<span class="sync-dot sync-ok" title="Synced with all devices">🟢 Synced</span>' :
-    state.syncStatus==='error' ? '<span class="sync-dot sync-err" title="'+escapeHtml('Problem with: '+state.syncErrorLabel+' — '+state.syncErrorMessage)+'">🔴 Offline ('+escapeHtml(state.syncErrorLabel)+')</span>' :
+    state.syncStatus==='error' ? '<span class="sync-dot sync-err" style="cursor:pointer;" title="'+escapeHtml('Problem with: '+state.syncErrorLabel+' — '+state.syncErrorMessage)+'" onclick="POS.showSyncErrorDetail()">🔴 Offline ('+escapeHtml(state.syncErrorLabel)+')</span>' :
     '<span class="sync-dot sync-wait" title="Connecting…">🟡 Connecting…</span>';
   var langDefs = [['en','EN'],['lo','ລາວ'],['th','ไทย']];
   var langHtml = langDefs.map(function(ld){
@@ -2727,6 +2888,58 @@ function buildHeader(){
 }
 
 /* ================= LOGIN SCREEN ================= */
+function buildLocationSetupScreen(){
+  if(state.locationPinTarget) return buildLocationPinCheckScreen();
+  var buttons = Object.keys(LOCATIONS).map(function(key){
+    var loc = LOCATIONS[key];
+    return '<button class="btn btn-primary" style="margin-top:10px;" onclick="POS.startLocationPinCheck(\''+key+'\')">'+escapeHtml(loc.name)+'</button>';
+  }).join('');
+  return '' +
+  '<div class="login-screen">' +
+    '<div class="login-card">' +
+      logoImg('cup-mark') +
+      '<h1>'+tr('location_setup_title')+'</h1>' +
+      '<p>'+tr('location_setup_hint')+'</p>' +
+      buttons +
+    '</div>' +
+  '</div>';
+}
+/* Whichever location is tapped on the setup screen, THAT location's own
+   admin PIN is required before the device actually commits to it — this
+   is a real, server-checked gate (verified via a throwaway sign-in on an
+   isolated app instance, see locationCheckApp), not just a UI step. It's
+   what stops someone from clearing this device's storage and simply
+   tapping their way into claiming a different location. */
+function buildLocationPinCheckScreen(){
+  var loc = LOCATIONS[state.locationPinTarget];
+  var locked = isPinLocked();
+  var dots = '';
+  for(var i=0;i<state.locationPinInput.length;i++){
+    dots += '<span class="pin-dot filled'+(state.locationPinError?' error':'')+'"></span>';
+  }
+  if(!dots) dots = '<span class="pin-dots-empty">'+tr('enter_pin_prompt').split(',')[0]+'</span>';
+  var disabled = state.locationPinChecking || locked;
+  var keys = ['1','2','3','4','5','6','7','8','9','back','0','enter'];
+  var keypadHtml = keys.map(function(k){
+    if(k==='back') return '<button class="pin-key-back" '+(disabled?'disabled':'')+' onclick="POS.locationPinBackspace()">⌫</button>';
+    if(k==='enter') return '<button class="pin-key-enter" '+(disabled?'disabled':'')+' onclick="POS.locationPinSubmit()">✓</button>';
+    return '<button '+(disabled?'disabled':'')+' onclick="POS.locationPinPress(\''+k+'\')">'+k+'</button>';
+  }).join('');
+  return '' +
+  '<div class="login-screen">' +
+    '<div class="login-card">' +
+      logoImg('cup-mark') +
+      '<h1>'+escapeHtml(loc.name)+'</h1>' +
+      (locked ? buildPinLockoutNotice() : (
+        '<p>'+(state.locationPinChecking?tr('checking'):tr('location_admin_pin_prompt'))+'</p>' +
+        '<div class="pin-dots">'+dots+'</div>' +
+        '<div class="pin-error-msg">'+(state.locationPinError?tr('incorrect_pin'):'&nbsp;')+'</div>'
+      )) +
+      '<div class="pin-keypad">'+keypadHtml+'</div>' +
+      (locked ? '' : '<button class="btn btn-ghost" style="margin-top:12px;" onclick="POS.cancelLocationPinCheck()">'+tr('cancel')+'</button>') +
+    '</div>' +
+  '</div>';
+}
 function buildLoginScreen(){
   var locked = isPinLocked();
   var dots = '';
@@ -4831,6 +5044,41 @@ function buildSettingsTab(){
     '<p class="hint">'+(privileged ? tr('privileged_session_hint') : tr('settings_restricted_hint'))+'</p>' +
     (privileged ? '' : '<button class="btn btn-ghost btn-small" onclick="POS.lockSettingsTab()">'+tr('lock_tab_now')+'</button>') +
   '</div>' +
+  (state.loggedInRole==='admin' ? ('' +
+    '<div class="section-card">' +
+      '<h2>'+tr('location_title')+'</h2>' +
+      '<p class="hint">'+tr('location_hint_prefix')+' <strong>'+escapeHtml(getActiveLocation().name)+'</strong></p>' +
+      (state.currentUid===MASTER_ADMIN_UID
+        ? '<button class="btn btn-outline btn-small" onclick="POS.changeLocationRequest()">'+tr('change_location_btn')+'</button>'
+        : '<p class="hint">'+tr('change_location_master_only_hint')+'</p>') +
+      (state.currentUid===MASTER_ADMIN_UID ? ('' +
+        '<h3 style="margin-top:16px;">'+tr('remote_monitoring_title')+'</h3>' +
+        '<p class="hint">'+tr('remote_monitoring_hint')+'</p>' +
+        (state.remoteViewLocation ? ('' +
+          '<p class="hint">'+tr('remote_viewing_prefix')+' <strong>'+escapeHtml(LOCATIONS[state.remoteViewLocation].name)+'</strong> '+tr('remote_viewing_suffix')+'</p>' +
+          '<button class="btn btn-outline btn-small" onclick="POS.stopRemoteView()">'+tr('stop_remote_viewing')+'</button>'
+        ) : (
+          Object.keys(LOCATIONS).filter(function(k){ return k!==getActiveLocationKey(); }).map(function(k){
+            return '<button class="btn btn-outline btn-small" style="margin-right:8px;" onclick="POS.startRemoteView(\''+k+'\')">'+tr('view_remotely_prefix')+' '+escapeHtml(LOCATIONS[k].name)+'</button>';
+          }).join('')
+        )) +
+        '<h3 style="margin-top:16px;">'+tr('copy_stock_setup_title')+'</h3>' +
+        '<p class="hint">'+tr('copy_stock_setup_hint')+'</p>' +
+        (state.copyStockSetupBusy ? '<p class="hint">'+tr('copying_ellipsis')+'</p>' : (
+          Object.keys(LOCATIONS).filter(function(k){ return k!==getActiveLocationKey(); }).map(function(k){
+            return '<button class="btn btn-outline btn-small" style="margin-right:8px;" onclick="POS.copyStockSetupToLocation(\''+k+'\')">'+tr('copy_to_prefix')+' '+escapeHtml(LOCATIONS[k].name)+'</button>';
+          }).join('')
+        )) +
+        '<h3 style="margin-top:16px;">'+tr('rename_locations_title')+'</h3>' +
+        '<p class="hint">'+tr('rename_locations_hint')+'</p>' +
+        '<div class="field-grid">' +
+          Object.keys(LOCATIONS).map(function(k){
+            return '<div class="field"><label>'+escapeHtml(k)+'</label><input type="text" value="'+escapeHtml(LOCATIONS[k].name)+'" onblur="POS.saveLocationName(\''+k+'\',this.value)"/></div>';
+          }).join('') +
+        '</div>'
+      ) : '') +
+    '</div>'
+  ) : '') +
   '<div class="section-card">' +
     '<h2>'+tr('shop_details')+'</h2><p class="hint">'+tr('shop_details_hint')+'</p>' +
     '<div class="field-grid">' +
@@ -5652,6 +5900,189 @@ var POS = {
       });
   },
 
+  startLocationPinCheck: function(key){
+    if(!LOCATIONS[key]) return;
+    state.locationPinTarget = key;
+    state.locationPinInput = '';
+    state.locationPinError = false;
+    state.locationPinChecking = false;
+    render();
+  },
+  locationPinPress: function(digit){
+    if(state.locationPinChecking || isPinLocked()) return;
+    if(state.locationPinInput.length >= 12) return;
+    state.locationPinInput += digit;
+    state.locationPinError = false;
+    render();
+  },
+  locationPinBackspace: function(){
+    if(state.locationPinChecking || isPinLocked()) return;
+    state.locationPinInput = state.locationPinInput.slice(0,-1);
+    state.locationPinError = false;
+    render();
+  },
+  /* Verifies specifically the TARGET location's own admin account — not
+     any of its staff/manager accounts — via a throwaway sign-in on the
+     isolated locationCheckApp instance (immediately signed back out
+     either way, so this never disturbs whatever's actually logged into
+     the main session). Only on success does the device's stored location
+     actually get set. Failures count against the same shared PIN lockout
+     as every other PIN screen in the app, so repeated guesses here lock
+     the whole device out just like anywhere else. */
+  locationPinSubmit: function(){
+    if(state.locationPinChecking || !state.locationPinInput || isPinLocked()) return;
+    state.locationPinChecking = true;
+    state.locationPinError = false;
+    render();
+    var pin = state.locationPinInput;
+    var targetKey = state.locationPinTarget;
+    var targetAdminEmail = LOCATIONS[targetKey].emails.admin;
+    var checkAuth = locationCheckApp.auth();
+    checkAuth.signInWithEmailAndPassword(targetAdminEmail, pin).then(function(){
+      return checkAuth.signOut();
+    }).then(function(){
+      state.locationPinChecking = false;
+      state.locationPinInput = '';
+      state.locationPinTarget = null;
+      registerPinSuccess();
+      try { window.localStorage.setItem(LOCATION_STORAGE_KEY, targetKey); } catch(e){}
+      applyLocationConfig();
+      render();
+    }).catch(function(e){
+      console.error('Location admin PIN check failed', e);
+      state.locationPinChecking = false;
+      state.locationPinError = true;
+      state.locationPinInput = '';
+      registerPinFailure();
+      render();
+    });
+  },
+  cancelLocationPinCheck: function(){
+    state.locationPinTarget = null;
+    state.locationPinInput = '';
+    state.locationPinError = false;
+    render();
+  },
+  /* Admin-only: lets this device be reassigned to a different location.
+     Clears the stored location (bringing back the setup screen) and signs
+     out, since switching location means switching to a completely
+     different set of accounts/PINs — staying signed in under the old
+     location's account wouldn't make sense once the data underneath has
+     changed. */
+  changeLocationRequest: function(){
+    if(state.currentUid !== MASTER_ADMIN_UID) return;
+    if(!window.confirm(tr('change_location_confirm'))) return;
+    try { window.localStorage.removeItem(LOCATION_STORAGE_KEY); } catch(e){}
+    firebase.auth().signOut();
+  },
+  /* Master-admin-only: temporarily view another location's live data —
+     orders, revenue, stock, everything — without touching this device's
+     own permanent location assignment and without visiting that branch.
+     Tears down the real-time listeners and rebuilds them against the
+     target location's collections (same live-switch mechanism Training
+     Mode already uses), so data updates in real time just like being on
+     that location's own device would. */
+  startRemoteView: function(key){
+    if(state.currentUid !== MASTER_ADMIN_UID) return;
+    if(!LOCATIONS[key] || key === getActiveLocationKey()) return;
+    teardownDataListeners();
+    state.remoteViewLocation = key;
+    state.loaded = false;
+    state.settingsLoaded = false;
+    state.menuLoaded = false;
+    state.toppingsLoaded = false;
+    state.ordersLoaded = false;
+    setupDataListeners();
+    render();
+  },
+  stopRemoteView: function(){
+    if(!state.remoteViewLocation) return;
+    teardownDataListeners();
+    state.remoteViewLocation = null;
+    state.loaded = false;
+    state.settingsLoaded = false;
+    state.menuLoaded = false;
+    state.toppingsLoaded = false;
+    state.ordersLoaded = false;
+    setupDataListeners();
+    render();
+  },
+  /* Copies Raw Materials and Pre-Mix from THIS device's own actual
+     location (ignoring any active remote view, so this never accidentally
+     copies FROM a remotely-viewed location) to a target location.
+     Deliberately does NOT copy real stock/houseStock quantities — those
+     are physical inventory counts specific to each location, and Location
+     2 hasn't actually received whatever Donkoi happens to have on the
+     shelf, so carrying those numbers over would be fabricated data. Every
+     other field DOES carry over, including weeklyTarget/monthlyTarget
+     (useful restocking targets to start from) and all cost/unit data.
+     Pre-Mix has no stock field of its own — it's a pure recipe/
+     composition template — so it copies through unchanged. Item ids are
+     preserved on the copy, so if recipes are ever copied over too, their
+     ingredient/pre-mix references will still line up correctly.
+     Overwrites the target location's existing Raw Materials and Pre-Mix
+     entirely — confirms first. Uses realDb (not the location-prefixed db
+     proxy) since this deliberately needs to read one location's
+     collections while writing another's. Gated to the Donkoi master
+     admin account specifically, same as every other cross-location
+     action in this app. */
+  copyStockSetupToLocation: function(targetKey){
+    if(state.currentUid !== MASTER_ADMIN_UID) return;
+    if(!LOCATIONS[targetKey] || targetKey === getActiveLocationKey()) return;
+    var targetLoc = LOCATIONS[targetKey];
+    if(!window.confirm(tr('copy_stock_setup_confirm').replace('{location}', targetLoc.name))) return;
+    state.copyStockSetupBusy = true;
+    render();
+    var sourcePrefix = getActiveLocation().prefix;
+    var targetPrefix = targetLoc.prefix;
+    Promise.all([
+      realDb.collection(sourcePrefix+'pos_ingredients').doc('main').get(),
+      realDb.collection(sourcePrefix+'pos_premix').doc('main').get()
+    ]).then(function(results){
+      var sourceIngredients = (results[0].exists && results[0].data().items) ? results[0].data().items : [];
+      var ingredientsItems = sourceIngredients.map(function(ing){
+        var copy = JSON.parse(JSON.stringify(ing));
+        copy.stock = 0;
+        copy.houseStock = 0;
+        return copy;
+      });
+      var premixItems = (results[1].exists && results[1].data().items) ? results[1].data().items : [];
+      return Promise.all([
+        realDb.collection(targetPrefix+'pos_ingredients').doc('main').set({items: ingredientsItems}),
+        realDb.collection(targetPrefix+'pos_premix').doc('main').set({items: premixItems})
+      ]);
+    }).then(function(){
+      state.copyStockSetupBusy = false;
+      render();
+      window.alert(tr('copy_stock_setup_success').replace('{location}', targetLoc.name));
+    }).catch(function(e){
+      console.error('Could not copy stock setup', e);
+      state.copyStockSetupBusy = false;
+      render();
+      window.alert('Could not copy stock setup: '+e.message);
+    });
+  },
+  /* Renames a location's display name — writes to the shared, unprefixed
+     pos_locations_meta doc that setupLocationNamesListener reads, so the
+     change appears live everywhere the name is shown (the location
+     picker, Remote Monitoring buttons, Copy Stock Setup buttons, etc.)
+     without needing a reload. Master-admin-only, same as every other
+     cross-location action. */
+  saveLocationName: function(key, value){
+    if(state.currentUid !== MASTER_ADMIN_UID) return;
+    if(!LOCATIONS[key]) return;
+    var trimmed = (value||'').trim();
+    if(!trimmed || trimmed === LOCATIONS[key].name) return;
+    var names = {};
+    Object.keys(LOCATIONS).forEach(function(k){ names[k] = LOCATIONS[k].name; });
+    names[key] = trimmed;
+    realDb.collection('pos_locations_meta').doc('main').set({names: names}).catch(function(e){
+      window.alert('Could not save location name: '+e.message);
+    });
+  },
+  showSyncErrorDetail: function(){
+    window.alert('Sync problem with: '+state.syncErrorLabel+'\n\n'+state.syncErrorMessage);
+  },
   setLanguage: function(lang){
     state.language = lang;
     render();
@@ -6837,6 +7268,8 @@ document.addEventListener('keydown', function(e){
   var press, backspace, submit;
   if(state.managerPrompt){
     press = POS.managerPinPress; backspace = POS.managerPinBackspace; submit = POS.managerPinSubmit;
+  } else if(state.locationPinTarget){
+    press = POS.locationPinPress; backspace = POS.locationPinBackspace; submit = POS.locationPinSubmit;
   } else if(state.trainingPromptOpen){
     press = POS.trainingPinPress; backspace = POS.trainingPinBackspace; submit = POS.trainingPinSubmit;
   } else if(!state.unlocked){
@@ -6916,10 +7349,12 @@ function startAuthListener(){
   firebase.auth().onAuthStateChanged(function(user){
     if(user){
       state.unlocked = true;
+      state.currentUid = user.uid;
       render();
       ensureInitialized();
     } else {
       state.unlocked = false;
+      state.currentUid = null;
       state.loggedInRole = null;
       state.loggedInAccount = null;
       state.settingsUnlocked = false;
@@ -6936,5 +7371,6 @@ if(sessionIsStale()){
 } else {
   startAuthListener();
 }
+setupLocationNamesListener();
 })();
 </script>
