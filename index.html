@@ -1330,10 +1330,12 @@ var TRANSLATIONS = {
     remote_monitoring_title:'Remote Monitoring', remote_monitoring_hint:'View another location\'s live orders, revenue, and stock without visiting it or changing this device\'s own location.',
     remote_viewing_prefix:'Remotely viewing', remote_viewing_suffix:'— this device\'s own data is untouched.',
     stop_remote_viewing:'Stop Remote Viewing', view_remotely_prefix:'View',
-    copy_stock_setup_title:'Copy Stock Setup', copy_stock_setup_hint:'Copy Raw Materials and Pre-Mix from this location to another — names, units, costs, and weekly/monthly targets carry over, but actual stock and house stock quantities start at 0 (each location\'s real inventory is its own). This replaces the target location\'s existing Raw Materials and Pre-Mix entirely.',
+    copy_stock_setup_title:'Copy Full Menu & Stock Setup', copy_stock_setup_hint:'Copy everything that defines the menu — Raw Materials, Pre-Mix, Menu items, Categories, Recipes, and Toppings — from this location to another. Names, units, costs, and weekly/monthly targets carry over, but actual stock and house stock quantities start at 0 (each location\'s real inventory is its own). This replaces the target location\'s existing data in all of these areas entirely — for copying just one item without touching anything else, use that item\'s own "Copy to" button in the Menu tab instead.',
     copy_stock_setup_confirm:'Copy Raw Materials and Pre-Mix to {location}? This will replace everything currently there.',
     copy_stock_setup_success:'Raw Materials and Pre-Mix copied to {location}.', copying_ellipsis:'Copying…', copy_to_prefix:'Copy to',
     rename_locations_title:'Rename Locations', rename_locations_hint:'Change what each location is called. The new name appears everywhere automatically — including the device setup screen — with no reload needed.',
+    duplicate_item_to_location_confirm:'Copy "{item}" to {location}? This brings its recipe, the raw materials and pre-mix it needs, its category, and all toppings — added to whatever\'s already there, nothing at {location} gets removed.',
+    duplicate_item_to_location_success:'"{item}" copied to {location}.',
     copy_to_size_prefix:'Copy to', copy_recipe_overwrite_confirm:'Size {size} already has a recipe — replace it with this one?',
     scales_with_sugar_label:'Scales with sugar level (e.g. Syrup) — deducted amount adjusts with the customer\'s chosen sweetness',
     scales_with_sugar_badge:'Scales with sugar',
@@ -1514,10 +1516,12 @@ var TRANSLATIONS = {
     remote_monitoring_title:'ການເຝົ້າຕິດຕາມທາງໄກ', remote_monitoring_hint:'ເບິ່ງອໍເດີ, ລາຍຮັບ, ແລະສະຕັອກແບບສົດຂອງສາຂາອື່ນໂດຍບໍ່ຕ້ອງໄປຢ້ຽມຢາມ ຫຼື ປ່ຽນສາຂາຂອງອຸປະກອນນີ້.',
     remote_viewing_prefix:'ກຳລັງເບິ່ງທາງໄກ', remote_viewing_suffix:'— ຂໍ້ມູນຂອງອຸປະກອນນີ້ບໍ່ຖືກກະທົບ.',
     stop_remote_viewing:'ຢຸດການເບິ່ງທາງໄກ', view_remotely_prefix:'ເບິ່ງ',
-    copy_stock_setup_title:'ສຳເນົາການຕັ້ງຄ່າສະຕັອກ', copy_stock_setup_hint:'ສຳເນົາວັດຖຸດິບ ແລະ ນ້ຳຫວານປະສົມລ່ວງໜ້າຈາກສາຂານີ້ໄປສາຂາອື່ນ — ຊື່, ຫົວໜ່ວຍ, ຕົ້ນທຶນ, ແລະເປົ້າໝາຍລາຍອາທິດ/ລາຍເດືອນຈະຖືກສຳເນົາໄປ ແຕ່ຈຳນວນສະຕັອກຮ້ານ ແລະ ສະຕັອກສາງຈິງຈະເລີ່ມຕົ້ນທີ່ 0 (ສະຕັອກຈິງຂອງແຕ່ລະສາຂາເປັນຂອງສາຂານັ້ນເອງ). ນີ້ຈະແທນທີ່ວັດຖຸດິບ ແລະ ນ້ຳຫວານປະສົມລ່ວງໜ້າຂອງສາຂາເປົ້າໝາຍທັງໝົດ.',
+    copy_stock_setup_title:'ສຳເນົາເມນູ ແລະ ສະຕັອກທັງໝົດ', copy_stock_setup_hint:'ສຳເນົາທຸກຢ່າງທີ່ກຳນົດເມນູ — ວັດຖຸດິບ, ນ້ຳຫວານປະສົມລ່ວງໜ້າ, ລາຍການເມນູ, ໝວດໝູ່,ສູດ, ແລະ ທັອບປິ້ງ — ຈາກສາຂານີ້ໄປສາຂາອື່ນ. ຊື່, ຫົວໜ່ວຍ, ຕົ້ນທຶນ, ແລະເປົ້າໝາຍລາຍອາທິດ/ລາຍເດືອນຈະຖືກສຳເນົາໄປ ແຕ່ຈຳນວນສະຕັອກຮ້ານ ແລະ ສະຕັອກສາງຈິງຈະເລີ່ມຕົ້ນທີ່ 0. ນີ້ຈະແທນທີ່ຂໍ້ມູນເຫຼົ່ານີ້ຂອງສາຂາເປົ້າໝາຍທັງໝົດ — ຖ້າຕ້ອງການສຳເນົາສະເພາະລາຍການດຽວ ໃຫ້ໃຊ້ປຸ່ມ "ສຳເນົາໄປ" ຂອງລາຍການນັ້ນໃນແທັບເມນູແທນ.',
     copy_stock_setup_confirm:'ສຳເນົາວັດຖຸດິບ ແລະ ນ້ຳຫວານປະສົມລ່ວງໜ້າໄປ {location} ບໍ? ນີ້ຈະແທນທີ່ທຸກຢ່າງທີ່ມີຢູ່ໃນປັດຈຸບັນ.',
     copy_stock_setup_success:'ສຳເນົາວັດຖຸດິບ ແລະ ນ້ຳຫວານປະສົມລ່ວງໜ້າໄປ {location} ແລ້ວ.', copying_ellipsis:'ກຳລັງສຳເນົາ…', copy_to_prefix:'ສຳເນົາໄປ',
     rename_locations_title:'ປ່ຽນຊື່ສາຂາ', rename_locations_hint:'ປ່ຽນຊື່ທີ່ໃຊ້ເອີ້ນແຕ່ລະສາຂາ. ຊື່ໃໝ່ຈະປາກົດຢູ່ທຸກບ່ອນໂດຍອັດຕະໂນມັດ — ລວມທັງໜ້າຕັ້ງຄ່າອຸປະກອນ — ໂດຍບໍ່ຕ້ອງໂຫຼດຫນ້າໃໝ່.',
+    duplicate_item_to_location_confirm:'ສຳເນົາ "{item}" ໄປ {location} ບໍ? ນີ້ຈະນຳສູດ, ວັດຖຸດິບ ແລະ ນ້ຳຫວານປະສົມລ່ວງໜ້າທີ່ຈຳເປັນ, ໝວດໝູ່, ແລະທັອບປິ້ງທັງໝົດໄປນຳ — ຈະຖືກເພີ່ມເຂົ້າກັບສິ່ງທີ່ມີຢູ່ແລ້ວ, ບໍ່ມີຫຍັງຢູ່ {location} ຖືກລຶບ.',
+    duplicate_item_to_location_success:'ສຳເນົາ "{item}" ໄປ {location} ແລ້ວ.',
     copy_to_size_prefix:'ສຳເນົາໄປຂະໜາດ', copy_recipe_overwrite_confirm:'ຂະໜາດ {size} ມີສູດຢູ່ແລ້ວ — ແທນທີ່ດ້ວຍອັນນີ້ບໍ?',
     scales_with_sugar_label:'ປ່ຽນຕາມລະດັບນ້ຳຕານ (ເຊັ່ນ: ນ້ຳຫວານ) — ຈຳນວນທີ່ຫັກຈະປັບຕາມລະດັບຄວາມຫວານທີ່ລູກຄ້າເລືອກ',
     scales_with_sugar_badge:'ປ່ຽນຕາມນ້ຳຕານ',
@@ -1698,10 +1702,12 @@ var TRANSLATIONS = {
     remote_monitoring_title:'การเฝ้าติดตามระยะไกล', remote_monitoring_hint:'ดูออเดอร์ รายได้ และสต็อกแบบสดของสาขาอื่นโดยไม่ต้องไปเยี่ยมชมหรือเปลี่ยนสาขาของอุปกรณ์นี้',
     remote_viewing_prefix:'กำลังดูระยะไกล', remote_viewing_suffix:'— ข้อมูลของอุปกรณ์นี้ไม่ได้รับผลกระทบ',
     stop_remote_viewing:'หยุดการดูระยะไกล', view_remotely_prefix:'ดู',
-    copy_stock_setup_title:'คัดลอกการตั้งค่าสต็อก', copy_stock_setup_hint:'คัดลอกวัตถุดิบและพรีมิกซ์จากสาขานี้ไปยังสาขาอื่น — ชื่อ หน่วย ต้นทุน และเป้าหมายรายสัปดาห์/รายเดือนจะถูกคัดลอกไป แต่จำนวนสต็อกร้านและสต็อกคลังจริงจะเริ่มต้นที่ 0 (สต็อกจริงของแต่ละสาขาเป็นของสาขานั้นเอง) การดำเนินการนี้จะแทนที่วัตถุดิบและพรีมิกซ์ที่มีอยู่ของสาขาปลายทางทั้งหมด',
+    copy_stock_setup_title:'คัดลอกเมนูและสต็อกทั้งหมด', copy_stock_setup_hint:'คัดลอกทุกอย่างที่กำหนดเมนู — วัตถุดิบ พรีมิกซ์ รายการเมนู หมวดหมู่ สูตร และท็อปปิ้ง — จากสาขานี้ไปยังสาขาอื่น ชื่อ หน่วย ต้นทุน และเป้าหมายรายสัปดาห์/รายเดือนจะถูกคัดลอกไป แต่จำนวนสต็อกร้านและสต็อกคลังจริงจะเริ่มต้นที่ 0 การดำเนินการนี้จะแทนที่ข้อมูลเหล่านี้ของสาขาปลายทางทั้งหมด — หากต้องการคัดลอกเฉพาะรายการเดียว ให้ใช้ปุ่ม "คัดลอกไป" ของรายการนั้นในแท็บเมนูแทน',
     copy_stock_setup_confirm:'คัดลอกวัตถุดิบและพรีมิกซ์ไปยัง {location} หรือไม่? การดำเนินการนี้จะแทนที่ทุกอย่างที่มีอยู่ในปัจจุบัน',
     copy_stock_setup_success:'คัดลอกวัตถุดิบและพรีมิกซ์ไปยัง {location} แล้ว', copying_ellipsis:'กำลังคัดลอก…', copy_to_prefix:'คัดลอกไป',
     rename_locations_title:'เปลี่ยนชื่อสาขา', rename_locations_hint:'เปลี่ยนชื่อที่ใช้เรียกแต่ละสาขา ชื่อใหม่จะปรากฏทุกที่โดยอัตโนมัติ — รวมถึงหน้าตั้งค่าอุปกรณ์ — โดยไม่ต้องโหลดหน้าใหม่',
+    duplicate_item_to_location_confirm:'คัดลอก "{item}" ไปยัง {location} หรือไม่? การดำเนินการนี้จะนำสูตร วัตถุดิบและพรีมิกซ์ที่จำเป็น หมวดหมู่ และท็อปปิ้งทั้งหมดไปด้วย — จะถูกเพิ่มเข้ากับสิ่งที่มีอยู่แล้ว ไม่มีอะไรที่ {location} ถูกลบ',
+    duplicate_item_to_location_success:'คัดลอก "{item}" ไปยัง {location} แล้ว',
     copy_to_size_prefix:'คัดลอกไปขนาด', copy_recipe_overwrite_confirm:'ขนาด {size} มีสูตรอยู่แล้ว — แทนที่ด้วยอันนี้หรือไม่?',
     scales_with_sugar_label:'ปรับตามระดับความหวาน (เช่น น้ำเชื่อม) — ปริมาณที่หักจะปรับตามความหวานที่ลูกค้าเลือก',
     scales_with_sugar_badge:'ปรับตามความหวาน',
@@ -1929,6 +1935,7 @@ var state = {
   currentUid:null, // set by startAuthListener whenever signed in
   remoteViewLocation:null, // master-admin-only: key of a location being temporarily viewed remotely, or null when viewing this device's own location
   copyStockSetupBusy:false,
+  duplicateItemBusyId:null,
   locationPinTarget:null, // key of the location whose admin PIN is currently being verified on the setup screen, or null
   locationPinInput:'',
   locationPinError:false,
@@ -3513,8 +3520,15 @@ function buildMenuTab(){
       var translationLine = translations.length ? '<div class="t3">'+escapeHtml(translations.join('   ·   '))+'</div>' : '';
       var unavailable = m.active===false;
       var unavailableLine = unavailable ? '<div class="t3" style="color:var(--danger);">⚠ '+tr('unavailable_label')+'</div>' : '';
+      var crossLocationBtns = (state.currentUid===MASTER_ADMIN_UID) ? ('' +
+        '<div style="width:100%;display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">' +
+          Object.keys(LOCATIONS).filter(function(k){ return k!==getActiveLocationKey(); }).map(function(k){
+            return '<button class="btn btn-ghost btn-small" onclick="POS.duplicateItemToLocation(\''+m.id+'\',\''+k+'\')">'+tr('copy_to_prefix')+' '+escapeHtml(LOCATIONS[k].name)+'</button>';
+          }).join('') +
+        '</div>'
+      ) : '';
       return '' +
-      '<div class="mgmt-row'+(unavailable?' order-row-refunded':'')+'">' +
+      '<div class="mgmt-row'+(unavailable?' order-row-refunded':'')+'" style="flex-wrap:wrap;">' +
         thumb +
         '<div class="info"><div class="t1">'+escapeHtml(m.name)+'</div>'+translationLine+unavailableLine+'<div class="t2">'+priceStr+'</div></div>' +
         '<div class="acts">' +
@@ -3523,6 +3537,7 @@ function buildMenuTab(){
           '<button class="btn btn-outline btn-small" onclick="POS.duplicateItem(\''+m.id+'\')">'+tr('duplicate')+'</button>' +
           '<button class="btn btn-danger btn-small" onclick="POS.deleteItem(\''+m.id+'\')">'+tr('delete')+'</button>' +
         '</div>' +
+        crossLocationBtns +
       '</div>';
     }).join('');
     return '<div class="cat-heading">'+escapeHtml(cat)+'</div>'+rows;
@@ -6007,25 +6022,29 @@ var POS = {
     setupDataListeners();
     render();
   },
-  /* Copies Raw Materials and Pre-Mix from THIS device's own actual
-     location (ignoring any active remote view, so this never accidentally
-     copies FROM a remotely-viewed location) to a target location.
-     Deliberately does NOT copy real stock/houseStock quantities — those
-     are physical inventory counts specific to each location, and Location
-     2 hasn't actually received whatever Donkoi happens to have on the
-     shelf, so carrying those numbers over would be fabricated data. Every
-     other field DOES carry over, including weeklyTarget/monthlyTarget
-     (useful restocking targets to start from) and all cost/unit data.
-     Pre-Mix has no stock field of its own — it's a pure recipe/
-     composition template — so it copies through unchanged. Item ids are
-     preserved on the copy, so if recipes are ever copied over too, their
-     ingredient/pre-mix references will still line up correctly.
-     Overwrites the target location's existing Raw Materials and Pre-Mix
-     entirely — confirms first. Uses realDb (not the location-prefixed db
-     proxy) since this deliberately needs to read one location's
-     collections while writing another's. Gated to the Donkoi master
-     admin account specifically, same as every other cross-location
-     action in this app. */
+  /* Copies EVERYTHING that defines the menu — Raw Materials, Pre-Mix,
+     Menu items, Categories (the list + their translations/photos),
+     Recipes, and Toppings — from THIS device's own actual location
+     (ignoring any active remote view, so this never accidentally copies
+     FROM a remotely-viewed location) to a target location. Deliberately
+     does NOT copy real stock/houseStock quantities on raw materials —
+     those are physical inventory counts specific to each location, and
+     the target hasn't actually received whatever Donkoi has on the
+     shelf, so carrying those numbers over would be fabricated data.
+     Every other field DOES carry over, including weeklyTarget/
+     monthlyTarget. Item ids are preserved throughout, so recipe ->
+     ingredient/pre-mix references stay correctly linked at the target.
+     This is the FULL destructive version: it replaces the target
+     location's existing Raw Materials, Pre-Mix, Menu, Recipes, and
+     Toppings entirely (though it only touches the category-related
+     fields within Settings, not the whole settings document, so shop
+     name/phone/etc at the target stay untouched) — confirms first. For
+     copying just ONE item and its actual dependencies without touching
+     anything else, use each menu item's own "Copy to [location]" button
+     instead. Uses realDb (not the location-prefixed db proxy) since this
+     deliberately needs to read one location's collections while writing
+     another's. Gated to the Donkoi master admin account specifically,
+     same as every other cross-location action in this app. */
   copyStockSetupToLocation: function(targetKey){
     if(state.currentUid !== MASTER_ADMIN_UID) return;
     if(!LOCATIONS[targetKey] || targetKey === getActiveLocationKey()) return;
@@ -6037,7 +6056,12 @@ var POS = {
     var targetPrefix = targetLoc.prefix;
     Promise.all([
       realDb.collection(sourcePrefix+'pos_ingredients').doc('main').get(),
-      realDb.collection(sourcePrefix+'pos_premix').doc('main').get()
+      realDb.collection(sourcePrefix+'pos_premix').doc('main').get(),
+      realDb.collection(sourcePrefix+'pos_menu').doc('main').get(),
+      realDb.collection(sourcePrefix+'pos_recipes').doc('main').get(),
+      realDb.collection(sourcePrefix+'pos_toppings').doc('main').get(),
+      realDb.collection(sourcePrefix+'pos_settings').doc('main').get(),
+      realDb.collection(targetPrefix+'pos_settings').doc('main').get()
     ]).then(function(results){
       var sourceIngredients = (results[0].exists && results[0].data().items) ? results[0].data().items : [];
       var ingredientsItems = sourceIngredients.map(function(ing){
@@ -6047,9 +6071,24 @@ var POS = {
         return copy;
       });
       var premixItems = (results[1].exists && results[1].data().items) ? results[1].data().items : [];
+      var menuItems = (results[2].exists && results[2].data().items) ? results[2].data().items : [];
+      var recipeItems = (results[3].exists && results[3].data().items) ? results[3].data().items : {};
+      var toppingItems = (results[4].exists && results[4].data().items) ? results[4].data().items : [];
+      var sourceSettings = results[5].exists ? results[5].data() : {};
+      var targetSettings = results[6].exists ? results[6].data() : JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+      // Only the category-related fields carry over — shop name, phone,
+      // printer settings, receipt QR, etc at the target are untouched.
+      targetSettings.categories = JSON.parse(JSON.stringify(sourceSettings.categories || []));
+      targetSettings.categoryTranslations = JSON.parse(JSON.stringify(sourceSettings.categoryTranslations || {}));
+      targetSettings.categoryPhotos = JSON.parse(JSON.stringify(sourceSettings.categoryPhotos || {}));
+      targetSettings.categoryBackgroundPhotos = JSON.parse(JSON.stringify(sourceSettings.categoryBackgroundPhotos || {}));
       return Promise.all([
         realDb.collection(targetPrefix+'pos_ingredients').doc('main').set({items: ingredientsItems}),
-        realDb.collection(targetPrefix+'pos_premix').doc('main').set({items: premixItems})
+        realDb.collection(targetPrefix+'pos_premix').doc('main').set({items: premixItems}),
+        realDb.collection(targetPrefix+'pos_menu').doc('main').set({items: menuItems}),
+        realDb.collection(targetPrefix+'pos_recipes').doc('main').set({items: recipeItems}),
+        realDb.collection(targetPrefix+'pos_toppings').doc('main').set({items: toppingItems}),
+        realDb.collection(targetPrefix+'pos_settings').doc('main').set(targetSettings)
       ]);
     }).then(function(){
       state.copyStockSetupBusy = false;
@@ -6078,6 +6117,130 @@ var POS = {
     names[key] = trimmed;
     realDb.collection('pos_locations_meta').doc('main').set({names: names}).catch(function(e){
       window.alert('Could not save location name: '+e.message);
+    });
+  },
+  /* Duplicates ONE menu item to another location, along with everything
+     it actually needs to work there — its recipe, every raw material and
+     pre-mix that recipe (or any nested pre-mix inside it) touches, its
+     category (name plus that category's own translation/photo config, if
+     any), and every topping (toppings aren't tied to specific items in
+     this app's data model — any topping can go on any drink — so the
+     full topping list, and whatever raw materials/pre-mix their own
+     composition needs, comes along too, to keep customization working
+     identically at the target). Unlike Copy Full Menu & Stock Setup, this
+     is ADDITIVE: it reads the target's current data first and merges in
+     (by id) rather than replacing anything the target already has —
+     other items, ingredients, toppings, etc already at the target are
+     left completely alone. Raw material stock/houseStock reset to 0 on
+     the copy, same reasoning as the bulk version. Master-admin-only. */
+  duplicateItemToLocation: function(itemId, targetKey){
+    if(state.currentUid !== MASTER_ADMIN_UID) return;
+    if(!LOCATIONS[targetKey] || targetKey === getActiveLocationKey()) return;
+    var item = state.menu.filter(function(m){ return m.id===itemId; })[0];
+    if(!item) return;
+    var targetLoc = LOCATIONS[targetKey];
+    if(!window.confirm(tr('duplicate_item_to_location_confirm').replace('{item}', itemDisplayName(item)).replace('{location}', targetLoc.name))) return;
+
+    var neededRawIds = {}, neededPremixIds = {};
+    function collectFromLines(lines, depth){
+      if(depth > 8 || !lines) return;
+      lines.forEach(function(rl){
+        if(!rl || !rl.ingredientId) return;
+        if(rl.kind === 'premix'){
+          if(!neededPremixIds[rl.ingredientId]){
+            neededPremixIds[rl.ingredientId] = true;
+            var pm = (state.premix||[]).filter(function(p){ return p.id===rl.ingredientId; })[0];
+            if(pm) collectFromLines(pm.composition, depth+1);
+          }
+        } else {
+          neededRawIds[rl.ingredientId] = true;
+        }
+      });
+    }
+    var itemRecipes = (state.recipes && state.recipes[itemId]) || {};
+    ['S','M','L'].forEach(function(sz){ collectFromLines(itemRecipes[sz], 0); });
+    // Every topping is coming along regardless, so resolve their
+    // composition dependencies too, not just the item's own recipe.
+    (state.toppings||[]).forEach(function(t){ collectFromLines(t.composition, 0); });
+
+    var rawToSend = (state.ingredients||[]).filter(function(ing){ return neededRawIds[ing.id]; }).map(function(ing){
+      var copy = JSON.parse(JSON.stringify(ing));
+      copy.stock = 0;
+      copy.houseStock = 0;
+      return copy;
+    });
+    var premixToSend = (state.premix||[]).filter(function(pm){ return neededPremixIds[pm.id]; });
+    var toppingsToSend = JSON.parse(JSON.stringify(state.toppings||[]));
+    var itemCopy = JSON.parse(JSON.stringify(item));
+    var recipeForItem = JSON.parse(JSON.stringify(itemRecipes));
+    var categoryName = item.category;
+    var catTranslation = (state.settings.categoryTranslations && state.settings.categoryTranslations[categoryName]) || null;
+    var catPhoto = (state.settings.categoryPhotos && state.settings.categoryPhotos[categoryName]) || null;
+    var catBgPhoto = (state.settings.categoryBackgroundPhotos && state.settings.categoryBackgroundPhotos[categoryName]) || null;
+
+    var targetPrefix = targetLoc.prefix;
+    state.duplicateItemBusyId = itemId;
+    render();
+
+    Promise.all([
+      realDb.collection(targetPrefix+'pos_ingredients').doc('main').get(),
+      realDb.collection(targetPrefix+'pos_premix').doc('main').get(),
+      realDb.collection(targetPrefix+'pos_toppings').doc('main').get(),
+      realDb.collection(targetPrefix+'pos_menu').doc('main').get(),
+      realDb.collection(targetPrefix+'pos_recipes').doc('main').get(),
+      realDb.collection(targetPrefix+'pos_settings').doc('main').get()
+    ]).then(function(results){
+      function upsertById(existingList, newItems){
+        var byId = {};
+        existingList.forEach(function(x){ byId[x.id] = x; });
+        newItems.forEach(function(x){ byId[x.id] = x; });
+        return Object.keys(byId).map(function(k){ return byId[k]; });
+      }
+      var existingRaw = (results[0].exists && results[0].data().items) ? results[0].data().items : [];
+      var existingPremix = (results[1].exists && results[1].data().items) ? results[1].data().items : [];
+      var existingToppings = (results[2].exists && results[2].data().items) ? results[2].data().items : [];
+      var existingMenu = (results[3].exists && results[3].data().items) ? results[3].data().items : [];
+      var existingRecipes = (results[4].exists && results[4].data().items) ? results[4].data().items : {};
+      var existingSettings = results[5].exists ? results[5].data() : JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+
+      var mergedRaw = upsertById(existingRaw, rawToSend);
+      var mergedPremix = upsertById(existingPremix, premixToSend);
+      var mergedToppings = upsertById(existingToppings, toppingsToSend);
+      var mergedMenu = upsertById(existingMenu, [itemCopy]);
+      existingRecipes[itemId] = recipeForItem;
+
+      if(!existingSettings.categories) existingSettings.categories = [];
+      if(existingSettings.categories.indexOf(categoryName)===-1) existingSettings.categories.push(categoryName);
+      if(catTranslation){
+        if(!existingSettings.categoryTranslations) existingSettings.categoryTranslations = {};
+        existingSettings.categoryTranslations[categoryName] = catTranslation;
+      }
+      if(catPhoto){
+        if(!existingSettings.categoryPhotos) existingSettings.categoryPhotos = {};
+        existingSettings.categoryPhotos[categoryName] = catPhoto;
+      }
+      if(catBgPhoto){
+        if(!existingSettings.categoryBackgroundPhotos) existingSettings.categoryBackgroundPhotos = {};
+        existingSettings.categoryBackgroundPhotos[categoryName] = catBgPhoto;
+      }
+
+      return Promise.all([
+        realDb.collection(targetPrefix+'pos_ingredients').doc('main').set({items: mergedRaw}),
+        realDb.collection(targetPrefix+'pos_premix').doc('main').set({items: mergedPremix}),
+        realDb.collection(targetPrefix+'pos_toppings').doc('main').set({items: mergedToppings}),
+        realDb.collection(targetPrefix+'pos_menu').doc('main').set({items: mergedMenu}),
+        realDb.collection(targetPrefix+'pos_recipes').doc('main').set({items: existingRecipes}),
+        realDb.collection(targetPrefix+'pos_settings').doc('main').set(existingSettings)
+      ]);
+    }).then(function(){
+      state.duplicateItemBusyId = null;
+      render();
+      window.alert(tr('duplicate_item_to_location_success').replace('{item}', itemDisplayName(item)).replace('{location}', targetLoc.name));
+    }).catch(function(e){
+      console.error('Could not duplicate item to location', e);
+      state.duplicateItemBusyId = null;
+      render();
+      window.alert('Could not duplicate item: '+e.message);
     });
   },
   showSyncErrorDetail: function(){
