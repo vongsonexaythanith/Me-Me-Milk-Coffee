@@ -4309,6 +4309,8 @@ var state = {
   settingsForm:null,
   ingredients:null,
   recipes:null,
+  photoMap:{},
+  photoSyncError:false,
   stockSubTab:'raw',
   houseStockSubTab:'raw',
   stockUnlocked:false,
@@ -4440,6 +4442,17 @@ function handleExpenseSyncError(label){
     render();
   };
 }
+/* Same idea for pos_photos — see setupDataListeners for why photos live in
+   their own collection now. A missing rule or transient error here must
+   never block the core ordering app; menu items/backgrounds just render
+   without a photo until it resolves. */
+function handlePhotosSyncError(label){
+  return function(err){
+    console.error('Photos sync error ('+label+')', err);
+    state.photoSyncError = true;
+    render();
+  };
+}
 
 var LISTENER_LABELS = ['settings','menu','toppings','orders'];
 function setListenerOk(label){
@@ -4465,14 +4478,97 @@ function teardownDataListeners(){
   activeDataUnsubs.forEach(function(unsub){ try{ unsub(); }catch(e){} });
   activeDataUnsubs = [];
 }
+/* ================= PHOTOS (pos_photos collection) =================
+   Every uploaded photo — menu item photos, category thumbnails/
+   backgrounds, page/header backgrounds — gets its own small Firestore
+   document here instead of being embedded inline in pos_settings/
+   pos_menu. Doc ID scheme: 'item_<menuItemId>', 'category_thumb_<name>',
+   'category_bg_<name>', 'page_background', 'header_background'. */
+function sanitizeCategoryKey(cat){
+  return String(cat||'').replace(/\//g,'_').trim();
+}
+function savePhotoDoc(id, dataUrl){
+  return db.collection('pos_photos').doc(id).set({data: dataUrl}).catch(function(e){
+    window.alert('Could not save photo: '+e.message);
+  });
+}
+function deletePhotoDoc(id){
+  return db.collection('pos_photos').doc(id).delete().catch(function(e){ console.error('Could not delete photo', e); });
+}
+/* On category rename, move both photo docs (thumbnail + background) from
+   the old sanitized key to the new one, rather than leaving them orphaned
+   under a key that no longer matches any category. Fire-and-forget, same
+   error-tolerant style as the rest of this app's Firestore writes. */
+function renameCategoryPhotoDocs(oldName, newName){
+  ['category_thumb_', 'category_bg_'].forEach(function(prefix){
+    var oldId = prefix + sanitizeCategoryKey(oldName);
+    var newId = prefix + sanitizeCategoryKey(newName);
+    if(oldId === newId) return;
+    db.collection('pos_photos').doc(oldId).get().then(function(doc){
+      if(!doc.exists) return;
+      return db.collection('pos_photos').doc(newId).set(doc.data()).then(function(){
+        return db.collection('pos_photos').doc(oldId).delete();
+      });
+    }).catch(function(e){ console.error('Could not rename category photo', e); });
+  });
+}
+/* Re-applies the current photoMap onto state.menu / state.settings. Run
+   after ANY of the settings/menu/photos listeners fires, since load order
+   between them isn't guaranteed — whichever arrives first should still
+   end up with photos attached once the others catch up. Falls back to
+   whatever value is already there (e.g. a legacy photo still embedded
+   inline from before this migration) if no pos_photos entry exists yet. */
+function applyPhotoMap(){
+  var map = state.photoMap || {};
+  if(state.menu){
+    state.menu.forEach(function(item){
+      var v = map['item_'+item.id];
+      if(v!=null) item.photo = v;
+    });
+  }
+  if(state.settings){
+    if(!state.settings.categoryPhotos) state.settings.categoryPhotos = {};
+    if(!state.settings.categoryBackgroundPhotos) state.settings.categoryBackgroundPhotos = {};
+    (state.settings.categories||[]).forEach(function(cat){
+      var key = sanitizeCategoryKey(cat);
+      var thumb = map['category_thumb_'+key];
+      var bg = map['category_bg_'+key];
+      if(thumb!=null) state.settings.categoryPhotos[cat] = thumb;
+      if(bg!=null) state.settings.categoryBackgroundPhotos[cat] = bg;
+    });
+    if(map.page_background!=null) state.settings.pageBackgroundPhoto = map.page_background;
+    if(map.header_background!=null) state.settings.headerBackgroundPhoto = map.header_background;
+  }
+}
+/* Sanitized copies used whenever the WHOLE menu/settings object is saved
+   wholesale — photo fields are stripped since they now live in
+   pos_photos, not embedded here. Without this, any unrelated settings/menu
+   save (e.g. renaming an item) would silently re-embed every photo back
+   into these shared documents and reintroduce the 1 MiB ceiling. */
+function menuForSave(){
+  return (state.menu||[]).map(function(item){
+    var copy = Object.assign({}, item);
+    delete copy.photo;
+    return copy;
+  });
+}
+function settingsForSave(){
+  var s = Object.assign({}, state.settings);
+  delete s.pageBackgroundPhoto;
+  delete s.headerBackgroundPhoto;
+  delete s.categoryPhotos;
+  delete s.categoryBackgroundPhotos;
+  return s;
+}
 function setupDataListeners(){
   activeDataUnsubs.push(db.collection('pos_settings').doc('main').onSnapshot(function(doc){
     if(doc.exists){
       state.settings = Object.assign({}, DEFAULT_SETTINGS, doc.data());
     } else {
       state.settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-      db.collection('pos_settings').doc('main').set(state.settings).catch(handleSyncError('settings-init'));
+      db.collection('pos_settings').doc('main').set(settingsForSave()).catch(handleSyncError('settings-init'));
     }
+    applyPhotoMap();
     state.settingsLoaded = true;
     setListenerOk('settings');
     checkLoaded();
@@ -4484,13 +4580,34 @@ function setupDataListeners(){
       state.menu = doc.data().items;
     } else {
       state.menu = JSON.parse(JSON.stringify(DEFAULT_MENU));
-      db.collection('pos_menu').doc('main').set({items: state.menu}).catch(handleSyncError('menu-init'));
+      db.collection('pos_menu').doc('main').set({items: menuForSave()}).catch(handleSyncError('menu-init'));
     }
+    applyPhotoMap();
     state.menuLoaded = true;
     setListenerOk('menu');
     checkLoaded();
     render();
   }, handleSyncError('menu')));
+
+  /* Photos (menu item photos, category thumbnails/backgrounds, page/header
+     backgrounds) live in their own collection — one small document per
+     photo — rather than embedded inline in pos_settings/pos_menu. Those two
+     documents each have Firestore's hard 1 MiB limit to share across EVERY
+     item/category/background they contain; splitting photos out gives each
+     one its own budget instead, so resolution/quality isn't capped by how
+     many photos happen to exist elsewhere. See applyPhotoMap, savePhotoDoc,
+     deletePhotoDoc, and the per-upload handlers below. */
+  activeDataUnsubs.push(db.collection('pos_photos').onSnapshot(function(snap){
+    var map = {};
+    snap.forEach(function(d){
+      var data = d.data();
+      if(data && data.data) map[d.id] = data.data;
+    });
+    state.photoMap = map;
+    state.photoSyncError = false;
+    applyPhotoMap();
+    render();
+  }, handlePhotosSyncError('photos')));
 
   activeDataUnsubs.push(db.collection('pos_toppings').doc('main').onSnapshot(function(doc){
     if(doc.exists && doc.data().items){
@@ -7916,8 +8033,8 @@ var POS = {
     // leftover practice orders from a previous training session so it's
     // always a completely fresh start.
     var seeds = [
-      realDb.collection('training_pos_settings').doc('main').set(state.settings),
-      realDb.collection('training_pos_menu').doc('main').set({items: state.menu}),
+      realDb.collection('training_pos_settings').doc('main').set(settingsForSave()),
+      realDb.collection('training_pos_menu').doc('main').set({items: menuForSave()}),
       realDb.collection('training_pos_toppings').doc('main').set({items: state.toppings}),
       realDb.collection('training_pos_ingredients').doc('main').set({items: state.ingredients||[]}),
       realDb.collection('training_pos_recipes').doc('main').set({items: state.recipes||{}}),
@@ -8015,7 +8132,7 @@ var POS = {
         } else if(prompt.action==='resetMenu'){
           state.menu = JSON.parse(JSON.stringify(DEFAULT_MENU));
           state.toppings = JSON.parse(JSON.stringify(DEFAULT_TOPPINGS));
-          task = opDb.collection('pos_menu').doc('main').set({items: state.menu})
+          task = opDb.collection('pos_menu').doc('main').set({items: menuForSave()})
             .then(function(){ return opDb.collection('pos_toppings').doc('main').set({items: state.toppings}); });
         } else if(prompt.action==='refundOrder'){
           var refundEv = state.refundEvidence;
@@ -9458,7 +9575,7 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var size = 200;
+        var size = 800;
         var canvas = document.createElement('canvas');
         canvas.width = size; canvas.height = size;
         var ctx = canvas.getContext('2d');
@@ -9466,9 +9583,13 @@ var POS = {
         var w = img.width*scale, h = img.height*scale;
         var x = (size-w)/2, y = (size-h)/2;
         ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
         var target = id ? state.menu.filter(function(m){return m.id===id;})[0] : state.newItemDraft;
-        if(target){ target.photo = dataUrl; render(); }
+        if(target){
+          target.photo = dataUrl;
+          if(id) savePhotoDoc('item_'+id, dataUrl); // new items: saved once saveItem() assigns an id
+          render();
+        }
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
       img.src = e.target.result;
@@ -9478,7 +9599,11 @@ var POS = {
   },
   removePhoto: function(id){
     var target = id ? state.menu.filter(function(m){return m.id===id;})[0] : state.newItemDraft;
-    if(target){ target.photo = null; render(); }
+    if(target){
+      target.photo = null;
+      if(id) deletePhotoDoc('item_'+id);
+      render();
+    }
   },
   handleCategoryPhotoInput: function(cat, inputEl){
     var file = inputEl && inputEl.files && inputEl.files[0];
@@ -9488,7 +9613,7 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var w0 = 480, h0 = 320;
+        var w0 = 640, h0 = 427;
         var canvas = document.createElement('canvas');
         canvas.width = w0; canvas.height = h0;
         var ctx = canvas.getContext('2d');
@@ -9496,10 +9621,10 @@ var POS = {
         var w = img.width*scale, h = img.height*scale;
         var x = (w0-w)/2, y = (h0-h)/2;
         ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
         if(!state.settings.categoryPhotos) state.settings.categoryPhotos = {};
         state.settings.categoryPhotos[cat] = dataUrl;
-        db.collection('pos_settings').doc('main').set(state.settings).catch(function(e){ window.alert('Could not save category photo: '+e.message); });
+        savePhotoDoc('category_thumb_'+sanitizeCategoryKey(cat), dataUrl);
         render();
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
@@ -9512,13 +9637,12 @@ var POS = {
     if(!state.settings.categoryTranslations) state.settings.categoryTranslations = {};
     if(!state.settings.categoryTranslations[cat]) state.settings.categoryTranslations[cat] = {};
     state.settings.categoryTranslations[cat][field] = value;
-    db.collection('pos_settings').doc('main').set(state.settings).catch(function(e){ window.alert('Could not save category translation: '+e.message); });
+    db.collection('pos_settings').doc('main').set(settingsForSave()).catch(function(e){ window.alert('Could not save category translation: '+e.message); });
     render();
   },
   removeCategoryPhoto: function(cat){
-    if(!state.settings.categoryPhotos) return;
-    delete state.settings.categoryPhotos[cat];
-    db.collection('pos_settings').doc('main').set(state.settings).catch(function(e){ window.alert('Could not save category photo: '+e.message); });
+    if(state.settings.categoryPhotos) delete state.settings.categoryPhotos[cat];
+    deletePhotoDoc('category_thumb_'+sanitizeCategoryKey(cat));
     render();
   },
 
@@ -9563,8 +9687,9 @@ var POS = {
     if(state.activeCategory===oldName) state.activeCategory=newName;
     state.editingCategoryName = null;
     state.categoryRenameValue = '';
-    db.collection('pos_menu').doc('main').set({items: state.menu}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
-    db.collection('pos_settings').doc('main').set(state.settings).catch(function(e){ window.alert('Could not save settings: '+e.message); });
+    renameCategoryPhotoDocs(oldName, newName);
+    db.collection('pos_menu').doc('main').set({items: menuForSave()}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
+    db.collection('pos_settings').doc('main').set(settingsForSave()).catch(function(e){ window.alert('Could not save settings: '+e.message); });
     if(state.settingsForm) state.settingsForm = JSON.parse(JSON.stringify(state.settings));
     render();
   },
@@ -9580,7 +9705,7 @@ var POS = {
     if(!state.settings.categories) state.settings.categories = getAllCategories();
     state.settings.categories.push(name);
     state.newCategoryName = '';
-    db.collection('pos_settings').doc('main').set(state.settings).catch(function(e){ window.alert('Could not save settings: '+e.message); });
+    db.collection('pos_settings').doc('main').set(settingsForSave()).catch(function(e){ window.alert('Could not save settings: '+e.message); });
     if(state.settingsForm) state.settingsForm = JSON.parse(JSON.stringify(state.settings));
     render();
   },
@@ -9594,7 +9719,7 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var w0=1400, h0=900;
+        var w0=1800, h0=1157;
         var canvas = document.createElement('canvas');
         canvas.width=w0; canvas.height=h0;
         var ctx = canvas.getContext('2d');
@@ -9602,10 +9727,10 @@ var POS = {
         var w=img.width*scale, h=img.height*scale;
         var x=(w0-w)/2, y=(h0-h)/2;
         ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
         state.settings.pageBackgroundPhoto = dataUrl;
         if(state.settingsForm) state.settingsForm.pageBackgroundPhoto = dataUrl;
-        db.collection('pos_settings').doc('main').set(state.settings).catch(function(e){ window.alert('Could not save background photo: '+e.message); });
+        savePhotoDoc('page_background', dataUrl);
         render();
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
@@ -9617,7 +9742,7 @@ var POS = {
   removePageBackgroundPhoto: function(){
     state.settings.pageBackgroundPhoto = null;
     if(state.settingsForm) state.settingsForm.pageBackgroundPhoto = null;
-    db.collection('pos_settings').doc('main').set(state.settings).catch(function(e){ window.alert('Could not save: '+e.message); });
+    deletePhotoDoc('page_background');
     render();
   },
   /* Receipt QR code (marketing/loyalty link) removed — replaced by the
@@ -9631,7 +9756,7 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var w0=1600, h0=320;
+        var w0=2000, h0=400;
         var canvas = document.createElement('canvas');
         canvas.width=w0; canvas.height=h0;
         var ctx = canvas.getContext('2d');
@@ -9639,10 +9764,10 @@ var POS = {
         var w=img.width*scale, h=img.height*scale;
         var x=(w0-w)/2, y=(h0-h)/2;
         ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
         state.settings.headerBackgroundPhoto = dataUrl;
         if(state.settingsForm) state.settingsForm.headerBackgroundPhoto = dataUrl;
-        db.collection('pos_settings').doc('main').set(state.settings).catch(function(e){ window.alert('Could not save header photo: '+e.message); });
+        savePhotoDoc('header_background', dataUrl);
         render();
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
@@ -9654,7 +9779,7 @@ var POS = {
   removeHeaderBackgroundPhoto: function(){
     state.settings.headerBackgroundPhoto = null;
     if(state.settingsForm) state.settingsForm.headerBackgroundPhoto = null;
-    db.collection('pos_settings').doc('main').set(state.settings).catch(function(e){ window.alert('Could not save: '+e.message); });
+    deletePhotoDoc('header_background');
     render();
   },
   updatePageBackgroundOpacity: function(value){
@@ -9663,7 +9788,7 @@ var POS = {
     render();
   },
   persistPageBackgroundOpacity: function(){
-    db.collection('pos_settings').doc('main').set(state.settings).catch(function(e){ console.error('Could not save page background opacity', e); });
+    db.collection('pos_settings').doc('main').set(settingsForSave()).catch(function(e){ console.error('Could not save page background opacity', e); });
   },
   updateHeaderBackgroundOpacity: function(value){
     state.settings.headerBackgroundOpacity = Number(value);
@@ -9671,7 +9796,7 @@ var POS = {
     render();
   },
   persistHeaderBackgroundOpacity: function(){
-    db.collection('pos_settings').doc('main').set(state.settings).catch(function(e){ console.error('Could not save header background opacity', e); });
+    db.collection('pos_settings').doc('main').set(settingsForSave()).catch(function(e){ console.error('Could not save header background opacity', e); });
   },
   handleCategoryBackgroundInput: function(cat, inputEl){
     var file = inputEl && inputEl.files && inputEl.files[0];
@@ -9681,7 +9806,7 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var w0=1400, h0=900;
+        var w0=1800, h0=1157;
         var canvas = document.createElement('canvas');
         canvas.width=w0; canvas.height=h0;
         var ctx = canvas.getContext('2d');
@@ -9689,14 +9814,14 @@ var POS = {
         var w=img.width*scale, h=img.height*scale;
         var x=(w0-w)/2, y=(h0-h)/2;
         ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
         if(!state.settings.categoryBackgroundPhotos) state.settings.categoryBackgroundPhotos = {};
         state.settings.categoryBackgroundPhotos[cat] = dataUrl;
         if(state.settingsForm){
           if(!state.settingsForm.categoryBackgroundPhotos) state.settingsForm.categoryBackgroundPhotos = {};
           state.settingsForm.categoryBackgroundPhotos[cat] = dataUrl;
         }
-        db.collection('pos_settings').doc('main').set(state.settings).catch(function(e){ window.alert('Could not save category background: '+e.message); });
+        savePhotoDoc('category_bg_'+sanitizeCategoryKey(cat), dataUrl);
         render();
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
@@ -9708,7 +9833,7 @@ var POS = {
   removeCategoryBackgroundPhoto: function(cat){
     if(state.settings.categoryBackgroundPhotos) delete state.settings.categoryBackgroundPhotos[cat];
     if(state.settingsForm && state.settingsForm.categoryBackgroundPhotos) delete state.settingsForm.categoryBackgroundPhotos[cat];
-    db.collection('pos_settings').doc('main').set(state.settings).catch(function(e){ window.alert('Could not save: '+e.message); });
+    deletePhotoDoc('category_bg_'+sanitizeCategoryKey(cat));
     render();
   },
   updateDraft: function(id, field, value){
@@ -9734,14 +9859,16 @@ var POS = {
       d.active = true;
       state.menu.push(d);
       state.newItemDraft = null;
+      if(d.photo) savePhotoDoc('item_'+d.id, d.photo); // draft photo was uploaded before an id existed
     }
-    db.collection('pos_menu').doc('main').set({items: state.menu}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
+    db.collection('pos_menu').doc('main').set({items: menuForSave()}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
     render();
   },
   deleteItem: function(id){
     if(!window.confirm('Delete this drink from the menu?')) return;
     state.menu = state.menu.filter(function(m){return m.id!==id;});
-    db.collection('pos_menu').doc('main').set({items: state.menu}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
+    db.collection('pos_menu').doc('main').set({items: menuForSave()}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
+    deletePhotoDoc('item_'+id);
     render();
   },
   /* Deep-copies a menu item under a new id, appending "(Copy)" to every
@@ -9758,7 +9885,8 @@ var POS = {
     if(m.nameLo) copy.nameLo = m.nameLo + tr('copy_suffix');
     if(m.nameTh) copy.nameTh = m.nameTh + tr('copy_suffix');
     state.menu.push(copy);
-    db.collection('pos_menu').doc('main').set({items: state.menu}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
+    db.collection('pos_menu').doc('main').set({items: menuForSave()}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
+    if(copy.photo) savePhotoDoc('item_'+copy.id, copy.photo); // carry the photo over to its own doc
     if(state.recipes && state.recipes[id]){
       if(!state.recipes) state.recipes = {};
       state.recipes[copy.id] = JSON.parse(JSON.stringify(state.recipes[id]));
@@ -9770,7 +9898,7 @@ var POS = {
     var m = state.menu.filter(function(i){return i.id===id;})[0];
     if(!m) return;
     m.active = (m.active===false) ? true : false;
-    db.collection('pos_menu').doc('main').set({items: state.menu}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
+    db.collection('pos_menu').doc('main').set({items: menuForSave()}).catch(function(e){ window.alert('Could not save menu: '+e.message); });
     render();
   },
   startNewTopping: function(){
