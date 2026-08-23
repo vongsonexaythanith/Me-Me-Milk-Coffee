@@ -4537,9 +4537,13 @@ function setupDataListeners(){
     render();
   }, handleExpenseSyncError('expenses')));
 }
+var clockIntervalStarted = false;
 function init(){
   setupDataListeners();
-  setInterval(tickClock, 30000);
+  if(!clockIntervalStarted){
+    clockIntervalStarted = true;
+    setInterval(tickClock, 30000);
+  }
 }
 
 /* ================= UTIL ================= */
@@ -7734,6 +7738,27 @@ var POS = {
     attemptLogin(0);
   },
   lockApp: function(){
+    /* Tear down every real-time listener tied to the OLD auth session
+       before signing out. Firestore treats a listener hitting
+       permission-denied (which happens the moment auth briefly goes null
+       during sign-out) as a terminal error — unlike a network blip, it
+       does NOT auto-retry. Left in place, those dead listeners are what
+       caused the "Offline" indicator to get stuck after locking and
+       logging back in as a different account: appInitialized was never
+       reset, so the next login never re-subscribed fresh listeners for
+       the new session. */
+    teardownDataListeners();
+    if(deletedOrdersUnsub){ deletedOrdersUnsub(); deletedOrdersUnsub = null; }
+    appInitialized = false;
+    state.loaded = false;
+    state.settingsLoaded = false;
+    state.menuLoaded = false;
+    state.toppingsLoaded = false;
+    state.ordersLoaded = false;
+    state.listenerStatus = {settings:'connecting', menu:'connecting', toppings:'connecting', orders:'connecting'};
+    state.syncStatus = 'connecting';
+    state.syncErrorLabel = '';
+    state.syncErrorMessage = '';
     firebase.auth().signOut().catch(function(e){ console.error(e); });
     // Full logout always resets every elevated-access flag — the next
     // person to unlock the app starts from a clean slate regardless of
