@@ -4264,7 +4264,7 @@ var state = {
   search:'',
   activeCategory:'All',
   sortPrefs:{menu:'az', toppings:'az', premix:'az', ingredients:'severity'}, // 'az' (alphabetical) | 'chrono' (creation order, oldest first); ingredients defaults to 'severity' (existing stock-urgency sort)
-  currentUid:null, // set by startAuthListener whenever signed in
+  currentUid:null, // set by the onAuthStateChanged listener whenever signed in
   remoteViewLocation:null, // master-admin-only: key of a location being temporarily viewed remotely, or null when viewing this device's own location
   copyStockSetupBusy:false,
   duplicateItemBusyId:null,
@@ -5054,7 +5054,6 @@ function doRender(){
   if(rootEl) rootEl.classList.toggle('lang-lo', state.language==='lo');
   applyPageBackground();
   applyReceiptPrintWidth();
-  recordActivityHeartbeat();
   try{
     document.getElementById('app').innerHTML = buildAppHTML();
   }catch(e){
@@ -9918,60 +9917,33 @@ document.addEventListener('keydown', function(e){
 /* ================= BOOTSTRAP ================= */
 loadPinLockState();
 try{
-  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+  /* NONE persistence: Firebase Auth is kept purely in memory and is never
+     written to sessionStorage/localStorage/IndexedDB. That means a page
+     refresh (or new tab) always comes up signed out and requires the PIN
+     again — no grace period, no "was this a real close or just a
+     background/refresh" heuristics needed. */
+  firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
 }catch(e){ console.error('Could not set auth persistence', e); }
 
-/* Mobile browsers frequently preserve sessionStorage (and so the
-   Firebase Auth SESSION-persisted login) even after the app is fully
-   force-closed and reopened — the OS suspends and later restores the
-   exact same browsing session rather than truly ending it, which
-   SESSION persistence alone has no way to detect. To make "the app was
-   actually closed for a while" reliably require the PIN again, a
-   lightweight heartbeat timestamp is kept in localStorage (which
-   persists regardless, but is only ever compared against wall-clock
-   time, not relied on to remember identity) while the app is in active
-   use. On boot, if the gap since the last heartbeat is too large, the
-   restored session is proactively signed out before it gets a chance to
-   silently carry over. */
-var LAST_ACTIVE_KEY = 'pos_last_active_at';
-var STALE_SESSION_MS = 5 * 60 * 1000; // 5 minutes
-function recordActivityHeartbeat(){
-  try { localStorage.setItem(LAST_ACTIVE_KEY, String(Date.now())); } catch(e){}
-}
-function sessionIsStale(){
-  try {
-    var last = Number(localStorage.getItem(LAST_ACTIVE_KEY));
-    if(!last) return false; // no prior heartbeat recorded yet — nothing to distrust
-    return (Date.now() - last) > STALE_SESSION_MS;
-  } catch(e){ return false; }
-}
-function startAuthListener(){
-  recordActivityHeartbeat();
-  firebase.auth().onAuthStateChanged(function(user){
-    if(user){
-      state.unlocked = true;
-      state.currentUid = user.uid;
-      render();
-      ensureInitialized();
-    } else {
-      state.unlocked = false;
-      state.currentUid = null;
-      state.loggedInRole = null;
-      state.loggedInAccount = null;
-      state.settingsUnlocked = false;
-      state.settingsForm = null;
-      state.stockUnlocked = false;
-      state.stockUnlockedRole = null;
-      state.adminUnlocked = false;
-      render();
-    }
-  });
-}
-if(sessionIsStale()){
-  firebase.auth().signOut().catch(function(e){ console.error('Could not clear stale session', e); }).then(startAuthListener, startAuthListener);
-} else {
-  startAuthListener();
-}
+firebase.auth().onAuthStateChanged(function(user){
+  if(user){
+    state.unlocked = true;
+    state.currentUid = user.uid;
+    render();
+    ensureInitialized();
+  } else {
+    state.unlocked = false;
+    state.currentUid = null;
+    state.loggedInRole = null;
+    state.loggedInAccount = null;
+    state.settingsUnlocked = false;
+    state.settingsForm = null;
+    state.stockUnlocked = false;
+    state.stockUnlockedRole = null;
+    state.adminUnlocked = false;
+    render();
+  }
+});
 setupLocationNamesListener();
 })();
 </script>
