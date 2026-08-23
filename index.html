@@ -92,6 +92,18 @@ html, body{touch-action:pan-x pan-y;}
   justify-content:space-between;
   gap:16px;
   flex-wrap:wrap;
+  position:relative;
+}
+.pos-header-welcome{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  font-size:14px;
+  font-weight:600;
+  color:var(--caramel-dark);
+  white-space:nowrap;
+  pointer-events:none;
 }
 .header-utility-cluster{
   display:flex;
@@ -527,6 +539,7 @@ html, body{touch-action:pan-x pan-y;}
 .rtc-value{font-size:26px;font-weight:800;font-family:'Fredoka';line-height:1.15;word-break:break-word;}
 .revenue-chart-row .chart-scroll{flex:1;min-width:0;}
 @media (max-width:560px){
+  .pos-header-welcome{position:static;transform:none;text-align:center;width:100%;}
   .revenue-chart-row{flex-direction:column;}
   .revenue-total-callout{width:100%;flex-direction:row;align-items:center;gap:12px;}
   .rtc-icon{margin-bottom:0;}
@@ -3674,6 +3687,7 @@ var TRANSLATIONS = {
     lapnet_qr_label:'LAPNet payment QR (dynamic)', lapnet_qr_hint:'Paste the raw text your bank app shows when generating a QR (starts with "000201…"). On every completed order, this shop will generate a fresh QR with the exact total already filled in — no more typing the amount by hand. Leave blank to skip this.',
     lapnet_qr_placeholder:'00020101021115...', lapnet_qr_valid:'✓ Looks valid', lapnet_qr_invalid:'⚠ Could not read this as a payment QR — double-check you pasted the full text',
     scan_to_pay_label:'Scan to pay',
+    welcome_label:'Welcome,',
     photo_visibility_label:'Photo visibility',
     preview_receipt:'Preview Receipt', preview_label:'🧾 Preview — not yet saved', back_to_cart:'← Back to Cart', confirm_order:'Confirm & Complete Order',
     reset_menu_title:'Reset menu to default?', reset_menu_sub:'This permanently replaces your menu and toppings with the default list. Enter the admin PIN to confirm.',
@@ -3863,6 +3877,7 @@ var TRANSLATIONS = {
     lapnet_qr_label:'LAPNet QR ຈ່າຍເງິນ (ແບບໄດນາມິກ)', lapnet_qr_hint:'ວາງຂໍ້ຄວາມທີ່ແອັບທະນາຄານຂອງທ່ານສະແດງເມື່ອສ້າງ QR (ເລີ່ມຕົ້ນດ້ວຍ "000201…"). ທຸກອໍເດີທີ່ສຳເລັດ ຮ້ານຈະສ້າງ QR ໃໝ່ພ້ອມຈຳນວນເງິນທີ່ຖືກຕ້ອງ — ບໍ່ຕ້ອງພິມຈຳນວນເອງອີກຕໍ່ໄປ. ປະໄວ້ຫວ່າງຖ້າບໍ່ຕ້ອງການໃຊ້.',
     lapnet_qr_placeholder:'00020101021115...', lapnet_qr_valid:'✓ ຖືກຕ້ອງ', lapnet_qr_invalid:'⚠ ອ່ານເປັນ QR ຈ່າຍເງິນບໍ່ໄດ້ — ກະລຸນາກວດຄືນວ່າວາງຂໍ້ຄວາມຄົບຖ້ວນ',
     scan_to_pay_label:'ສະແກນເພື່ອຈ່າຍ',
+    welcome_label:'ຍິນດີຕ້ອນຮັບ,',
     photo_visibility_label:'ຄວາມຊັດເຈນຂອງຮູບ',
     preview_receipt:'ເບິ່ງຕົວຢ່າງໃບບິນ', preview_label:'🧾 ຕົວຢ່າງ — ຍັງບໍ່ໄດ້ບັນທຶກ', back_to_cart:'← ກັບຄືນກະຕ່າ', confirm_order:'ຢືນຢັນ ແລະ ສຳເລັດອໍເດີ',
     reset_menu_title:'ຣີເຊັດເມນູກັບຄືນຄ່າເລີ່ມຕົ້ນ?', reset_menu_sub:'ນີ້ຈະປ່ຽນແທນເມນູ ແລະ ທັອບປິ້ງຂອງທ່ານດ້ວຍລາຍການເລີ່ມຕົ້ນຖາວອນ. ໃສ່ລະຫັດຜູ້ດູແລລະບົບເພື່ອຢືນຢັນ.',
@@ -4052,6 +4067,7 @@ var TRANSLATIONS = {
     lapnet_qr_label:'LAPNet QR ชำระเงิน (แบบไดนามิก)', lapnet_qr_hint:'วางข้อความดิบที่แอปธนาคารของคุณแสดงตอนสร้าง QR (ขึ้นต้นด้วย "000201…") ทุกออเดอร์ที่เสร็จสมบูรณ์ ร้านจะสร้าง QR ใหม่พร้อมยอดที่ถูกต้อง — ไม่ต้องพิมพ์จำนวนเงินเองอีก เว้นว่างไว้หากไม่ต้องการใช้',
     lapnet_qr_placeholder:'00020101021115...', lapnet_qr_valid:'✓ ถูกต้อง', lapnet_qr_invalid:'⚠ อ่านเป็น QR ชำระเงินไม่ได้ — กรุณาตรวจสอบว่าวางข้อความครบถ้วน',
     scan_to_pay_label:'สแกนเพื่อจ่าย',
+    welcome_label:'ยินดีต้อนรับ,',
     photo_visibility_label:'ความชัดเจนของภาพ',
     preview_receipt:'ดูตัวอย่างใบเสร็จ', preview_label:'🧾 ตัวอย่าง — ยังไม่ได้บันทึก', back_to_cart:'← กลับไปที่ตะกร้า', confirm_order:'ยืนยันและทำรายการให้เสร็จสิ้น',
     reset_menu_title:'รีเซ็ตเมนูเป็นค่าเริ่มต้น?', reset_menu_sub:'การดำเนินการนี้จะแทนที่เมนูและท็อปปิ้งของคุณด้วยรายการเริ่มต้นอย่างถาวร ป้อนรหัส PIN ผู้ดูแลระบบเพื่อยืนยัน',
@@ -5199,6 +5215,7 @@ function buildHeader(){
         logoImg('cup-mark') +
         '<div class="pos-brand-text"><h1>'+escapeHtml(s.shopName)+'</h1><p>'+escapeHtml(s.tagline)+'</p></div>' +
       '</div>' +
+      '<div class="pos-header-welcome">'+tr('welcome_label')+' '+escapeHtml(staffNameFor(state.loggedInAccount))+'</div>' +
       '<div class="header-utility-cluster">' +
         '<button class="cart-btn" onclick="POS.openMobileCart()" title="'+tr('current_order')+'">🛒'+(cartCount>0 ? '<span class="cart-badge">'+cartCount+'</span>' : '')+'</button>' +
         (state.trainingMode ? '' : '<button class="lock-btn" onclick="POS.openTrainingPrompt()" title="'+tr('training_mode_title')+'">🎓</button>') +
