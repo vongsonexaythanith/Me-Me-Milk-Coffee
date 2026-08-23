@@ -247,7 +247,7 @@ html, body{touch-action:pan-x pan-y;}
     width:100%;
     box-sizing:border-box;
   }
-  .cart-list{max-height:260px;}
+  .cart-list{overflow:hidden;}
   .cart-panel-close{display:inline-flex !important;}
 }
 .cart-panel-close{display:none;}
@@ -276,20 +276,20 @@ html, body{touch-action:pan-x pan-y;}
 .search-box input:focus{outline:2px solid var(--caramel);border-color:var(--caramel);}
 
 /* ---------- Menu grid ---------- */
-.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(180px,100%),1fr));gap:12px;}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(360px,100%),1fr));gap:20px;}
 .item-card{
-  background:var(--paper);border-radius:var(--radius);padding:14px;text-align:left;
+  background:var(--paper);border-radius:var(--radius);padding:22px;text-align:left;
   border:1.5px solid var(--border);border-left:5px solid var(--accent,var(--caramel));
   box-shadow:var(--shadow);transition:border-color .12s, box-shadow .12s;
 }
 .item-card:hover{border-color:var(--accent,var(--caramel));box-shadow:var(--shadow-lg);}
-.item-card .emoji{font-size:26px;margin-bottom:6px;display:block;}
-.item-card .item-photo{width:100%;height:112px;object-fit:cover;border-radius:10px;margin-bottom:8px;display:block;}
-.item-card .item-photo-emoji{width:100%;height:112px;border-radius:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;background:var(--cream-dark);}
-.item-card .item-photo-emoji .emoji{font-size:44px;margin-bottom:0;}
-.item-card .name{font-weight:700;font-size:14.5px;margin:0 0 3px;color:var(--espresso);}
-.item-card .cat{font-size:11px;color:var(--espresso-soft);margin:0 0 8px;text-transform:uppercase;letter-spacing:.4px;}
-.item-card .price{font-weight:700;font-size:14px;color:var(--caramel-dark);}
+.item-card .emoji{font-size:78px;margin-bottom:10px;display:block;}
+.item-card .item-photo{width:100%;height:220px;object-fit:cover;border-radius:10px;margin-bottom:12px;display:block;}
+.item-card .item-photo-emoji{width:100%;height:220px;border-radius:10px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;background:var(--cream-dark);}
+.item-card .item-photo-emoji .emoji{font-size:132px;margin-bottom:0;}
+.item-card .name{font-weight:700;font-size:43.5px;line-height:1.15;margin:0 0 6px;color:var(--espresso);}
+.item-card .cat{font-size:33px;line-height:1.2;color:var(--espresso-soft);margin:0 0 14px;text-transform:uppercase;letter-spacing:.4px;}
+.item-card .price{font-weight:700;font-size:42px;line-height:1.2;color:var(--caramel-dark);}
 .item-card-unavailable{
   position:relative;opacity:.55;filter:grayscale(0.85);cursor:not-allowed;box-shadow:none;
 }
@@ -328,7 +328,8 @@ html, body{touch-action:pan-x pan-y;}
 .cart-panel h2{font-size:16px;margin:0 0 10px;display:flex;align-items:center;gap:10px;justify-content:space-between;}
 .cart-panel h2 .count{font-size:11.5px;background:var(--caramel-light);color:var(--caramel-dark);padding:2px 9px;border-radius:999px;font-family:'Inter';font-weight:700;margin-right:auto;}
 .cart-panel-close{border:none;background:var(--cream-dark);color:var(--espresso);width:28px;height:28px;border-radius:50%;font-size:14px;align-items:center;justify-content:center;line-height:1;flex-shrink:0;}
-.cart-list{overflow-y:auto;flex:1;margin-bottom:12px;max-height:290px;}
+.cart-list{overflow:hidden;flex:1;margin-bottom:12px;}
+.cart-list-inner{}
 .cart-line{border-bottom:1px dashed var(--border);padding:10px 0;}
 .cart-line:last-child{border-bottom:none;}
 .cart-line-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;}
@@ -342,6 +343,21 @@ html, body{touch-action:pan-x pan-y;}
 .qty-stepper button:hover{border-color:var(--caramel);}
 .qty-stepper .qv{font-weight:700;font-size:13px;min-width:16px;text-align:center;}
 .remove-line{border:none;background:none;color:var(--danger);font-size:11.5px;font-weight:700;margin-left:auto;}
+.cart-line-toppings{display:flex;flex-direction:column;gap:4px;margin-top:5px;}
+.topping-chip{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--cream-dark);border-radius:8px;padding:3px 4px 3px 8px;font-size:11px;color:var(--espresso);}
+.topping-chip .tc-left{display:flex;align-items:center;gap:5px;overflow:hidden;}
+.topping-chip .tc-right{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.topping-chip .tc-name{white-space:nowrap;}
+.topping-chip .tc-price{color:var(--espresso-soft);white-space:nowrap;}
+.topping-chip button{
+  width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border);background:#fff;font-weight:700;color:var(--espresso);line-height:1;font-size:11px;flex-shrink:0;
+}
+.topping-chip button:hover{border-color:var(--caramel);}
+.topping-chip .tc-qty{font-weight:700;min-width:12px;text-align:center;}
+.add-topping-btn{display:block;border:1.5px dashed var(--border);background:none;color:var(--caramel-dark);font-size:11px;font-weight:700;border-radius:8px;padding:5px 8px;margin-top:6px;width:100%;text-align:center;}
+.add-topping-btn:hover{border-color:var(--caramel);}
+.add-topping-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;padding:8px;background:var(--cream-dark);border-radius:8px;}
+.add-topping-picker .hint{margin:0;font-size:11px;}
 
 .cart-empty{color:var(--espresso-soft);font-size:13px;text-align:center;padding:26px 6px;}
 
@@ -430,6 +446,7 @@ html, body{touch-action:pan-x pan-y;}
 .r-item .r-name{font-weight:600;font-size:0.8em;}
 .r-item .r-item-price{font-size:0.8em;}
 .r-item .r-sub-line{font-size:0.7em;color:var(--espresso-soft);}
+.r-item .r-topping-line{font-size:0.7em;color:var(--espresso-soft);padding-left:10px;}
 .r-row{display:flex;justify-content:space-between;font-size:1.05em;margin-bottom:3px;}
 .r-row.big{font-weight:700;font-size:1.15em;margin-top:6px;}
 .r-footer{text-align:center;margin-top:14px;font-size:0.95em;color:var(--espresso-soft);white-space:pre-line;}
@@ -3135,8 +3152,11 @@ function buildEposPrintXml(o){
       nameLines.forEach(function(ln,i){
         out += eposText(i===0 ? eposPadLine(ln, priceStr, W) : ln);
       });
-      var meta = l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice) + (l.toppings.length ? ' '+l.toppings.map(cartLineToppingDisplay).join(', ') : '');
+      var meta = l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice);
       eposWrapLines(meta, W-2).forEach(function(ln){ out += eposText('  '+ln); });
+      l.toppings.forEach(function(t){
+        eposWrapLines(cartLineToppingDisplay(t), W-4).forEach(function(ln){ out += eposText('    '+ln); });
+      });
     });
     out += eposText(new Array(W+1).join('-'));
     out += eposText(eposPadLine(tr('subtotal'), formatMoney(o.subtotal), W));
@@ -3271,8 +3291,11 @@ function buildEscPosReceipt(o){
       eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1)).forEach(function(ln,i){
         out += escposLine(i===0 ? eposPadLine(ln, priceStr, W) : ln);
       });
-      var meta = sz(l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice) + (l.toppings.length ? ' '+l.toppings.map(cartLineToppingDisplay).join(', ') : ''));
+      var meta = sz(l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice));
       eposWrapLines(meta, W-2).forEach(function(ln){ out += escposLine('  '+ln); });
+      l.toppings.forEach(function(t){
+        eposWrapLines(sz(cartLineToppingDisplay(t)), W-4).forEach(function(ln){ out += escposLine('    '+ln); });
+      });
     });
     out += escposLine(new Array(W+1).join('-'));
     out += escposLine(eposPadLine(sz(tr('subtotal')), escposMoney(o.subtotal), W));
@@ -3563,6 +3586,7 @@ var TRANSLATIONS = {
     complete_order:'Complete Order', processing:'Processing…',
     clear_cart:'Clear cart',
     size:'Size', sugar_level:'Sugar Level', ice_level:'Ice Level', toppings_extra:'Toppings (extra)',
+    add_more_toppings:'Add more toppings', all_toppings_added:'All toppings already added',
     add_to_order:'Add to Order',
     staff_access:'Staff Access',
     enter_pin_prompt:'Enter the shop PIN, then tap ✓',
@@ -3754,6 +3778,7 @@ var TRANSLATIONS = {
     complete_order:'ຢືນຢັນອໍເດີ', processing:'ກຳລັງດຳເນີນການ…',
     clear_cart:'ລ້າງກະຕ່າ',
     size:'ຂະໜາດ', sugar_level:'ລະດັບນ້ຳຕານ', ice_level:'ລະດັບນ້ຳກ້ອນ', toppings_extra:'ທັອບປິ້ງ (ເພີ່ມ)',
+    add_more_toppings:'ເພີ່ມທັອບປິ້ງ', all_toppings_added:'ເພີ່ມທັອບປິ້ງທັງໝົດແລ້ວ',
     add_to_order:'ເພີ່ມໃສ່ອໍເດີ',
     staff_access:'ພະນັກງານເຂົ້າສູ່ລະບົບ',
     enter_pin_prompt:'ໃສ່ລະຫັດຮ້ານ ແລ້ວກົດ ✓',
@@ -3945,6 +3970,7 @@ var TRANSLATIONS = {
     complete_order:'ยืนยันออเดอร์', processing:'กำลังดำเนินการ…',
     clear_cart:'ล้างตะกร้า',
     size:'ขนาด', sugar_level:'ระดับความหวาน', ice_level:'ระดับน้ำแข็ง', toppings_extra:'ท็อปปิ้ง (เพิ่ม)',
+    add_more_toppings:'เพิ่มท็อปปิ้ง', all_toppings_added:'เพิ่มท็อปปิ้งครบทุกอย่างแล้ว',
     add_to_order:'เพิ่มลงออเดอร์',
     staff_access:'การเข้าถึงสำหรับพนักงาน',
     enter_pin_prompt:'ป้อนรหัส PIN ของร้าน แล้วกด ✓',
@@ -4290,6 +4316,7 @@ var state = {
   orderView:'categories', // 'categories' | 'items'
   orderCurrency:'LAK',
   modal:null,          // {itemId, size, sugar, ice, toppingIds:[], qty}
+  addToppingLineIdx:null, // index of cart line whose "add more toppings" picker is open, or null
   discount:0,
   paymentMethod:'cash',
   amountReceived:'',
@@ -4785,8 +4812,9 @@ function deductStockForOrder(cartLines){
       line.toppings.forEach(function(lt){
         var topping = state.toppings.filter(function(t){ return t.id===lt.id; })[0];
         if(!topping || !topping.composition || !topping.composition.length) return;
+        var toppingPortions = Number(lt.qty)||1;
         topping.composition.forEach(function(cl){
-          var multiplier = line.qty * sugarMultiplier(cl.ingredientId, cl.kind, line);
+          var multiplier = line.qty * toppingPortions * sugarMultiplier(cl.ingredientId, cl.kind, line);
           applyDeduction(cl.ingredientId, cl.kind, (Number(cl.amount)||0) * multiplier);
         });
       });
@@ -4954,8 +4982,9 @@ function cartLineToppingName(lt){
    into the line's total price. */
 function cartLineToppingDisplay(lt){
   var name = cartLineToppingName(lt);
-  var priceStr = '+' + Math.round(Number(lt.price)||0).toLocaleString('en-US');
-  return name+' ('+priceStr+')';
+  var qty = Number(lt.qty)||1;
+  var priceStr = '+' + Math.round((Number(lt.price)||0) * qty).toLocaleString('en-US');
+  return name + (qty>1 ? ' x'+qty : '') + ' ('+priceStr+')';
 }
 function categoryVar(name){
   if(name==='taro') return 'var(--taro)';
@@ -5178,6 +5207,31 @@ function applyPageBackground(){
     rootEl.style.backgroundAttachment = '';
   }
 }
+/* "See the whole order at a glance" — the cart panel's height is fixed
+   (sticky, capped to the viewport), so once enough drinks/toppings are
+   added the line list would normally need to scroll. Instead of a
+   scrollbar, shrink the whole list via CSS zoom until it fits the space
+   that's actually available. zoom (not transform) is used because it
+   reflows naturally — the shrunk content still fills the container's
+   width correctly instead of leaving a gap on one side. Re-measured
+   after every render since the cart's size changes constantly. Floors
+   out at 55% scale — readable at that point, but true edge cases (an
+   enormous single order) fall back to scrolling as a safety net rather
+   than silently clipping items nobody could see or tap. */
+function fitCartList(){
+  var list = document.querySelector('.cart-list');
+  var inner = document.querySelector('.cart-list-inner');
+  if(!list || !inner) return;
+  inner.style.zoom = 1;
+  list.style.overflowY = 'hidden';
+  var available = list.clientHeight;
+  var natural = inner.scrollHeight;
+  if(available<=0 || natural<=available) return;
+  var floor = 0.55;
+  var ratio = Math.max(floor, available/natural);
+  inner.style.zoom = ratio;
+  if(natural*floor > available) list.style.overflowY = 'auto';
+}
 function doRender(){
   var active = document.activeElement;
   var savedId = null, selStart=null, selEnd=null;
@@ -5199,6 +5253,7 @@ function doRender(){
       '</div>';
     return;
   }
+  fitCartList();
   if(savedId){
     var el = document.getElementById(savedId);
     if(el){
@@ -5740,13 +5795,44 @@ function buildCartPanel(){
   } else {
     linesHtml = state.cart.map(function(l, idx){
       var meta = l.size + ' · ' + l.sugar + '% ' + tr('sugar_word') + ' · ' + iceLabel(l.ice);
-      if(l.toppings.length) meta += ' · ' + l.toppings.map(cartLineToppingDisplay).join(', ');
+      var toppingsHtml = l.toppings.length ? (
+        '<div class="cart-line-toppings">' +
+        l.toppings.map(function(t, tIdx){
+          var qty = Number(t.qty)||1;
+          var lineTotal = Math.round((Number(t.price)||0)*qty).toLocaleString('en-US');
+          return '' +
+          '<div class="topping-chip">' +
+            '<span class="tc-left"><span class="tc-name">'+escapeHtml(cartLineToppingName(t))+'</span><span class="tc-price">+'+lineTotal+'</span></span>' +
+            '<span class="tc-right">' +
+              '<button onclick="POS.cartToppingQty('+idx+','+tIdx+',-1)" aria-label="'+tr('remove')+'">−</button>' +
+              '<span class="tc-qty">'+qty+'</span>' +
+              '<button onclick="POS.cartToppingQty('+idx+','+tIdx+',1)" aria-label="'+tr('add_to_order')+'">+</button>' +
+            '</span>' +
+          '</div>';
+        }).join('') +
+        '</div>'
+      ) : '';
+      var addToppingBtn = state.toppings && state.toppings.length ?
+        '<button class="add-topping-btn" onclick="POS.toggleAddToppingPicker('+idx+')">+ '+tr('add_more_toppings')+'</button>' : '';
+      var addToppingPicker = '';
+      if(state.addToppingLineIdx===idx && state.toppings && state.toppings.length){
+        var existingIds = l.toppings.map(function(t){return t.id;});
+        var available = state.toppings.filter(function(t){ return existingIds.indexOf(t.id)===-1; });
+        addToppingPicker = '<div class="add-topping-picker">' +
+          (available.length ? available.map(function(t){
+            return '<button class="opt-pill" onclick="POS.addToppingToLine('+idx+',\''+t.id+'\')">'+escapeHtml(toppingDisplayName(t))+' <span class="pill-extra">+'+formatMoneyAs(t.price, cur)+'</span></button>';
+          }).join('') : '<div class="hint">'+tr('all_toppings_added')+'</div>') +
+        '</div>';
+      }
       return '' +
       '<div class="cart-line">' +
         '<div class="cart-line-top">' +
           '<div><div class="cart-line-name">'+escapeHtml(cartLineName(l))+'</div><div class="cart-line-meta">'+escapeHtml(meta)+'</div></div>' +
           '<div class="cart-line-price">'+formatMoneyAs(computeCartLineTotal(l), cur)+'</div>' +
         '</div>' +
+        toppingsHtml +
+        addToppingBtn +
+        addToppingPicker +
         '<div class="qty-stepper">' +
           '<button onclick="POS.cartQty('+idx+',-1)">−</button>' +
           '<span class="qv">'+l.qty+'</span>' +
@@ -5791,7 +5877,7 @@ function buildCartPanel(){
   return '' +
   '<div class="cart-panel">' +
     '<h2>'+tr('current_order')+' <span class="count">'+state.cart.reduce(function(s,l){return s+l.qty;},0)+' '+tr('items_suffix')+'</span><button type="button" class="cart-panel-close" onclick="POS.closeMobileCart()" aria-label="'+tr('close_recipe')+'">✕</button></h2>' +
-    '<div class="cart-list">'+linesHtml+'</div>' +
+    '<div class="cart-list"><div class="cart-list-inner">'+linesHtml+'</div></div>' +
     '<div class="summary-row"><span>'+tr('subtotal')+'</span><span>'+formatMoneyAs(t.subtotalLAK, cur)+'</span></div>' +
     '<div class="summary-row"><span>'+tr('discount')+' ('+currencySymbolFor(cur)+')</span><input id="pos-discount" type="text" inputmode="decimal" value="'+escapeHtml(String(state.discount||''))+'" placeholder="0" oninput="POS.setDiscount(this.value)"/></div>' +
     (t.serviceLAK>0 ? '<div class="summary-row"><span>'+tr('service_charge')+' ('+state.settings.serviceChargePercent+'%)</span><span>'+formatMoneyAs(t.serviceLAK, cur)+'</span></div>' : '') +
@@ -6000,8 +6086,11 @@ function paymentDisplayFor(o){
 function buildReceiptContentHtml(o, isPreview){
   var s = state.settings;
   var itemsHtml = o.items.map(function(l){
-    var meta = l.size+' · '+l.sugar+'% '+tr('sugar_word')+' · '+iceLabel(l.ice) + (l.toppings.length? ' · '+l.toppings.map(cartLineToppingDisplay).join(', ') : '');
-    return '<div class="r-item"><div><div class="r-name">'+l.qty+'x '+escapeHtml(cartLineName(l))+'</div><div class="r-sub-line">'+escapeHtml(meta)+'</div></div><div class="r-item-price">'+formatMoney(l.unitPrice*l.qty)+'</div></div>';
+    var metaBase = l.size+' · '+l.sugar+'% '+tr('sugar_word')+' · '+iceLabel(l.ice);
+    var toppingsHtml = l.toppings.length ? l.toppings.map(function(t){
+      return '<div class="r-topping-line">'+escapeHtml(cartLineToppingDisplay(t))+'</div>';
+    }).join('') : '';
+    return '<div class="r-item"><div><div class="r-name">'+l.qty+'x '+escapeHtml(cartLineName(l))+'</div><div class="r-sub-line">'+escapeHtml(metaBase)+'</div>'+toppingsHtml+'</div><div class="r-item-price">'+formatMoney(l.unitPrice*l.qty)+'</div></div>';
   }).join('');
   var isForeign = !!(o.currency && o.currency!=='LAK');
   var cashRowsHtml = '';
@@ -9005,9 +9094,9 @@ var POS = {
     var mo = state.modal;
     var m = state.menu.filter(function(i){return i.id===mo.itemId;})[0];
     if(!m) return;
-    var toppings = state.toppings.filter(function(t){return mo.toppingIds.indexOf(t.id)>-1;}).map(function(t){return {id:t.id,name:t.name,price:t.price};});
+    var toppings = state.toppings.filter(function(t){return mo.toppingIds.indexOf(t.id)>-1;}).map(function(t){return {id:t.id,name:t.name,price:t.price,qty:1};});
     var basePrice = m.prices[mo.size]||0;
-    var unitPrice = basePrice + toppings.reduce(function(s,t){return s+t.price;},0);
+    var unitPrice = basePrice + toppings.reduce(function(s,t){return s+t.price*t.qty;},0);
     var sortedToppingIds = toppings.map(function(t){return t.id;}).sort().join(',');
 
     var existing = state.cart.filter(function(l){
@@ -9020,7 +9109,7 @@ var POS = {
     } else {
       state.cart.push({
         id: uid('line'), menuItemId:m.id, name:itemDisplayName(m), category:m.category,
-        size:mo.size, sugar:mo.sugar, ice:mo.ice, toppings:toppings,
+        size:mo.size, sugar:mo.sugar, ice:mo.ice, toppings:toppings, basePrice:basePrice,
         unitPrice:unitPrice, qty:mo.qty
       });
     }
@@ -9032,6 +9121,50 @@ var POS = {
     if(!line) return;
     line.qty += delta;
     if(line.qty<=0) state.cart.splice(idx,1);
+    render();
+  },
+  /* Adjusts how many portions of a single topping are on one drink line —
+     e.g. going from 1x to 2x Pearl doubles just that topping's charge,
+     not the whole drink. Reaching 0 removes that topping from the line
+     entirely, mirroring how cartQty removes a whole line at 0. unitPrice
+     is recomputed and stored back on the line immediately so every other
+     place that reads line.unitPrice (receipt, printing, totals) stays
+     correct without needing to know about per-topping quantities. */
+  cartToppingQty: function(lineIdx, toppingIdx, delta){
+    var line = state.cart[lineIdx];
+    if(!line) return;
+    var t = line.toppings[toppingIdx];
+    if(!t) return;
+    var newQty = (Number(t.qty)||1) + delta;
+    if(newQty<=0){
+      line.toppings.splice(toppingIdx,1);
+    } else {
+      t.qty = newQty;
+    }
+    line.unitPrice = (Number(line.basePrice)||0) + line.toppings.reduce(function(s,tp){return s + (Number(tp.price)||0)*(Number(tp.qty)||1);},0);
+    render();
+  },
+  /* "Add More Toppings" — lets staff modify an already-added drink's
+     toppings without removing and re-adding the whole line. Opens a
+     small inline picker (rather than a full modal) showing only
+     toppings not already on that line; picking one adds it at qty 1 and
+     the picker stays open so several can be added in a row. */
+  toggleAddToppingPicker: function(lineIdx){
+    state.addToppingLineIdx = (state.addToppingLineIdx===lineIdx) ? null : lineIdx;
+    render();
+  },
+  addToppingToLine: function(lineIdx, toppingId){
+    var line = state.cart[lineIdx];
+    if(!line) return;
+    var t = (state.toppings||[]).filter(function(x){return x.id===toppingId;})[0];
+    if(!t) return;
+    var existing = line.toppings.filter(function(x){return x.id===toppingId;})[0];
+    if(existing){
+      existing.qty = (Number(existing.qty)||1) + 1;
+    } else {
+      line.toppings.push({id:t.id, name:t.name, price:t.price, qty:1});
+    }
+    line.unitPrice = (Number(line.basePrice)||0) + line.toppings.reduce(function(s,tp){return s + (Number(tp.price)||0)*(Number(tp.qty)||1);},0);
     render();
   },
   removeCartLine: function(idx){ state.cart.splice(idx,1); render(); },
