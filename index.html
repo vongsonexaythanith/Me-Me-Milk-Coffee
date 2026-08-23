@@ -3636,6 +3636,7 @@ var TRANSLATIONS = {
     ingredient_name_label:'Ingredient name', unit_label:'Unit', unit_grams:'Grams (g)', unit_ml:'Milliliters (ml)', unit_pcs:'Piece',
     current_stock_label:'Shop Stock',
     deposit_hint:'Enter the amount in one unit (e.g. one bag or bottle) and how many of those you\'re adding — the total is moved from House Stock into Shop Stock automatically.',
+    house_deposit_hint:'Enter the amount in one unit (e.g. one bag or bottle) and how many of those just arrived from your supplier — the total is added straight into House Stock.',
     deposit_amount_placeholder:'Amount to add', deposit_btn:'Deposit',
     deposit_per_unit_label:'Amount Per Set', deposit_set_label:'Set', deposit_preview_suffix:'will be added',
     recipes_hint:'Set how much of each ingredient goes into one drink. This powers automatic stock deduction whenever an order is completed.',
@@ -3826,6 +3827,7 @@ var TRANSLATIONS = {
     ingredient_name_label:'ຊື່ວັດຖຸດິບ', unit_label:'ຫົວໜ່ວຍ', unit_grams:'ກຣາມ (g)', unit_ml:'ມິນລິລິດ (ml)', unit_pcs:'ອັນ',
     current_stock_label:'ສະຕັອກຮ້ານ',
     deposit_hint:'ໃສ່ຈຳນວນຕໍ່ 1 ໜ່ວຍ (ເຊັ່ນ: 1 ຖົງ ຫຼື 1 ແກ້ວ) ແລະ ຈຳນວນຊຸດທີ່ຈະເພີ່ມ — ຍອດລວມຈະຖືກຍ້າຍຈາກສະຕັອກສາງເຂົ້າສະຕັອກຮ້ານອັດຕະໂນມັດ.',
+    house_deposit_hint:'ໃສ່ຈຳນວນຕໍ່ 1 ໜ່ວຍ (ເຊັ່ນ: 1 ຖົງ ຫຼື 1 ແກ້ວ) ແລະ ຈຳນວນຊຸດທີ່ຫາກໍມາຮອດຈາກຜູ້ສະໜອງ — ຍອດລວມຈະຖືກເພີ່ມເຂົ້າສະຕັອກສາງໂດຍກົງ.',
     deposit_amount_placeholder:'ຈຳນວນທີ່ຈະເພີ່ມ', deposit_btn:'ຝາກ',
     deposit_per_unit_label:'ຈຳນວນຕໍ່ຊຸດ', deposit_set_label:'ຊຸດ', deposit_preview_suffix:'ຈະຖືກເພີ່ມ',
     recipes_hint:'ຕັ້ງຄ່າວ່າແຕ່ລະວັດຖຸດິບໃຊ້ເທົ່າໃດຕໍ່ເຄື່ອງດື່ມໜຶ່ງແກ້ວ. ນີ້ຄືສິ່ງທີ່ຄວບຄຸມການຫັກສະຕັອກອັດຕະໂນມັດເມື່ອອໍເດີສຳເລັດ.',
@@ -4016,6 +4018,7 @@ var TRANSLATIONS = {
     ingredient_name_label:'ชื่อวัตถุดิบ', unit_label:'หน่วย', unit_grams:'กรัม (g)', unit_ml:'มิลลิลิตร (ml)', unit_pcs:'ชิ้น',
     current_stock_label:'สต็อกร้าน',
     deposit_hint:'ป้อนจำนวนต่อ 1 หน่วย (เช่น 1 ถุง หรือ 1 ขวด) และจำนวนชุดที่จะเพิ่ม — ยอดรวมจะถูกย้ายจากสต็อกคลังเข้าสต็อกร้านโดยอัตโนมัติ',
+    house_deposit_hint:'ป้อนจำนวนต่อ 1 หน่วย (เช่น 1 ถุง หรือ 1 ขวด) และจำนวนชุดที่เพิ่งมาถึงจากซัพพลายเออร์ — ยอดรวมจะถูกเพิ่มเข้าสต็อกคลังโดยตรง',
     deposit_amount_placeholder:'จำนวนที่จะเพิ่ม', deposit_btn:'ฝาก',
     deposit_per_unit_label:'จำนวนต่อชุด', deposit_set_label:'ชุด', deposit_preview_suffix:'จะถูกเพิ่ม',
     recipes_hint:'ตั้งค่าว่าแต่ละวัตถุดิบใช้เท่าไรต่อเครื่องดื่มหนึ่งแก้ว นี่คือสิ่งที่ควบคุมการหักสต็อกอัตโนมัติเมื่อออเดอร์เสร็จสมบูรณ์',
@@ -4307,6 +4310,7 @@ var state = {
   ingredients:null,
   recipes:null,
   stockSubTab:'raw',
+  houseStockSubTab:'raw',
   stockUnlocked:false,
   stockUnlockedRole:null,
   stockPinInput:'',
@@ -4316,6 +4320,7 @@ var state = {
   editingHouseStockId:null,
   newIngredientDraft:null,
   depositDrafts:{},
+  houseDepositDrafts:{},
   recipeEditingItemId:null,
   recipeLineDrafts:{},
   premix:null,
@@ -6632,6 +6637,28 @@ function buildHouseStockTab(){
   var privileged = state.trainingMode
     ? (state.trainingRole==='manager' || state.trainingRole==='admin')
     : (state.loggedInRole==='manager' || state.loggedInRole==='admin');
+  var subTabs = [['raw','stock_raw_materials'],['deposit','stock_deposit']];
+  var subTabHtml = subTabs.map(function(s){
+    return '<button class="chip '+(state.houseStockSubTab===s[0]?'active':'')+'" onclick="POS.setHouseStockSubTab(\''+s[0]+'\')">'+tr(s[1])+'</button>';
+  }).join('');
+  var content = state.houseStockSubTab==='deposit' ? buildHouseDepositStockSubTab() : buildHouseStockRawSubTab();
+  var errorBanner = state.stockSyncError ? (
+    '<div class="section-card" style="background:#FFFBF9;border-color:var(--danger-light);">' +
+      '<h2 style="color:var(--danger);">'+tr('stock_sync_error_title')+'</h2>' +
+      '<p class="hint">'+tr('stock_sync_error_hint')+'</p>' +
+    '</div>'
+  ) : '';
+  return '' +
+  '<div class="section-card" style="background:var(--taro-light);border-color:var(--taro);">' +
+    '<h2 style="color:var(--taro);">'+tr('manager_admin_area_title')+'</h2>' +
+    '<p class="hint">'+(privileged ? tr('privileged_session_hint') : tr('stock_restricted_hint'))+'</p>' +
+    (privileged ? '' : '<button class="btn btn-ghost btn-small" onclick="POS.lockStockTab(); POS.setTab(\'housestock\')">'+tr('lock_tab_now')+'</button>') +
+  '</div>' +
+  errorBanner +
+  '<div class="chip-row" style="margin-bottom:16px;">'+subTabHtml+'</div>' +
+  content;
+}
+function buildHouseStockRawSubTab(){
   var ingredients = (state.ingredients || []).slice().sort(function(a,b){
     return ingredientSeverityHouseStock(a) - ingredientSeverityHouseStock(b);
   });
@@ -6648,21 +6675,45 @@ function buildHouseStockTab(){
       '</div>' +
     '</div>';
   }).join('');
-  var errorBanner = state.stockSyncError ? (
-    '<div class="section-card" style="background:#FFFBF9;border-color:var(--danger-light);">' +
-      '<h2 style="color:var(--danger);">'+tr('stock_sync_error_title')+'</h2>' +
-      '<p class="hint">'+tr('stock_sync_error_hint')+'</p>' +
-    '</div>'
-  ) : '';
   return '' +
-  '<div class="section-card" style="background:var(--taro-light);border-color:var(--taro);">' +
-    '<h2 style="color:var(--taro);">'+tr('manager_admin_area_title')+'</h2>' +
-    '<p class="hint">'+(privileged ? tr('privileged_session_hint') : tr('stock_restricted_hint'))+'</p>' +
-    (privileged ? '' : '<button class="btn btn-ghost btn-small" onclick="POS.lockStockTab(); POS.setTab(\'housestock\')">'+tr('lock_tab_now')+'</button>') +
-  '</div>' +
-  errorBanner +
   '<div class="section-card">' +
     '<h2>'+tr('tab_house_stock')+'</h2><p class="hint">'+tr('house_stock_hint')+'</p>' +
+    (rows || '<p class="hint" style="margin-top:0;">'+tr('no_ingredients_yet')+'</p>') +
+  '</div>';
+}
+/* Deposit into House Stock is the top of the supply chain: stock just
+   arrived from a supplier, so the total is added straight to
+   ing.houseStock with nothing drawn down from anywhere else — unlike
+   Shop Stock's Deposit Stock, which transfers FROM House Stock. Uses
+   its own amountPerUnitHouse field (rather than reusing amountPerUnit)
+   so an in-progress Shop Stock deposit and an in-progress House Stock
+   deposit for the same ingredient don't overwrite each other's draft
+   value if both screens are visited in the same session. */
+function buildHouseDepositStockSubTab(){
+  var ingredients = state.ingredients || [];
+  var rows = ingredients.map(function(ing){
+    var perUnit = Number(ing.amountPerUnitHouse)||0;
+    var setsDraft = state.houseDepositDrafts[ing.id]!=null ? state.houseDepositDrafts[ing.id] : '';
+    var sets = Number(setsDraft)||0;
+    var total = perUnit * sets;
+    var previewHtml = total>0
+      ? '<div class="deposit-preview">= '+formatIngredientAmount(total)+' '+escapeHtml(ing.unit)+' '+tr('deposit_preview_suffix')+'</div>'
+      : '';
+    return '' +
+    '<div class="mgmt-row" style="flex-wrap:wrap;row-gap:10px;">' +
+      '<span class="em">'+ingredientEmoji(ing.unit)+'</span>' +
+      '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+tr('house_stock_qty_label')+': '+formatIngredientAmount(ing.houseStock)+' '+escapeHtml(ing.unit)+'</div></div>' +
+      '<div class="deposit-inputs">' +
+        '<div class="deposit-field"><label>'+tr('deposit_per_unit_label')+'</label><input id="pos-ing-perunit-house-'+ing.id+'" type="text" inputmode="decimal" placeholder="0" value="'+(ing.amountPerUnitHouse?escapeHtml(String(ing.amountPerUnitHouse)):'')+'" oninput="POS.updateIngredientAmountPerUnitHouse(\''+ing.id+'\',this.value)"/></div>' +
+        '<div class="deposit-field"><label>'+tr('deposit_set_label')+'</label><input id="pos-deposit-sets-house-'+ing.id+'" type="text" inputmode="decimal" placeholder="0" value="'+escapeHtml(setsDraft)+'" oninput="POS.updateHouseDepositSets(\''+ing.id+'\',this.value)"/></div>' +
+        '<button class="btn btn-primary btn-small" onclick="POS.depositHouseStock(\''+ing.id+'\')">'+tr('deposit_btn')+'</button>' +
+      '</div>' +
+      previewHtml +
+    '</div>';
+  }).join('');
+  return '' +
+  '<div class="section-card">' +
+    '<h2>'+tr('stock_deposit')+'</h2><p class="hint">'+tr('house_deposit_hint')+'</p>' +
     (rows || '<p class="hint" style="margin-top:0;">'+tr('no_ingredients_yet')+'</p>') +
   '</div>';
 }
@@ -8968,6 +9019,11 @@ var POS = {
     state.recipeEditingItemId = null;
     render();
   },
+  setHouseStockSubTab: function(t){
+    state.houseStockSubTab = t;
+    state.editingHouseStockId = null;
+    render();
+  },
 
   /* ---- Stock: raw materials ---- */
   startNewIngredient: function(){
@@ -9091,6 +9147,36 @@ var POS = {
     ing.houseStock = Math.round(((Number(ing.houseStock)||0) - total) * 1000) / 1000;
     ing.amountPerUnit = 0;
     delete state.depositDrafts[id];
+    db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(function(e){ window.alert('Could not deposit stock: '+e.message); });
+    render();
+  },
+  /* ---- House Stock deposit: new supply arriving from a supplier, so
+     the total is simply added to houseStock — there's nothing to draw
+     down from, unlike Shop Stock's deposit which transfers FROM here.
+     Uses amountPerUnitHouse (a separate field from Shop Stock's
+     amountPerUnit) so the two deposit screens don't clobber each
+     other's in-progress draft for the same ingredient. ---- */
+  updateIngredientAmountPerUnitHouse: function(id, value){
+    var ing = state.ingredients.filter(function(i){return i.id===id;})[0];
+    if(!ing) return;
+    ing.amountPerUnitHouse = sanitizeDecimal(value);
+    render();
+  },
+  updateHouseDepositSets: function(id, value){
+    state.houseDepositDrafts[id] = sanitizeDecimal(value);
+    render();
+  },
+  depositHouseStock: function(id){
+    var ing = state.ingredients.filter(function(i){return i.id===id;})[0];
+    if(!ing) return;
+    var perUnit = Number(ing.amountPerUnitHouse)||0;
+    var sets = Number(state.houseDepositDrafts[id]||0);
+    if(!perUnit || perUnit<=0){ window.alert('Please enter the amount per unit for this deposit first.'); return; }
+    if(!sets || sets<=0){ window.alert('Enter the number of sets (must be greater than 0).'); return; }
+    var total = perUnit * sets;
+    ing.houseStock = Math.round(((Number(ing.houseStock)||0) + total) * 1000) / 1000;
+    ing.amountPerUnitHouse = 0;
+    delete state.houseDepositDrafts[id];
     db.collection('pos_ingredients').doc('main').set({items: state.ingredients}).catch(function(e){ window.alert('Could not deposit stock: '+e.message); });
     render();
   },
