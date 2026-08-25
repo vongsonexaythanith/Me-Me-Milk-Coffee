@@ -3654,6 +3654,8 @@ var TRANSLATIONS = {
     lock_screen_now:'Lock Screen Now',
     danger_zone:'Danger Zone', danger_zone_hint:'These actions cannot be undone.',
     reset_menu:'Reset Menu to Default', clear_all_history:'Clear All Order History',
+    clear_history_range_label:'Clear history in date range', clear_history_range_hint:'Only orders placed within the selected dates (inclusive) move to Deleted — everything outside that range is left untouched.',
+    clear_history_range_btn:'Clear Selected Range', from_label:'From', to_label:'To',
     categories_pictures_title:'Categories & Pictures', categories_pictures_hint:'Rename categories or add new ones, and set the picture shown for each on the main order screen. Renaming instantly updates every drink using it, and new categories immediately appear in the drink category dropdown and on the Page Appearance section above.',
     categories_col_heading:'Categories', category_pictures_col_heading:'Category Pictures',
     rename:'Rename', save:'Save', cancel:'Cancel', edit:'Edit', delete:'Delete',
@@ -3667,6 +3669,7 @@ var TRANSLATIONS = {
     category_label:'Category', emoji_label:'Emoji', photo_label:'Photo',
     small_price_label:'Small price', medium_price_label:'Medium price', large_price_label:'Large price',
     clear_all_history_title:'Clear ALL order history?', clear_all_history_sub:'Every saved order moves to the Deleted tab (admin can restore it) rather than being permanently removed. Enter the manager or admin PIN to confirm.',
+    clear_history_range_title:'Clear order history in this range?', clear_history_range_sub:'Orders placed within the selected dates move to the Deleted tab (admin can restore them) rather than being permanently removed. Enter the manager or admin PIN to confirm.',
     delete_order_title:'Delete this order?', delete_order_sub:'The order moves to the Deleted tab (admin can restore it) rather than being permanently removed. Enter the manager or admin PIN to confirm.',
     manager_pin_placeholder:'Manager PIN', incorrect_manager_pin:'Incorrect manager PIN',
     sugar_word:'sugar',
@@ -3847,6 +3850,8 @@ var TRANSLATIONS = {
     lock_screen_now:'ລັອກໜ້າຈໍດຽວນີ້',
     danger_zone:'ເຂດອັນຕະລາຍ', danger_zone_hint:'ການກະທຳເຫຼົ່ານີ້ບໍ່ສາມາດຍົກເລີກໄດ້.',
     reset_menu:'ຣີເຊັດເມນູກັບຄືນຄ່າເລີ່ມຕົ້ນ', clear_all_history:'ລ້າງປະຫວັດອໍເດີທັງໝົດ',
+    clear_history_range_label:'ລ້າງປະຫວັດຕາມຊ່ວງວັນທີ', clear_history_range_hint:'ສະເພາະອໍເດີທີ່ສັ່ງພາຍໃນຊ່ວງວັນທີທີ່ເລືອກ (ລວມທັງສອງວັນ) ຈະຖືກຍ້າຍໄປແທັບ Deleted — ນອກຊ່ວງນີ້ຈະບໍ່ຖືກກະທົບ.',
+    clear_history_range_btn:'ລ້າງຊ່ວງທີ່ເລືອກ', from_label:'ຈາກ', to_label:'ຫາ',
     categories_pictures_title:'ໝວດໝູ່ ແລະ ຮູບພາບ', categories_pictures_hint:'ປ່ຽນຊື່ໝວດໝູ່ ຫຼື ເພີ່ມອັນໃໝ່, ແລະ ຕັ້ງຮູບພາບທີ່ຈະສະແດງໃນແຕ່ລະໝວດຢູ່ໜ້າສັ່ງເຄື່ອງດື່ມຫຼັກ. ການປ່ຽນຊື່ຈະອັບເດດເຄື່ອງດື່ມທັງໝົດທີ່ໃຊ້ມັນທັນທີ, ແລະ ໝວດໝູ່ໃໝ່ຈະປາກົດໃນລາຍການເລືອກໝວດໝູ່ ແລະ ໃນສ່ວນຮູບແບບໜ້າເວັບທັນທີ.',
     categories_col_heading:'ໝວດໝູ່', category_pictures_col_heading:'ຮູບພາບໝວດໝູ່',
     rename:'ປ່ຽນຊື່', save:'ບັນທຶກ', cancel:'ຍົກເລີກ', edit:'ແກ້ໄຂ', delete:'ລຶບ',
@@ -3860,6 +3865,7 @@ var TRANSLATIONS = {
     category_label:'ໝວດໝູ່', emoji_label:'ອີໂມຈິ', photo_label:'ຮູບພາບ',
     small_price_label:'ລາຄາຂະໜາດນ້ອຍ', medium_price_label:'ລາຄາຂະໜາດກາງ', large_price_label:'ລາຄາຂະໜາດໃຫຍ່',
     clear_all_history_title:'ລ້າງປະຫວັດອໍເດີທັງໝົດ?', clear_all_history_sub:'ອໍເດີທີ່ບັນທຶກໄວ້ທັງໝົດຈະຍ້າຍໄປແທັບ Deleted (ແອັດມິນສາມາດກູ້ຄືນໄດ້) ແທນທີ່ຈະຖືກລຶບຖາວອນ. ໃສ່ລະຫັດຜູ້ຈັດການ ຫຼື ແອັດມິນເພື່ອຢືນຢັນ.',
+    clear_history_range_title:'ລ້າງປະຫວັດອໍເດີໃນຊ່ວງນີ້?', clear_history_range_sub:'ອໍເດີທີ່ສັ່ງພາຍໃນຊ່ວງວັນທີທີ່ເລືອກຈະຍ້າຍໄປແທັບ Deleted (ແອັດມິນສາມາດກູ້ຄືນໄດ້) ແທນທີ່ຈະຖືກລຶບຖາວອນ. ໃສ່ລະຫັດຜູ້ຈັດການ ຫຼື ແອັດມິນເພື່ອຢືນຢັນ.',
     delete_order_title:'ລຶບອໍເດີນີ້?', delete_order_sub:'ອໍເດີນີ້ຈະຍ້າຍໄປແທັບ Deleted (ແອັດມິນສາມາດກູ້ຄືນໄດ້) ແທນທີ່ຈະຖືກລຶບຖາວອນ. ໃສ່ລະຫັດຜູ້ຈັດການ ຫຼື ແອັດມິນເພື່ອຢືນຢັນ.',
     manager_pin_placeholder:'ລະຫັດຜູ້ຈັດການ', incorrect_manager_pin:'ລະຫັດຜູ້ຈັດການຜິດ',
     sugar_word:'ນ້ຳຕານ',
@@ -4040,6 +4046,8 @@ var TRANSLATIONS = {
     lock_screen_now:'ล็อกหน้าจอตอนนี้',
     danger_zone:'โซนอันตราย', danger_zone_hint:'การกระทำเหล่านี้ไม่สามารถย้อนกลับได้',
     reset_menu:'รีเซ็ตเมนูเป็นค่าเริ่มต้น', clear_all_history:'ล้างประวัติออเดอร์ทั้งหมด',
+    clear_history_range_label:'ล้างประวัติตามช่วงวันที่', clear_history_range_hint:'เฉพาะออเดอร์ที่สั่งภายในช่วงวันที่เลือก (รวมทั้งสองวัน) จะถูกย้ายไปแท็บ Deleted — นอกช่วงนี้จะไม่ถูกกระทบ',
+    clear_history_range_btn:'ล้างช่วงที่เลือก', from_label:'จาก', to_label:'ถึง',
     categories_pictures_title:'หมวดหมู่และรูปภาพ', categories_pictures_hint:'เปลี่ยนชื่อหมวดหมู่หรือเพิ่มหมวดหมู่ใหม่ และตั้งค่ารูปภาพที่จะแสดงในแต่ละหมวดบนหน้าสั่งซื้อหลัก การเปลี่ยนชื่อจะอัปเดตเครื่องดื่มทั้งหมดที่ใช้ทันที และหมวดหมู่ใหม่จะปรากฏในดรอปดาวน์และส่วนรูปลักษณ์หน้าเว็บทันที',
     categories_col_heading:'หมวดหมู่', category_pictures_col_heading:'รูปภาพหมวดหมู่',
     rename:'เปลี่ยนชื่อ', save:'บันทึก', cancel:'ยกเลิก', edit:'แก้ไข', delete:'ลบ',
@@ -4053,6 +4061,7 @@ var TRANSLATIONS = {
     category_label:'หมวดหมู่', emoji_label:'อีโมจิ', photo_label:'รูปภาพ',
     small_price_label:'ราคาขนาดเล็ก', medium_price_label:'ราคาขนาดกลาง', large_price_label:'ราคาขนาดใหญ่',
     clear_all_history_title:'ล้างประวัติออเดอร์ทั้งหมด?', clear_all_history_sub:'ออเดอร์ที่บันทึกไว้ทั้งหมดจะย้ายไปแท็บ Deleted (แอดมินสามารถกู้คืนได้) แทนที่จะถูกลบถาวร ป้อนรหัส PIN ผู้จัดการหรือแอดมินเพื่อยืนยัน',
+    clear_history_range_title:'ล้างประวัติออเดอร์ในช่วงนี้?', clear_history_range_sub:'ออเดอร์ที่สั่งภายในช่วงวันที่เลือกจะย้ายไปแท็บ Deleted (แอดมินสามารถกู้คืนได้) แทนที่จะถูกลบถาวร ป้อนรหัส PIN ผู้จัดการหรือแอดมินเพื่อยืนยัน',
     delete_order_title:'ลบออเดอร์นี้?', delete_order_sub:'ออเดอร์นี้จะย้ายไปแท็บ Deleted (แอดมินสามารถกู้คืนได้) แทนที่จะถูกลบถาวร ป้อนรหัส PIN ผู้จัดการหรือแอดมินเพื่อยืนยัน',
     manager_pin_placeholder:'รหัส PIN ผู้จัดการ', incorrect_manager_pin:'รหัส PIN ผู้จัดการไม่ถูกต้อง',
     sugar_word:'น้ำตาล',
@@ -4352,6 +4361,8 @@ var state = {
   historyRange:'today',
   historyCustomFrom:'',
   historyCustomTo:'',
+  clearHistoryFrom:'',
+  clearHistoryTo:'',
   expandedOrderId:null,
   editingItemId:null,
   editingToppingId:null,
@@ -5278,35 +5289,44 @@ function doRender(){
   }
 }
 /* render() is called from many places (user actions, Firestore listeners that
-   may fire repeatedly if the connection is unstable, timers, etc). If several
-   calls land in quick succession we must NOT rebuild the entire screen once
-   per call — that full DOM replacement is what causes visible "flashing" and
-   makes buttons briefly unclickable. Instead, batch everything into a single
-   rebuild per animation frame, with a hard floor of ~120ms between rebuilds
-   so even a rapidly retrying network connection can't cause a rebuild storm.
-   An optional callback runs after the DOM has actually been rebuilt — used,
-   e.g., to trigger printing only once the receipt is really on screen rather
-   than racing the throttled rebuild. Callbacks are queued (not dropped) even
-   when a call piggybacks on an already-scheduled render. */
-var renderQueued = false;
-var lastRenderAt = 0;
+   may fire repeatedly if the connection is unstable, typing in a text field,
+   timers, etc). If several calls land in quick succession we must NOT
+   rebuild the entire screen once per call — that full DOM replacement is
+   expensive (this app's HTML is rebuilt from scratch every time) and
+   blocking the main thread on every single keystroke is exactly what makes
+   fast typing feel like it's dropping or delaying characters: the browser
+   can't get back to processing input events until the rebuild finishes.
+   So this is a genuine debounce (the wait timer RESETS on every call)
+   rather than a fixed-interval throttle — a burst of rapid calls (typing)
+   coalesces into a single rebuild shortly after the burst pauses, instead
+   of one rebuild per call. A maxWait ceiling still forces a rebuild at
+   least every ~200ms even under a continuous, uninterrupted stream of
+   calls, so a render-storm (e.g. a rapidly retrying network connection)
+   can't starve the UI indefinitely. An optional callback runs after the
+   DOM has actually been rebuilt — used, e.g., to trigger printing only
+   once the receipt is really on screen. Callbacks are queued (not
+   dropped) even when a call piggybacks on an already-scheduled render. */
+var renderTimer = null;
+var renderBurstStartedAt = 0;
 var pendingRenderCallbacks = [];
+var RENDER_DEBOUNCE_MS = 60;
+var RENDER_MAX_WAIT_MS = 200;
 function render(afterRender){
   if(afterRender) pendingRenderCallbacks.push(afterRender);
-  if(renderQueued) return;
-  renderQueued = true;
-  var elapsed = Date.now() - lastRenderAt;
-  var wait = elapsed >= 120 ? 0 : (120 - elapsed);
-  setTimeout(function(){
-    renderQueued = false;
-    lastRenderAt = Date.now();
+  var now = Date.now();
+  if(!renderTimer) renderBurstStartedAt = now;
+  if(renderTimer) clearTimeout(renderTimer);
+  var waitLeftInBurst = RENDER_MAX_WAIT_MS - (now - renderBurstStartedAt);
+  var delay = Math.max(0, Math.min(RENDER_DEBOUNCE_MS, waitLeftInBurst));
+  renderTimer = setTimeout(function(){
+    renderTimer = null;
     doRender();
     var callbacks = pendingRenderCallbacks;
     pendingRenderCallbacks = [];
     callbacks.forEach(function(cb){
       try{ cb(); }catch(e){ console.error('render callback error', e); }
     });
-  }, wait);
+  }, delay);
 }
 
 /* ================= APP SHELL ================= */
@@ -5560,6 +5580,7 @@ function buildManagerPinModal(){
   var isEither = p.role==='either';
   var title, sub;
   if(p.action==='clearHistory'){ title = tr('clear_all_history_title'); sub = tr('clear_all_history_sub'); }
+  else if(p.action==='clearHistoryRange'){ title = tr('clear_history_range_title'); sub = tr('clear_history_range_sub'); }
   else if(p.action==='resetMenu'){ title = tr('reset_menu_title'); sub = tr('reset_menu_sub'); }
   else if(p.action==='refundOrder'){ title = tr('refund_order_title'); sub = tr('refund_order_sub'); }
   else if(p.action==='exportCsv'){ title = tr('export_csv_title'); sub = tr('export_csv_sub'); }
@@ -7958,6 +7979,15 @@ function buildSettingsTab(){
       '<button class="btn btn-danger" onclick="POS.resetMenu()">'+tr('reset_menu')+'</button>' +
       '<button class="btn btn-danger" onclick="POS.clearHistory()">'+tr('clear_all_history')+'</button>' +
     '</div>' +
+    '<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">' +
+      '<label>'+tr('clear_history_range_label')+'</label>' +
+      '<p class="hint" style="margin-top:0;">'+tr('clear_history_range_hint')+'</p>' +
+      '<div class="date-picker-row">' +
+        '<div class="field"><label>'+tr('from_label')+'</label><input id="pos-clear-hist-from" type="date" max="'+todayDateKey()+'" value="'+escapeHtml(state.clearHistoryFrom)+'" oninput="POS.setClearHistoryFrom(this.value)"/></div>' +
+        '<div class="field"><label>'+tr('to_label')+'</label><input id="pos-clear-hist-to" type="date" max="'+todayDateKey()+'" value="'+escapeHtml(state.clearHistoryTo)+'" oninput="POS.setClearHistoryTo(this.value)"/></div>' +
+      '</div>' +
+      '<button class="btn btn-danger" style="margin-top:10px;" '+(state.clearHistoryFrom && state.clearHistoryTo ? '' : 'disabled')+' onclick="POS.clearHistoryRange()">'+tr('clear_history_range_btn')+'</button>' +
+    '</div>' +
   '</div>';
 }
 
@@ -7988,6 +8018,33 @@ function buildSettingsPinGate(){
       '<div class="pin-keypad">'+keypadHtml+'</div>' +
     '</div>' +
   '</div>';
+}
+
+/* Shared by Clear All History and Clear History (date range): archives
+   every order in the given (already-fetched) snapshot into
+   pos_deleted_orders and deletes it from pos_orders, in chunks of 200
+   (Firestore's batch write limit). The only difference between the two
+   callers is the query passed in — this is the deletion mechanics common
+   to both. */
+function archiveAndDeleteOrders(opDb, snapPromise, useAdmin){
+  return snapPromise.then(function(snap){
+    var docs = snap.docs;
+    var chunks = [];
+    for(var i=0;i<docs.length;i+=200){ chunks.push(docs.slice(i,i+200)); }
+    var chain = Promise.resolve();
+    chunks.forEach(function(chunk){
+      chain = chain.then(function(){
+        var batch = opDb.batch();
+        chunk.forEach(function(d){
+          var archived = Object.assign({}, d.data(), {deletedAt: new Date().toISOString(), deletedBy: useAdmin?'admin':'manager'});
+          batch.set(opDb.collection('pos_deleted_orders').doc(d.id), archived);
+          batch.delete(d.ref);
+        });
+        return batch.commit();
+      });
+    });
+    return chain;
+  });
 }
 
 /* ================= ACTIONS ================= */
@@ -8238,24 +8295,15 @@ var POS = {
       return actorAuth.signInWithEmailAndPassword(actorEmail, pin).then(function(){
         var task;
         if(prompt.action==='clearHistory'){
-          task = opDb.collection('pos_orders').get().then(function(snap){
-            var docs = snap.docs;
-            var chunks = [];
-            for(var i=0;i<docs.length;i+=200){ chunks.push(docs.slice(i,i+200)); }
-            var chain = Promise.resolve();
-            chunks.forEach(function(chunk){
-              chain = chain.then(function(){
-                var batch = opDb.batch();
-                chunk.forEach(function(d){
-                  var archived = Object.assign({}, d.data(), {deletedAt: new Date().toISOString(), deletedBy: useAdmin?'admin':'manager'});
-                  batch.set(opDb.collection('pos_deleted_orders').doc(d.id), archived);
-                  batch.delete(d.ref);
-                });
-                return batch.commit();
-              });
-            });
-            return chain;
-          });
+          task = archiveAndDeleteOrders(opDb, opDb.collection('pos_orders').get(), useAdmin);
+        } else if(prompt.action==='clearHistoryRange'){
+          var fromISO = new Date(state.clearHistoryFrom+'T00:00:00.000').toISOString();
+          var toISO = new Date(state.clearHistoryTo+'T23:59:59.999').toISOString();
+          task = archiveAndDeleteOrders(
+            opDb,
+            opDb.collection('pos_orders').where('timestamp','>=',fromISO).where('timestamp','<=',toISO).get(),
+            useAdmin
+          );
         } else if(prompt.action==='resetMenu'){
           state.menu = JSON.parse(JSON.stringify(DEFAULT_MENU));
           state.toppings = JSON.parse(JSON.stringify(DEFAULT_TOPPINGS));
@@ -10250,6 +10298,13 @@ var POS = {
   },
   clearHistory: function(){
     POS.requestManagerApproval('clearHistory', null, 'either');
+  },
+  setClearHistoryFrom: function(value){ state.clearHistoryFrom = value; render(); },
+  setClearHistoryTo: function(value){ state.clearHistoryTo = value; render(); },
+  clearHistoryRange: function(){
+    if(!state.clearHistoryFrom || !state.clearHistoryTo){ window.alert('Please choose both a start and end date.'); return; }
+    if(state.clearHistoryFrom > state.clearHistoryTo){ window.alert('The start date must be on or before the end date.'); return; }
+    POS.requestManagerApproval('clearHistoryRange', null, 'either');
   }
 };
 window.POS = POS;
