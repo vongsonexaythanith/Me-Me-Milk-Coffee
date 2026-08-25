@@ -3582,6 +3582,7 @@ var TRANSLATIONS = {
     split_payment_label:'Split (Cash+Transfer)', split_cash_label:'Cash amount', split_transfer_label:'Transfer amount',
     split_match_label:'Matches total', split_remaining_label:'Still needed', split_over_label:'Over by',
     cash_received:'Cash received',
+    cash_amount_optional:'Optional — leave blank for exact change',
     change_due:'Change due', short_by:'Short by',
     complete_order:'Complete Order', processing:'Processing…',
     clear_cart:'Clear cart',
@@ -3774,6 +3775,7 @@ var TRANSLATIONS = {
     split_payment_label:'ແບ່ງຈ່າຍ (ເງິນສົດ+ໂອນ)', split_cash_label:'ຈຳນວນເງິນສົດ', split_transfer_label:'ຈຳນວນເງິນໂອນ',
     split_match_label:'ຄົບຕາມຍອດລວມ', split_remaining_label:'ຍັງຂາດ', split_over_label:'ເກີນ',
     cash_received:'ຮັບເງິນສົດ',
+    cash_amount_optional:'ບໍ່ບັງຄັບ — ປະໄວ້ຫວ່າງຖ້າຈ່າຍພໍດີ',
     change_due:'ເງິນທອນ', short_by:'ຂາດອີກ',
     complete_order:'ຢືນຢັນອໍເດີ', processing:'ກຳລັງດຳເນີນການ…',
     clear_cart:'ລ້າງກະຕ່າ',
@@ -3966,6 +3968,7 @@ var TRANSLATIONS = {
     split_payment_label:'แบ่งจ่าย (เงินสด+โอน)', split_cash_label:'จำนวนเงินสด', split_transfer_label:'จำนวนเงินโอน',
     split_match_label:'ครบตามยอดรวม', split_remaining_label:'ยังขาดอยู่', split_over_label:'เกินอยู่',
     cash_received:'รับเงินสด',
+    cash_amount_optional:'ไม่บังคับ — เว้นว่างไว้หากจ่ายพอดี',
     change_due:'เงินทอน', short_by:'ขาดอีก',
     complete_order:'ยืนยันออเดอร์', processing:'กำลังดำเนินการ…',
     clear_cart:'ล้างตะกร้า',
@@ -5730,8 +5733,13 @@ function buildDraftOrder(){
   var t = computeCartTotals();
   var cur = t.cur, rate = t.rate;
   var totalDisplayRounded = roundedDisplayTotal(t.totalLAK, cur);
-  var receivedInput = state.paymentMethod==='cash' ? Number(state.amountReceived||0) : null;
-  if(state.paymentMethod==='cash' && (receivedInput==null || receivedInput < totalDisplayRounded - 0.005)) return null;
+  /* Cash amount is optional — if the staff didn't type one in, assume
+     exact change (received == total, so change comes out to 0) rather
+     than blocking checkout. If they did type something, use it as-is
+     (even if it's short) since entering it is no longer a hard gate. */
+  var receivedInput = state.paymentMethod==='cash'
+    ? (state.amountReceived==='' ? totalDisplayRounded : Number(state.amountReceived||0))
+    : null;
   var receivedLAK = state.paymentMethod==='cash' ? receivedInput*rate : t.totalLAK;
 
   var splitCashInput = null, splitTransferInput = null;
@@ -5853,7 +5861,7 @@ function buildCartPanel(){
     var receivedInput = state.amountReceived==='' ? null : Number(state.amountReceived);
     var changeDisplay = receivedInput==null ? null : receivedInput - totalDisplayRounded;
     cashHtml = '' +
-    '<div class="cash-row"><span>'+tr('cash_received')+' ('+currencySymbolFor(cur)+')</span><input id="pos-amount-received" type="text" inputmode="decimal" placeholder="0" value="'+escapeHtml(state.amountReceived)+'" oninput="POS.setAmountReceived(this.value)"/></div>' +
+    '<div class="cash-row"><span>'+tr('cash_received')+' ('+currencySymbolFor(cur)+')</span><input id="pos-amount-received" type="text" inputmode="decimal" placeholder="'+tr('cash_amount_optional')+'" value="'+escapeHtml(state.amountReceived)+'" oninput="POS.setAmountReceived(this.value)"/></div>' +
     (changeDisplay!=null ? ('<div class="summary-row change-line '+(changeDisplay<-0.005?'warn':'ok')+'"><span>'+(changeDisplay<-0.005?tr('short_by'):tr('change_due'))+'</span><span>'+formatForeignAmount(Math.abs(changeDisplay), cur)+'</span></div>') : '');
   }
 
@@ -5869,9 +5877,7 @@ function buildCartPanel(){
     '<div class="summary-row change-line '+(Math.abs(splitDiff)<=0.005?'ok':'warn')+'"><span>'+(Math.abs(splitDiff)<=0.005?tr('split_match_label'):(splitDiff>0?tr('split_remaining_label'):tr('split_over_label')))+'</span><span>'+(Math.abs(splitDiff)<=0.005?'✓':formatForeignAmount(Math.abs(splitDiff), cur))+'</span></div>';
   }
 
-  var receivedInputForGate = state.amountReceived==='' ? null : Number(state.amountReceived);
   var canComplete = !state.completingOrder && state.cart.length>0 &&
-    (state.paymentMethod!=='cash' || (receivedInputForGate!=null && receivedInputForGate >= totalDisplayRounded - 0.005)) &&
     (state.paymentMethod!=='split' || Math.abs(splitDiff)<=0.005);
 
   return '' +
