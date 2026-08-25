@@ -3103,7 +3103,15 @@ function eposCharWidth(){
 function eposEscapeXml(s){
   return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
 }
-function eposText(s){ return '<text>'+eposEscapeXml(s)+'&#10;</text>'; }
+/* This printer's built-in font (on this specific network/Epson path, same
+   as the RawBT path below) is a legacy single-byte codepage with no real
+   Unicode support — see the longer explanation by ESCPOS_CHAR_MAP further
+   down, which this function also uses. Without this, the ₭ symbol,
+   Lao/Thai script (used throughout the UI whenever the shop's language is
+   set to Lao or Thai — every label, not just item names), and smart
+   punctuation all print as garbled noise instead of being silently
+   dropped/substituted like everything else already is. */
+function eposText(s){ return '<text>'+eposEscapeXml(escposSanitize(s))+'&#10;</text>'; }
 /* Greedy word-wrap to a fixed character width, so long item names or
    addresses break onto extra lines instead of being cut off. */
 function eposWrapLines(text, width){
@@ -3146,7 +3154,7 @@ function buildEposPrintXml(o){
     out += '<text align="left"/>';
     out += eposText(new Array(W+1).join('-'));
     o.items.forEach(function(l){
-      var priceStr = formatMoney(l.unitPrice*l.qty);
+      var priceStr = escposMoney(l.unitPrice*l.qty);
       var nameStr = l.qty+'x '+cartLineName(l);
       var nameLines = eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1));
       nameLines.forEach(function(ln,i){
@@ -3159,17 +3167,17 @@ function buildEposPrintXml(o){
       });
     });
     out += eposText(new Array(W+1).join('-'));
-    out += eposText(eposPadLine(tr('subtotal'), formatMoney(o.subtotal), W));
-    if(o.discount>0) out += eposText(eposPadLine(tr('discount'), '-'+formatMoney(o.discount), W));
-    if(o.serviceCharge>0) out += eposText(eposPadLine(tr('service_charge'), formatMoney(o.serviceCharge), W));
+    out += eposText(eposPadLine(tr('subtotal'), escposMoney(o.subtotal), W));
+    if(o.discount>0) out += eposText(eposPadLine(tr('discount'), '-'+escposMoney(o.discount), W));
+    if(o.serviceCharge>0) out += eposText(eposPadLine(tr('service_charge'), escposMoney(o.serviceCharge), W));
     out += '<text em="true"/>';
-    out += eposText(eposPadLine(tr('total'), formatMoney(o.total), W));
+    out += eposText(eposPadLine(tr('total'), escposMoney(o.total), W));
     out += '<text em="false"/>';
     out += eposText(eposPadLine(tr('receipt_payment'), paymentDisplayFor(o), W));
     if(o.placedByAccount) out += eposText(eposPadLine(tr('served_by_label'), staffNameFor(o.placedByAccount), W));
     if(o.paymentMethod==='cash'){
-      out += eposText(eposPadLine(tr('cash_received'), formatMoney(o.amountReceived), W));
-      out += eposText(eposPadLine(tr('receipt_change'), formatMoney(o.change), W));
+      out += eposText(eposPadLine(tr('cash_received'), escposMoney(o.amountReceived), W));
+      out += eposText(eposPadLine(tr('receipt_change'), escposMoney(o.change), W));
     }
     out += '<text align="center"/>';
     String(s.footerMessage||'').split('\n').forEach(function(line){
@@ -3252,12 +3260,13 @@ function escposSanitize(str){
   return str.replace(/[^\x20-\x7E]/g, ''); // drop anything still outside printable ASCII
 }
 function escposLine(s){ return escposSanitize(s)+'\n'; }
-/* Plain-ASCII money format for RawBT/ESC-POS specifically — the ₭ symbol
-   (U+20AD) is an obscure Unicode character most budget thermal printer
-   fonts simply don't have a glyph for, which corrupted every price line.
-   The rest of the app keeps using formatMoney()/₭ (on-screen, ePOS-Print,
-   window.print()) since those render through proper Unicode-capable
-   paths; this plain "LAK 50,000" form is only for this raw ESC/POS path. */
+/* Plain-ASCII money format for the two raw-text printer paths (RawBT and
+   Epson ePOS-Print) — the ₭ symbol (U+20AD) is an obscure Unicode
+   character most thermal printer fonts simply don't have a glyph for,
+   which corrupted every price line on both paths. On-screen and
+   window.print() keep using formatMoney()/₭ since browsers render
+   Unicode correctly; this plain "LAK 50,000" form is only for text sent
+   directly to a thermal printer's own built-in font. */
 function escposMoney(n){
   n = Math.round(Number(n)||0);
   return 'LAK '+n.toLocaleString('en-US');
