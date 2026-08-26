@@ -3653,6 +3653,16 @@ var CATEGORY_PALETTE = ['caramel','taro','matcha','coral'];
 var TRANSLATIONS = {
   en: {
     tab_order:'🧋 Order', tab_incoming:'🧺 Incoming Orders', tab_menu:'📋 Menu', tab_history:'🧾 History', tab_deleted:'🔒 Deleted', tab_settings:'⚙️ Settings',
+    incoming_sync_error:'Could not load Incoming Orders — check the Firestore security rules for the pos_incoming_orders collection.',
+    incoming_empty_note:'No pending self-service orders right now. New orders submitted from the QR menu will show up here automatically.',
+    incoming_guest_order:'Guest order',
+    incoming_reject_btn:'✕ Reject', incoming_review_approve_btn:'✓ Review & Approve',
+    incoming_tab_hint:'Customer orders submitted from the QR self-service menu. Nothing is recorded as a sale — and no stock is deducted — until you approve it below.',
+    incoming_approve_title:'Approve Order', incoming_payment_method_label:'Payment method',
+    incoming_exact_amount_placeholder:'Exact amount', incoming_confirm_record_btn:'Confirm & Record Sale',
+    incoming_reject_hint:'Need a discount in a foreign currency, or to edit items? Reject this and enter it manually from the Order tab instead.',
+    incoming_customer_requested_label:'Customer requested:',
+    incoming_reject_confirm:'Reject this order? The customer will need to re-submit or order at the counter instead.',
     search_placeholder:'Search menu…',
     currency_label:'Currency',
     current_order:'Current Order',
@@ -3848,7 +3858,17 @@ var TRANSLATIONS = {
     unavailable_label:'Unavailable', mark_unavailable:'Mark Unavailable', mark_available:'Mark Available'
   },
   lo: {
-    tab_order:'🧋 ສັ່ງເຄື່ອງດື່ມ', tab_menu:'📋 ເມນູ', tab_history:'🧾 ປະຫວັດ', tab_deleted:'🔒 ລຶບແລ້ວ', tab_settings:'⚙️ ຕັ້ງຄ່າ',
+    tab_order:'🧋 ສັ່ງເຄື່ອງດື່ມ', tab_incoming:'🧺 ອໍເດີເຂົ້າມາ', tab_menu:'📋 ເມນູ', tab_history:'🧾 ປະຫວັດ', tab_deleted:'🔒 ລຶບແລ້ວ', tab_settings:'⚙️ ຕັ້ງຄ່າ',
+    incoming_sync_error:'ບໍ່ສາມາດໂຫຼດອໍເດີເຂົ້າມາໄດ້ — ກະລຸນາກວດສອບ Firestore security rules ສຳລັບ pos_incoming_orders',
+    incoming_empty_note:'ຍັງບໍ່ມີອໍເດີຈາກລູກຄ້າຕອນນີ້. ອໍເດີໃໝ່ທີ່ສົ່ງມາຈາກເມນູ QR ຈະສະແດງຢູ່ບ່ອນນີ້ໂດຍອັດຕະໂນມັດ.',
+    incoming_guest_order:'ອໍເດີບໍ່ລະບຸຊື່',
+    incoming_reject_btn:'✕ ປະຕິເສດ', incoming_review_approve_btn:'✓ ກວດສອບ ແລະ ອະນຸມັດ',
+    incoming_tab_hint:'ອໍເດີຈາກລູກຄ້າທີ່ສົ່ງມາຈາກເມນູ QR. ຈະບໍ່ຖືກບັນທຶກເປັນຍອດຂາຍ — ແລະ ຈະບໍ່ຖືກຫັກສະຕັອກ — ຈົນກວ່າທ່ານຈະອະນຸມັດຢູ່ລຸ່ມນີ້.',
+    incoming_approve_title:'ອະນຸມັດອໍເດີ', incoming_payment_method_label:'ວິທີຊຳລະເງິນ',
+    incoming_exact_amount_placeholder:'ຈຳນວນພໍດີ', incoming_confirm_record_btn:'ຢືນຢັນ ແລະ ບັນທຶກຍອດຂາຍ',
+    incoming_reject_hint:'ຕ້ອງການສ່ວນຫຼຸດເປັນສະກຸນເງິນຕ່າງປະເທດ ຫຼື ແກ້ໄຂລາຍການບໍ? ປະຕິເສດອໍເດີນີ້ ແລະ ໃສ່ຂໍ້ມູນເອງຈາກແທັບອໍເດີແທນ.',
+    incoming_customer_requested_label:'ລູກຄ້າຂໍຊຳລະດ້ວຍ:',
+    incoming_reject_confirm:'ປະຕິເສດອໍເດີນີ້ບໍ? ລູກຄ້າຈະຕ້ອງສົ່ງອໍເດີໃໝ່ ຫຼື ສັ່ງທີ່ເຄົາເຕີແທນ.',
     search_placeholder:'ຄົ້ນຫາເມນູ…',
     currency_label:'ສະກຸນເງິນ',
     current_order:'ອໍເດີປັດຈຸບັນ',
@@ -4044,7 +4064,17 @@ var TRANSLATIONS = {
     unavailable_label:'ໝົດ', mark_unavailable:'ໝາຍວ່າໝົດ', mark_available:'ໝາຍວ່າມີຄືນ'
   },
   th: {
-    tab_order:'🧋 สั่งเครื่องดื่ม', tab_menu:'📋 เมนู', tab_history:'🧾 ประวัติ', tab_deleted:'🔒 ที่ลบแล้ว', tab_settings:'⚙️ ตั้งค่า',
+    tab_order:'🧋 สั่งเครื่องดื่ม', tab_incoming:'🧺 ออเดอร์ที่เข้ามา', tab_menu:'📋 เมนู', tab_history:'🧾 ประวัติ', tab_deleted:'🔒 ที่ลบแล้ว', tab_settings:'⚙️ ตั้งค่า',
+    incoming_sync_error:'ไม่สามารถโหลดออเดอร์ที่เข้ามาได้ — กรุณาตรวจสอบ Firestore security rules สำหรับ pos_incoming_orders',
+    incoming_empty_note:'ยังไม่มีออเดอร์จากลูกค้าตอนนี้ ออเดอร์ใหม่ที่ส่งมาจากเมนู QR จะแสดงที่นี่โดยอัตโนมัติ',
+    incoming_guest_order:'ออเดอร์ไม่ระบุชื่อ',
+    incoming_reject_btn:'✕ ปฏิเสธ', incoming_review_approve_btn:'✓ ตรวจสอบและอนุมัติ',
+    incoming_tab_hint:'ออเดอร์จากลูกค้าที่ส่งมาจากเมนู QR จะไม่ถูกบันทึกเป็นยอดขาย — และจะไม่ถูกหักสต็อก — จนกว่าคุณจะอนุมัติด้านล่างนี้',
+    incoming_approve_title:'อนุมัติออเดอร์', incoming_payment_method_label:'วิธีชำระเงิน',
+    incoming_exact_amount_placeholder:'จำนวนพอดี', incoming_confirm_record_btn:'ยืนยันและบันทึกยอดขาย',
+    incoming_reject_hint:'ต้องการส่วนลดเป็นสกุลเงินต่างประเทศ หรือแก้ไขรายการ? ปฏิเสธออเดอร์นี้แล้วกรอกข้อมูลเองจากแท็บออเดอร์แทน',
+    incoming_customer_requested_label:'ลูกค้าขอชำระด้วย:',
+    incoming_reject_confirm:'ปฏิเสธออเดอร์นี้หรือไม่? ลูกค้าจะต้องส่งออเดอร์ใหม่ หรือสั่งที่เคาน์เตอร์แทน',
     search_placeholder:'ค้นหาเมนู…',
     currency_label:'สกุลเงิน',
     current_order:'ออเดอร์ปัจจุบัน',
@@ -6048,6 +6078,11 @@ function buildDraftOrderFromIncoming(order, prompt){
   var receivedInput = prompt.paymentMethod==='cash'
     ? (prompt.amountReceived==='' || prompt.amountReceived==null ? totalLAK : Number(prompt.amountReceived||0))
     : totalLAK;
+  // Split is always plain LAK here (this approval flow has no foreign-currency
+  // support — see the "reject and enter manually" hint), so the LAK-suffixed
+  // fields are identical to the plain ones, same as they'd be at rate=1.
+  var splitCashInput = prompt.paymentMethod==='split' ? (prompt.splitCash==='' || prompt.splitCash==null ? 0 : Number(prompt.splitCash)) : null;
+  var splitTransferInput = prompt.paymentMethod==='split' ? (prompt.splitTransfer==='' || prompt.splitTransfer==null ? 0 : Number(prompt.splitTransfer)) : null;
   return {
     items: JSON.parse(JSON.stringify(order.items)),
     subtotal: subtotalLAK,
@@ -6061,7 +6096,8 @@ function buildDraftOrderFromIncoming(order, prompt){
     displayTotal: totalLAK,
     displayReceived: prompt.paymentMethod==='cash' ? receivedInput : null,
     displayChange: prompt.paymentMethod==='cash' ? (receivedInput - totalLAK) : null,
-    splitCash: null, splitTransfer: null, splitCashLAK: null, splitTransferLAK: null,
+    splitCash: splitCashInput, splitTransfer: splitTransferInput,
+    splitCashLAK: splitCashInput, splitTransferLAK: splitTransferInput,
     placedByAccount: state.loggedInAccount || null,
     placedByRole: state.loggedInRole || null,
     source: 'self_service',
@@ -6086,41 +6122,42 @@ function relativeTimeFromIso(iso){
 function buildIncomingOrdersTab(){
   var orders = state.incomingOrders || [];
   var syncNotice = state.incomingOrdersSyncError
-    ? '<div class="section-card" style="background:#FFFBF9;border-color:var(--danger-light);"><p class="hint" style="color:var(--danger);">Could not load Incoming Orders — check the Firestore security rules for the pos_incoming_orders collection.</p></div>'
+    ? '<div class="section-card" style="background:#FFFBF9;border-color:var(--danger-light);"><p class="hint" style="color:var(--danger);">'+tr('incoming_sync_error')+'</p></div>'
     : '';
   if(!orders.length){
-    return syncNotice + '<div class="section-card"><h2>🧺 Incoming Orders</h2><p class="empty-note">No pending self-service orders right now. New orders submitted from the QR menu will show up here automatically.</p></div>';
+    return syncNotice + '<div class="section-card"><h2>'+tr('tab_incoming')+'</h2><p class="empty-note">'+tr('incoming_empty_note')+'</p></div>';
   }
   var cardsHtml = orders.map(function(o){
     var expanded = state.expandedIncomingId === o.id;
     var subtotal = computeIncomingOrderSubtotal(o.items);
     var itemLines = (o.items||[]).map(function(l){
       var toppingsText = (l.toppings&&l.toppings.length) ? (' · '+l.toppings.map(function(t){return (Number(t.qty)>1?t.qty+'x ':'')+t.name;}).join(', ')) : '';
-      var meta = l.size+' · '+l.sugar+'% sugar · '+iceLabel(l.ice)+toppingsText;
+      var meta = l.size+' · '+l.sugar+'% '+tr('sugar_word')+' · '+iceLabel(l.ice)+toppingsText;
       return '<div class="di"><span>'+l.qty+'x '+escapeHtml(l.name)+' <span style="opacity:.75;">('+escapeHtml(meta)+')</span></span><span>'+formatMoney(l.unitPrice*l.qty)+'</span></div>';
     }).join('');
     var titleBits = [];
     if(o.customerName) titleBits.push(escapeHtml(o.customerName));
     if(o.customerNote) titleBits.push(escapeHtml(o.customerNote));
-    var title = titleBits.length ? titleBits.join(' · ') : 'Guest order';
+    var title = titleBits.length ? titleBits.join(' · ') : tr('incoming_guest_order');
+    var paymentNote = o.paymentChoice ? ('<div class="otime">'+tr('incoming_customer_requested_label')+' '+paymentMethodLabel(o.paymentChoice)+'</div>') : '';
     return '' +
     '<div class="order-row">' +
       '<div class="order-row-top" onclick="POS.toggleIncomingExpand(\''+o.id+'\')">' +
-        '<div><div class="onum">'+title+'</div><div class="otime">'+relativeTimeFromIso(o.submittedAt)+' · '+(o.items?o.items.length:0)+' item(s)</div></div>' +
+        '<div><div class="onum">'+title+'</div><div class="otime">'+relativeTimeFromIso(o.submittedAt)+' · '+(o.items?o.items.length:0)+' '+tr('items_suffix')+'</div>'+paymentNote+'</div>' +
         '<div class="ototal">'+formatMoney(subtotal)+'</div>' +
       '</div>' +
       (expanded ? (
         '<div class="order-detail">' + itemLines +
           '<div class="dactions">' +
-            '<button class="btn btn-ghost btn-small" onclick="POS.rejectIncoming(\''+o.id+'\')">✕ Reject</button>' +
-            '<button class="btn btn-primary btn-small" style="width:auto;" onclick="POS.openIncomingApprove(\''+o.id+'\')">✓ Review &amp; Approve</button>' +
+            '<button class="btn btn-ghost btn-small" onclick="POS.rejectIncoming(\''+o.id+'\')">'+tr('incoming_reject_btn')+'</button>' +
+            '<button class="btn btn-primary btn-small" style="width:auto;" onclick="POS.openIncomingApprove(\''+o.id+'\')">'+tr('incoming_review_approve_btn')+'</button>' +
           '</div>' +
         '</div>'
       ) : '') +
     '</div>';
   }).join('');
   return syncNotice +
-    '<div class="section-card"><h2>🧺 Incoming Orders</h2><p class="hint">Customer orders submitted from the QR self-service menu. Nothing is recorded as a sale — and no stock is deducted — until you approve it below.</p></div>' +
+    '<div class="section-card"><h2>'+tr('tab_incoming')+'</h2><p class="hint">'+tr('incoming_tab_hint')+'</p></div>' +
     cardsHtml;
 }
 function buildIncomingApproveModal(){
@@ -6128,35 +6165,49 @@ function buildIncomingApproveModal(){
   var o = (state.incomingOrders||[]).filter(function(x){return x.id===p.orderId;})[0];
   if(!o){ state.incomingApprovePrompt = null; return ''; }
   var draft = buildDraftOrderFromIncoming(o, p);
-  var payDefs = [['cash','Cash'],['transfer','Transfer'],['qr','QR Pay'],['egets','E-Gets'],['foodpanda','FoodPanda']];
+  /* Deliberately just these three, matching the exact set customers can
+     request on self-service.html (see openIncomingApprove's fallback list
+     and firestore.rules' paymentChoice check) — this shop doesn't take
+     E-Gets/FoodPanda orders through the QR menu (nothing here integrates
+     with those apps), and transfer already covers "pay via QR scan" as far
+     as this review step is concerned, so there's no separate QR option. */
+  var payDefs = [['cash',tr('cash')],['transfer',tr('transfer')],['split',tr('split_payment_label')]];
   var payBtns = payDefs.map(function(pm){
     return '<button class="'+(p.paymentMethod===pm[0]?'active':'')+'" onclick="POS.setIncomingApprovePayment(\''+pm[0]+'\')">'+pm[1]+'</button>';
   }).join('');
   var itemsHtml = (o.items||[]).map(function(l){
     var toppingsText = (l.toppings&&l.toppings.length) ? (' · '+l.toppings.map(function(t){return (Number(t.qty)>1?t.qty+'x ':'')+t.name;}).join(', ')) : '';
-    var meta = l.size+' · '+l.sugar+'% sugar · '+iceLabel(l.ice)+toppingsText;
+    var meta = l.size+' · '+l.sugar+'% '+tr('sugar_word')+' · '+iceLabel(l.ice)+toppingsText;
     return '<div class="r-item"><span class="r-name">'+l.qty+'x '+escapeHtml(l.name)+'<div class="r-sub-line">'+escapeHtml(meta)+'</div></span><span class="r-item-price">'+formatMoney(l.unitPrice*l.qty)+'</span></div>';
   }).join('');
+  var splitSumOk = draft.paymentMethod!=='split' || Math.abs(draft.total - ((draft.splitCash||0)+(draft.splitTransfer||0))) <= 0.005;
+  var canConfirm = !state.completingOrder && splitSumOk;
   return '' +
   '<div class="pos-overlay" onclick="if(event.target===this) POS.cancelIncomingApprove()">' +
     '<div class="pos-modal" style="max-width:380px;">' +
       '<button class="modal-close-x" '+(state.completingOrder?'disabled':'')+' onclick="POS.cancelIncomingApprove()">✕</button>' +
-      '<h2>Approve Order</h2>' +
+      '<h2>'+tr('incoming_approve_title')+'</h2>' +
       (o.customerName || o.customerNote ? '<p class="sub-cat">'+escapeHtml([o.customerName,o.customerNote].filter(Boolean).join(' · '))+'</p>' : '') +
+      (o.paymentChoice ? '<p class="sub-cat">'+tr('incoming_customer_requested_label')+' '+paymentMethodLabel(o.paymentChoice)+'</p>' : '') +
       itemsHtml +
       '<div class="r-divider"></div>' +
-      '<div class="summary-row"><span>Subtotal</span><span>'+formatMoney(draft.subtotal)+'</span></div>' +
-      '<div class="summary-row"><span>Discount (₭)</span><input type="text" inputmode="decimal" value="'+escapeHtml(String(p.discount||''))+'" placeholder="0" oninput="POS.setIncomingApproveDiscount(this.value)"/></div>' +
-      (draft.serviceCharge>0 ? '<div class="summary-row"><span>Service charge</span><span>'+formatMoney(draft.serviceCharge)+'</span></div>' : '') +
-      '<div class="summary-row total"><span>Total</span><span>'+formatMoney(draft.total)+'</span></div>' +
-      '<div class="opt-label">Payment method</div>' +
+      '<div class="summary-row"><span>'+tr('subtotal')+'</span><span>'+formatMoney(draft.subtotal)+'</span></div>' +
+      '<div class="summary-row"><span>'+tr('discount')+' (₭)</span><input type="text" inputmode="decimal" value="'+escapeHtml(String(p.discount||''))+'" placeholder="0" oninput="POS.setIncomingApproveDiscount(this.value)"/></div>' +
+      (draft.serviceCharge>0 ? '<div class="summary-row"><span>'+tr('service_charge')+'</span><span>'+formatMoney(draft.serviceCharge)+'</span></div>' : '') +
+      '<div class="summary-row total"><span>'+tr('total')+'</span><span>'+formatMoney(draft.total)+'</span></div>' +
+      '<div class="opt-label">'+tr('incoming_payment_method_label')+'</div>' +
       '<div class="pay-methods">'+payBtns+'</div>' +
       (p.paymentMethod==='cash' ? (
-        '<div class="cash-row"><span>Cash received (₭)</span><input type="text" inputmode="decimal" placeholder="Exact amount" value="'+escapeHtml(p.amountReceived)+'" oninput="POS.setIncomingApproveAmount(this.value)"/></div>' +
-        (draft.displayChange!=null ? ('<div class="summary-row change-line '+(draft.displayChange<-0.005?'warn':'ok')+'"><span>'+(draft.displayChange<-0.005?'Short by':'Change due')+'</span><span>'+formatMoney(Math.abs(draft.displayChange))+'</span></div>') : '')
+        '<div class="cash-row"><span>'+tr('cash_received')+' (₭)</span><input type="text" inputmode="decimal" placeholder="'+tr('incoming_exact_amount_placeholder')+'" value="'+escapeHtml(p.amountReceived)+'" oninput="POS.setIncomingApproveAmount(this.value)"/></div>' +
+        (draft.displayChange!=null ? ('<div class="summary-row change-line '+(draft.displayChange<-0.005?'warn':'ok')+'"><span>'+(draft.displayChange<-0.005?tr('short_by'):tr('change_due'))+'</span><span>'+formatMoney(Math.abs(draft.displayChange))+'</span></div>') : '')
       ) : '') +
-      '<button class="btn btn-primary" '+(state.completingOrder?'disabled':'')+' onclick="POS.confirmIncomingApprove()">'+(state.completingOrder?'Recording…':('Confirm &amp; Record Sale · '+formatMoney(draft.total)))+'</button>' +
-      '<p class="hint" style="margin-top:10px;">Need a discount in a foreign currency, a split payment, or to edit items? Reject this and enter it manually from the Order tab instead.</p>' +
+      (p.paymentMethod==='split' ? (
+        '<div class="cash-row"><span>'+tr('split_cash_label')+' (₭)</span><input type="text" inputmode="decimal" placeholder="0" value="'+escapeHtml(p.splitCash)+'" oninput="POS.setIncomingApproveSplitCash(this.value)"/></div>' +
+        '<div class="cash-row"><span>'+tr('split_transfer_label')+' (₭)</span><input type="text" inputmode="decimal" placeholder="0" value="'+escapeHtml(p.splitTransfer)+'" oninput="POS.setIncomingApproveSplitTransfer(this.value)"/></div>' +
+        '<div class="summary-row change-line '+(splitSumOk?'ok':'warn')+'"><span>'+(splitSumOk?tr('split_match_label'):((draft.total-((draft.splitCash||0)+(draft.splitTransfer||0)))>0?tr('split_remaining_label'):tr('split_over_label')))+'</span><span>'+(splitSumOk?'✓':formatMoney(Math.abs(draft.total-((draft.splitCash||0)+(draft.splitTransfer||0)))))+'</span></div>'
+      ) : '') +
+      '<button class="btn btn-primary" '+(canConfirm?'':'disabled')+' onclick="POS.confirmIncomingApprove()">'+(state.completingOrder?tr('processing'):(tr('incoming_confirm_record_btn')+' · '+formatMoney(draft.total)))+'</button>' +
+      '<p class="hint" style="margin-top:10px;">'+tr('incoming_reject_hint')+'</p>' +
     '</div>' +
   '</div>';
 }
@@ -9710,7 +9761,14 @@ var POS = {
     render();
   },
   openIncomingApprove: function(id){
-    state.incomingApprovePrompt = {orderId:id, paymentMethod:'cash', amountReceived:'', discount:0};
+    var o = (state.incomingOrders||[]).filter(function(x){return x.id===id;})[0];
+    /* Pre-select whatever payment method the customer said they'd use, so
+       staff usually just has to confirm rather than re-pick it — they can
+       still change it freely, this is only a starting point. Falls back to
+       'cash' for older incoming orders recorded before customers could
+       state a preference, or if the stored value is somehow unrecognized. */
+    var initialMethod = (o && ['cash','transfer','split'].indexOf(o.paymentChoice)>-1) ? o.paymentChoice : 'cash';
+    state.incomingApprovePrompt = {orderId:id, paymentMethod:initialMethod, amountReceived:'', discount:0, splitCash:'', splitTransfer:''};
     render();
   },
   cancelIncomingApprove: function(){
@@ -9721,10 +9779,20 @@ var POS = {
   setIncomingApprovePayment: function(pm){
     state.incomingApprovePrompt.paymentMethod = pm;
     state.incomingApprovePrompt.amountReceived = '';
+    state.incomingApprovePrompt.splitCash = '';
+    state.incomingApprovePrompt.splitTransfer = '';
     render();
   },
   setIncomingApproveAmount: function(v){
     state.incomingApprovePrompt.amountReceived = sanitizeDecimal(v);
+    render();
+  },
+  setIncomingApproveSplitCash: function(v){
+    state.incomingApprovePrompt.splitCash = sanitizeDecimal(v);
+    render();
+  },
+  setIncomingApproveSplitTransfer: function(v){
+    state.incomingApprovePrompt.splitTransfer = sanitizeDecimal(v);
     render();
   },
   setIncomingApproveDiscount: function(v){
@@ -9738,6 +9806,11 @@ var POS = {
     var o = (state.incomingOrders||[]).filter(function(x){return x.id===p.orderId;})[0];
     if(!o){ state.incomingApprovePrompt = null; render(); return; }
     var draft = buildDraftOrderFromIncoming(o, p);
+    /* Same guard the disabled Confirm button already enforces in the UI —
+       repeated here so this can never record a sale with a split payment
+       that doesn't actually add up to the total, even if this were ever
+       called some other way. */
+    if(draft.paymentMethod==='split' && Math.abs(draft.total - ((draft.splitCash||0)+(draft.splitTransfer||0))) > 0.005) return;
     state.completingOrder = true;
     render();
     recordCompletedOrder(draft).then(function(order){
@@ -9756,7 +9829,7 @@ var POS = {
     });
   },
   rejectIncoming: function(id){
-    if(!window.confirm('Reject this order? The customer will need to re-submit or order at the counter instead.')) return;
+    if(!window.confirm(tr('incoming_reject_confirm'))) return;
     db.collection('pos_incoming_orders').doc(id).delete().catch(function(e){
       window.alert('Could not reject this order: '+e.message);
     });

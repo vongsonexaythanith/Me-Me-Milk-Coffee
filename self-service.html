@@ -268,9 +268,12 @@ var TRANSLATIONS = {
     subtotal:'Subtotal',
     your_name_label:'Your Name and Phone Number', your_name_placeholder:'e.g. Somchai, 020 5555 1234',
     table_note_label:'Table / note (optional)', table_note_placeholder:'e.g. Table 4, or "less ice please"',
+    payment_method_label:'Payment Method',
+    payment_cash:'Cash', payment_transfer:'Transfer', payment_split:'Split Cash & Transfer',
     submit_order:'Send Order to Counter', submitting:'Sending…',
     submit_error_prefix:'Could not send your order — check your connection and try again.',
     submit_error_missing_name:'Please enter your name and phone number before sending your order.',
+    submit_error_missing_payment:'Please choose a payment method before sending your order.',
     submitted_title:'Order Sent!', submitted_body:'Please wait — a staff member will confirm your order shortly and start preparing it.',
     submitted_start_new:'Start a New Order',
     unavailable_label:'Sold Out',
@@ -293,8 +296,11 @@ var TRANSLATIONS = {
     subtotal:'ລວມຍ່ອຍ',
     your_name_label:'ຊື່ ແລະ ເບີໂທຂອງທ່ານ', your_name_placeholder:'ຕົວຢ່າງ: ສົມໃຈ, 020 5555 1234',
     table_note_label:'ໂຕະ / ໝາຍເຫດ (ບໍ່ບັງຄັບ)', table_note_placeholder:'ຕົວຢ່າງ: ໂຕະ 4',
+    payment_method_label:'ວິທີຊຳລະເງິນ',
+    payment_cash:'ເງິນສົດ', payment_transfer:'ໂອນເງິນ', payment_split:'ແບ່ງຈ່າຍ (ເງິນສົດ+ໂອນ)',
     submit_order:'ສົ່ງອໍເດີໄປໂຕະບໍລິການ', submitting:'ກຳລັງສົ່ງ…',
     submit_error_missing_name:'ກະລຸນາໃສ່ຊື່ ແລະ ເບີໂທກ່ອນສົ່ງອໍເດີ',
+    submit_error_missing_payment:'ກະລຸນາເລືອກວິທີຊຳລະເງິນກ່ອນສົ່ງອໍເດີ',
     sugar_word:'ນ້ຳຕານ', add_more_toppings:'ເພີ່ມທັອບປິ້ງ', all_toppings_added:'ເພີ່ມທັອບປິ້ງໝົດແລ້ວ',
     submitted_title:'ສົ່ງອໍເດີແລ້ວ!', submitted_body:'ກະລຸນາລໍຖ້າ — ພະນັກງານຈະຢືນຢັນອໍເດີຂອງທ່ານໃນໄວໆນີ້.',
     submitted_start_new:'ສັ່ງອໍເດີໃໝ່',
@@ -313,8 +319,11 @@ var TRANSLATIONS = {
     subtotal:'ยอดรวมย่อย',
     your_name_label:'ชื่อและเบอร์โทรศัพท์ของคุณ', your_name_placeholder:'เช่น สมชาย 020 5555 1234',
     table_note_label:'โต๊ะ / หมายเหตุ (ไม่บังคับ)', table_note_placeholder:'เช่น โต๊ะ 4',
+    payment_method_label:'วิธีชำระเงิน',
+    payment_cash:'เงินสด', payment_transfer:'โอนเงิน', payment_split:'แบ่งจ่าย (เงินสด+โอน)',
     submit_order:'ส่งออเดอร์ไปที่เคาน์เตอร์', submitting:'กำลังส่ง…',
     submit_error_missing_name:'กรุณากรอกชื่อและเบอร์โทรก่อนส่งออเดอร์',
+    submit_error_missing_payment:'กรุณาเลือกวิธีชำระเงินก่อนส่งออเดอร์',
     sugar_word:'น้ำตาล', add_more_toppings:'เพิ่มท็อปปิ้ง', all_toppings_added:'เพิ่มท็อปปิ้งครบแล้ว',
     submitted_title:'ส่งออเดอร์แล้ว!', submitted_body:'กรุณารอสักครู่ — พนักงานจะยืนยันออเดอร์ของคุณในไม่ช้า',
     submitted_start_new:'สั่งออเดอร์ใหม่',
@@ -339,6 +348,7 @@ var state = {
   modal:null, // {itemId, size, sugar, ice, toppingIds:[], qty}
   customerName:'',
   customerNote:'',
+  paymentChoice:'', // '' | 'cash' | 'transfer' | 'split' -- mandatory, matches the same three values index.html already uses so a customer's choice lines up directly with the staff payment-method buttons
   submitting:false,
   submitError:null
 };
@@ -723,7 +733,12 @@ function buildCartPage(){
   }).join('');
 
   var nameFilled = (state.customerName||'').trim().length>0;
-  var canSubmit = !state.submitting && state.cart.length>0 && nameFilled;
+  var paymentFilled = !!state.paymentChoice;
+  var canSubmit = !state.submitting && state.cart.length>0 && nameFilled && paymentFilled;
+  var paymentOptions = [['cash','payment_cash'],['transfer','payment_transfer'],['split','payment_split']];
+  var paymentBtns = paymentOptions.map(function(p){
+    return '<button class="opt-pill '+(state.paymentChoice===p[0]?'active':'')+'" onclick="APP.setPaymentChoice(\''+p[0]+'\')">'+tr(p[1])+'</button>';
+  }).join('');
   return '' +
   '<div class="back-row"><button class="back-to-categories" onclick="APP.backToMenu()">'+tr('edit_order')+'</button></div>' +
   (state.submitError ? ('<div class="error-banner">'+escapeHtml(state.submitError)+'</div>') : '') +
@@ -735,6 +750,8 @@ function buildCartPage(){
   '<div class="section-card">' +
     '<div class="field"><label>'+tr('your_name_label')+'<span class="required-mark">*</span></label><input id="cust-name" type="text" required placeholder="'+tr('your_name_placeholder')+'" value="'+escapeHtml(state.customerName)+'" oninput="APP.setCustomerName(this.value)"/></div>' +
     '<div class="field"><label>'+tr('table_note_label')+'</label><input id="cust-note" type="text" placeholder="'+tr('table_note_placeholder')+'" value="'+escapeHtml(state.customerNote)+'" oninput="APP.setCustomerNote(this.value)"/></div>' +
+    '<div class="opt-label">'+tr('payment_method_label')+'<span class="required-mark">*</span></div>' +
+    '<div class="opt-row">'+paymentBtns+'</div>' +
   '</div>' +
   '<button class="btn btn-primary" '+(canSubmit?'':'disabled')+' onclick="APP.submitOrder()">'+(state.submitting?tr('submitting'):tr('submit_order'))+'</button>';
 }
@@ -841,6 +858,7 @@ var APP = {
   backToMenu: function(){ state.view='items'; render(); window.scrollTo({top:0}); },
   setCustomerName: function(v){ state.customerName=v; render(); },
   setCustomerNote: function(v){ state.customerNote=v; render(); },
+  setPaymentChoice: function(v){ state.paymentChoice=v; state.submitError=null; render(); },
   submitOrder: function(){
     if(state.submitting || state.cart.length===0) return;
     if((state.customerName||'').trim().length===0){
@@ -850,6 +868,11 @@ var APP = {
       if(el) el.focus();
       return;
     }
+    if(!state.paymentChoice){
+      state.submitError = tr('submit_error_missing_payment');
+      render();
+      return;
+    }
     state.submitting = true;
     state.submitError = null;
     render();
@@ -857,6 +880,7 @@ var APP = {
       items: JSON.parse(JSON.stringify(state.cart)),
       customerName: (state.customerName||'').trim().slice(0,60),
       customerNote: (state.customerNote||'').trim().slice(0,140),
+      paymentChoice: state.paymentChoice,
       status: 'pending',
       submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
       appVersion: 1
@@ -866,6 +890,7 @@ var APP = {
       state.cart = [];
       state.customerName = '';
       state.customerNote = '';
+      state.paymentChoice = '';
       state.view = 'submitted';
       render();
       window.scrollTo({top:0});
