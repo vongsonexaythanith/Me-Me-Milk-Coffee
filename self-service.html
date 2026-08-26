@@ -328,7 +328,7 @@ function tr(key){
 
 /* ================= STATE ================= */
 var state = {
-  language:'en',
+  language:'lo', // default UI language on first load; a language chip tap only changes this in memory (see setLanguage) — it isn't persisted, so every fresh load/QR scan falls back to this default
   settings:null, menu:null, toppings:null, photoMap:{},
   settingsLoaded:false, menuLoaded:false, toppingsLoaded:false,
   loadError:null,

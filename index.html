@@ -4386,7 +4386,7 @@ var state = {
   settingsLoaded:false, menuLoaded:false, toppingsLoaded:false, ordersLoaded:false, ingredientsLoaded:false, recipesLoaded:false,
   expensesLoaded:false, expenses:{}, expenseSyncError:false,
   stockSyncError:false,
-  language:'en',
+  language:'lo', // default UI language on first load; a language chip tap only changes this in memory (see setLanguage) — it isn't persisted, so every fresh load falls back to this default
   syncStatus:'connecting', // connecting | synced | error
   syncErrorLabel:'',
   syncErrorMessage:'',
