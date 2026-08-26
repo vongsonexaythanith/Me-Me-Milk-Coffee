@@ -677,6 +677,7 @@ html, body{touch-action:pan-x pan-y;}
 .scroll-nav-btn:hover{background:rgba(255,255,255,0.92);}
 .scroll-nav-btn-disabled{opacity:0.35;pointer-events:none;}
 @media print{ .scroll-nav-buttons{display:none !important;} }
+.tab-badge{display:inline-block;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--coral,#DC5758);color:#fff;font-size:10px;font-weight:800;line-height:16px;text-align:center;margin-left:4px;vertical-align:middle;}
 </style>
 
 <div id="pos-root">
@@ -3109,7 +3110,8 @@ var DEFAULT_SETTINGS = {
   printerIpAddress: "",
   printerDeviceId: "local_printer",
   printerRawbtImageMode: false,
-  categoryTranslations: {} // { "CategoryName": {lo:"...", th:"..."} }
+  categoryTranslations: {}, // { "CategoryName": {lo:"...", th:"..."} }
+  selfServiceBaseUrl: "" // Customer self-service portal base URL (e.g. https://yourshop.web.app/self-service.html). Leave blank to auto-guess from this page's own address.
 };
 /* Fallback labels shown for any account key not yet given a custom name in
    Settings — e.g. before the shop owner has typed in each team member's
@@ -3638,7 +3640,7 @@ var CATEGORY_PALETTE = ['caramel','taro','matcha','coral'];
    Menu/History/Settings/Admin back-office text stays in English for now. */
 var TRANSLATIONS = {
   en: {
-    tab_order:'🧋 Order', tab_menu:'📋 Menu', tab_history:'🧾 History', tab_deleted:'🔒 Deleted', tab_settings:'⚙️ Settings',
+    tab_order:'🧋 Order', tab_incoming:'🧺 Incoming Orders', tab_menu:'📋 Menu', tab_history:'🧾 History', tab_deleted:'🔒 Deleted', tab_settings:'⚙️ Settings',
     search_placeholder:'Search menu…',
     currency_label:'Currency',
     current_order:'Current Order',
@@ -4464,7 +4466,12 @@ var state = {
   costUnlocked:false,
   costPinInput:'',
   costPinError:false,
-  costPinChecking:false
+  costPinChecking:false,
+  incomingOrders:[],
+  incomingOrdersLoaded:false,
+  incomingOrdersSyncError:false,
+  incomingApprovePrompt:null, // {orderId, paymentMethod, amountReceived, discount}
+  expandedIncomingId:null
 };
 
 /* ================= FIREBASE (multi-device sync + auth) ================= */
@@ -4576,6 +4583,17 @@ function handlePhotosSyncError(label){
     render();
   };
 }
+/* Same idea for pos_incoming_orders (QR self-service submissions) — a
+   missing Firestore rule for this newer collection must never block the
+   core ordering app from loading; the Incoming Orders tab just shows a
+   notice until it resolves. */
+function handleIncomingOrdersSyncError(label){
+  return function(err){
+    console.error('Incoming orders sync error ('+label+')', err);
+    state.incomingOrdersSyncError = true;
+    render();
+  };
+}
 
 var LISTENER_LABELS = ['settings','menu','toppings','orders'];
 function setListenerOk(label){
@@ -4683,6 +4701,30 @@ function settingsForSave(){
   delete s.categoryBackgroundPhotos;
   return s;
 }
+/* ================= PUBLIC SETTINGS (read by the unauthenticated QR page) =================
+   self-service.html has no login and reads Firestore under public, rules-
+   enforced access — so it must NEVER read pos_settings directly, since
+   that document also carries the LAPNet payment QR payload, the printer's
+   IP address, and staff display names. This mirrors just the handful of
+   fields the public menu actually needs into its own small document,
+   re-synced every time settings load/change on any device. Firestore
+   rules (see SELF_SERVICE_SETUP.md) only grant public read on THIS
+   collection, never on pos_settings itself. */
+function publicSettingsSubset(s){
+  return {
+    shopName: s.shopName || '',
+    tagline: s.tagline || '',
+    currency: s.currency || '₭',
+    categories: s.categories || [],
+    categoryTranslations: s.categoryTranslations || {}
+  };
+}
+function syncPublicSettings(){
+  if(!state.settings) return;
+  db.collection('pos_public_settings').doc('main').set(publicSettingsSubset(state.settings)).catch(function(e){
+    console.error('Could not sync public settings for the self-service page', e);
+  });
+}
 function setupDataListeners(){
   activeDataUnsubs.push(db.collection('pos_settings').doc('main').onSnapshot(function(doc){
     if(doc.exists){
@@ -4695,6 +4737,7 @@ function setupDataListeners(){
     state.settingsLoaded = true;
     setListenerOk('settings');
     checkLoaded();
+    syncPublicSettings();
     render();
   }, handleSyncError('settings')));
 
@@ -4752,6 +4795,18 @@ function setupDataListeners(){
     checkLoaded();
     render();
   }, handleSyncError('orders')));
+
+  /* Customer self-service submissions (QR portal) — pending orders that
+     have NOT yet touched shop data (no order number, no stock deducted).
+     Oldest first so staff naturally clear the queue in submission order.
+     Written by the public self-service.html page (unauthenticated,
+     create-only per the Firestore rules), never by this app. */
+  activeDataUnsubs.push(db.collection('pos_incoming_orders').orderBy('submittedAt','asc').onSnapshot(function(snap){
+    state.incomingOrders = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    state.incomingOrdersLoaded = true;
+    state.incomingOrdersSyncError = false;
+    render();
+  }, handleIncomingOrdersSyncError('incoming-orders')));
 
   activeDataUnsubs.push(db.collection('pos_ingredients').doc('main').onSnapshot(function(doc){
     if(doc.exists && doc.data().items){
@@ -5429,6 +5484,7 @@ function buildAppHTML(){
   if(state.remoteViewLocation) html += buildRemoteViewBanner();
   html += '<div class="pos-main">';
   if(state.tab==='order') html += buildOrderTab();
+  else if(state.tab==='incoming') html += buildIncomingOrdersTab();
   else if(state.tab==='history') html += buildHistoryTab();
   else if(state.tab==='stock') html += buildStockTab();
   else if(state.tab==='housestock') html += buildHouseStockTab();
@@ -5443,6 +5499,7 @@ function buildAppHTML(){
   if(state.managerPrompt) html += buildManagerPinModal();
   else if(state.refundEvidence) html += buildRefundEvidenceModal();
   if(state.trainingPromptOpen) html += buildTrainingPinGate();
+  if(state.incomingApprovePrompt) html += buildIncomingApproveModal();
   return html;
 }
 function buildTrainingBanner(){
@@ -5493,9 +5550,11 @@ function buildTrainingPinGate(){
 
 function buildHeader(){
   var s = state.settings;
-  var tabDefs = [['order','tab_order'],['history','tab_history'],['stock','tab_stock'],['housestock','tab_house_stock'],['revenue','tab_revenue'],['cost','tab_cost'],['deleted','tab_deleted'],['settings','tab_settings']];
+  var tabDefs = [['order','tab_order'],['incoming','tab_incoming'],['history','tab_history'],['stock','tab_stock'],['housestock','tab_house_stock'],['revenue','tab_revenue'],['cost','tab_cost'],['deleted','tab_deleted'],['settings','tab_settings']];
+  var incomingPendingCount = (state.incomingOrders||[]).length;
   var navHtml = tabDefs.map(function(td){
-    return '<button class="'+(state.tab===td[0]?'active':'')+'" onclick="POS.setTab(\''+td[0]+'\')">'+tr(td[1])+'</button>';
+    var badge = (td[0]==='incoming' && incomingPendingCount>0) ? (' <span class="tab-badge">'+incomingPendingCount+'</span>') : '';
+    return '<button class="'+(state.tab===td[0]?'active':'')+'" onclick="POS.setTab(\''+td[0]+'\')">'+tr(td[1])+badge+'</button>';
   }).join('');
   var syncHtml = state.syncStatus==='synced' ? '<span class="sync-dot sync-ok" title="Synced with all devices">🟢 Synced</span>' :
     state.syncStatus==='error' ? '<span class="sync-dot sync-err" style="cursor:pointer;" title="'+escapeHtml('Problem with: '+state.syncErrorLabel+' — '+state.syncErrorMessage)+'" onclick="POS.showSyncErrorDetail()">🔴 Offline ('+escapeHtml(state.syncErrorLabel)+')</span>' :
@@ -5882,6 +5941,183 @@ function buildDraftOrder(){
     placedByAccount: state.loggedInAccount || null,
     placedByRole: state.loggedInRole || null
   };
+}
+/* Shared by both a normal in-person checkout (completeOrder) and an
+   Incoming Order approval (POS.confirmIncomingApprove) — the exact same
+   order-numbering + pos_orders write + stock deduction pipeline either
+   way, so a customer's approved self-service order is indistinguishable
+   from a staff-entered one anywhere else in the app (History, receipts,
+   revenue, stock). draft must have the same shape buildDraftOrder()
+   returns (items/subtotal/discount/serviceCharge/total/paymentMethod/...). */
+function recordCompletedOrder(draft){
+  var counterRef = db.collection('pos_meta').doc('counter');
+  var todayKey = todayDateKey();
+  return db.runTransaction(function(tx){
+    return tx.get(counterRef).then(function(doc){
+      var data = doc.exists ? doc.data() : {};
+      var isNewDay = data.date !== todayKey;
+      var current = isNewDay ? 1 : ((Number(data.value)||1));
+      tx.set(counterRef, {value: current+1, date: todayKey});
+      return current;
+    });
+  }).then(function(orderNumber){
+    var order = Object.assign({}, draft, {
+      id: uid('order'),
+      number: orderNumber,
+      timestamp: new Date().toISOString(),
+      items: draft.items
+    });
+    return db.collection('pos_orders').doc(order.id).set(order).then(function(){ return order; });
+  }).then(function(order){
+    deductStockForOrder(order.items);
+    return order;
+  });
+}
+
+/* ================= INCOMING ORDERS (QR self-service approval) =================
+   A pending doc submitted by the public self-service.html page never
+   touches pos_orders/pos_ingredients/pos_meta on its own — see the
+   Firestore rules. Approving one here runs it through the exact same
+   recordCompletedOrder() pipeline a staff-entered sale uses, then removes
+   the pending doc. Prices/toppings are honored exactly as the customer
+   saw them at submission time (never re-priced against a menu that may
+   have changed since) — the same way an in-person cart line's price is
+   locked in the moment it's added, not re-resolved at checkout. */
+function computeIncomingOrderSubtotal(items){
+  return (items||[]).reduce(function(sum,l){ return sum + (Number(l.unitPrice)||0)*(Number(l.qty)||0); }, 0);
+}
+function buildDraftOrderFromIncoming(order, prompt){
+  var subtotalLAK = computeIncomingOrderSubtotal(order.items);
+  var discountLAK = Math.min(Number(prompt.discount)||0, subtotalLAK);
+  var afterDiscountLAK = Math.max(subtotalLAK - discountLAK, 0);
+  var serviceLAK = computeServiceCharge(afterDiscountLAK);
+  var totalLAK = afterDiscountLAK + serviceLAK;
+  var receivedInput = prompt.paymentMethod==='cash'
+    ? (prompt.amountReceived==='' || prompt.amountReceived==null ? totalLAK : Number(prompt.amountReceived||0))
+    : totalLAK;
+  return {
+    items: JSON.parse(JSON.stringify(order.items)),
+    subtotal: subtotalLAK,
+    discount: discountLAK,
+    serviceCharge: serviceLAK,
+    total: totalLAK,
+    paymentMethod: prompt.paymentMethod,
+    amountReceived: receivedInput,
+    change: receivedInput - totalLAK,
+    currency: 'LAK',
+    displayTotal: totalLAK,
+    displayReceived: prompt.paymentMethod==='cash' ? receivedInput : null,
+    displayChange: prompt.paymentMethod==='cash' ? (receivedInput - totalLAK) : null,
+    splitCash: null, splitTransfer: null, splitCashLAK: null, splitTransferLAK: null,
+    placedByAccount: state.loggedInAccount || null,
+    placedByRole: state.loggedInRole || null,
+    source: 'self_service',
+    customerName: order.customerName || '',
+    customerNote: order.customerNote || '',
+    sourceIncomingOrderId: order.id
+  };
+}
+function relativeTimeFromIso(iso){
+  if(!iso) return '';
+  var then = new Date(iso).getTime();
+  if(isNaN(then)) return '';
+  var diffSec = Math.max(0, Math.round((Date.now()-then)/1000));
+  if(diffSec<60) return diffSec+'s ago';
+  var diffMin = Math.round(diffSec/60);
+  if(diffMin<60) return diffMin+'m ago';
+  var diffHr = Math.round(diffMin/60);
+  if(diffHr<24) return diffHr+'h ago';
+  var diffDay = Math.round(diffHr/24);
+  return diffDay+'d ago';
+}
+function buildIncomingOrdersTab(){
+  var orders = state.incomingOrders || [];
+  var syncNotice = state.incomingOrdersSyncError
+    ? '<div class="section-card" style="background:#FFFBF9;border-color:var(--danger-light);"><p class="hint" style="color:var(--danger);">Could not load Incoming Orders — check the Firestore security rules for the pos_incoming_orders collection.</p></div>'
+    : '';
+  if(!orders.length){
+    return syncNotice + '<div class="section-card"><h2>🧺 Incoming Orders</h2><p class="empty-note">No pending self-service orders right now. New orders submitted from the QR menu will show up here automatically.</p></div>';
+  }
+  var cardsHtml = orders.map(function(o){
+    var expanded = state.expandedIncomingId === o.id;
+    var subtotal = computeIncomingOrderSubtotal(o.items);
+    var itemLines = (o.items||[]).map(function(l){
+      var toppingsText = (l.toppings&&l.toppings.length) ? (' · '+l.toppings.map(function(t){return (Number(t.qty)>1?t.qty+'x ':'')+t.name;}).join(', ')) : '';
+      var meta = l.size+' · '+l.sugar+'% sugar · '+iceLabel(l.ice)+toppingsText;
+      return '<div class="di"><span>'+l.qty+'x '+escapeHtml(l.name)+' <span style="opacity:.75;">('+escapeHtml(meta)+')</span></span><span>'+formatMoney(l.unitPrice*l.qty)+'</span></div>';
+    }).join('');
+    var titleBits = [];
+    if(o.customerName) titleBits.push(escapeHtml(o.customerName));
+    if(o.customerNote) titleBits.push(escapeHtml(o.customerNote));
+    var title = titleBits.length ? titleBits.join(' · ') : 'Guest order';
+    return '' +
+    '<div class="order-row">' +
+      '<div class="order-row-top" onclick="POS.toggleIncomingExpand(\''+o.id+'\')">' +
+        '<div><div class="onum">'+title+'</div><div class="otime">'+relativeTimeFromIso(o.submittedAt)+' · '+(o.items?o.items.length:0)+' item(s)</div></div>' +
+        '<div class="ototal">'+formatMoney(subtotal)+'</div>' +
+      '</div>' +
+      (expanded ? (
+        '<div class="order-detail">' + itemLines +
+          '<div class="dactions">' +
+            '<button class="btn btn-ghost btn-small" onclick="POS.rejectIncoming(\''+o.id+'\')">✕ Reject</button>' +
+            '<button class="btn btn-primary btn-small" style="width:auto;" onclick="POS.openIncomingApprove(\''+o.id+'\')">✓ Review &amp; Approve</button>' +
+          '</div>' +
+        '</div>'
+      ) : '') +
+    '</div>';
+  }).join('');
+  return syncNotice +
+    '<div class="section-card"><h2>🧺 Incoming Orders</h2><p class="hint">Customer orders submitted from the QR self-service menu. Nothing is recorded as a sale — and no stock is deducted — until you approve it below.</p></div>' +
+    cardsHtml;
+}
+function buildIncomingApproveModal(){
+  var p = state.incomingApprovePrompt;
+  var o = (state.incomingOrders||[]).filter(function(x){return x.id===p.orderId;})[0];
+  if(!o){ state.incomingApprovePrompt = null; return ''; }
+  var draft = buildDraftOrderFromIncoming(o, p);
+  var payDefs = [['cash','Cash'],['transfer','Transfer'],['qr','QR Pay'],['egets','E-Gets'],['foodpanda','FoodPanda']];
+  var payBtns = payDefs.map(function(pm){
+    return '<button class="'+(p.paymentMethod===pm[0]?'active':'')+'" onclick="POS.setIncomingApprovePayment(\''+pm[0]+'\')">'+pm[1]+'</button>';
+  }).join('');
+  var itemsHtml = (o.items||[]).map(function(l){
+    var toppingsText = (l.toppings&&l.toppings.length) ? (' · '+l.toppings.map(function(t){return (Number(t.qty)>1?t.qty+'x ':'')+t.name;}).join(', ')) : '';
+    var meta = l.size+' · '+l.sugar+'% sugar · '+iceLabel(l.ice)+toppingsText;
+    return '<div class="r-item"><span class="r-name">'+l.qty+'x '+escapeHtml(l.name)+'<div class="r-sub-line">'+escapeHtml(meta)+'</div></span><span class="r-item-price">'+formatMoney(l.unitPrice*l.qty)+'</span></div>';
+  }).join('');
+  return '' +
+  '<div class="pos-overlay" onclick="if(event.target===this) POS.cancelIncomingApprove()">' +
+    '<div class="pos-modal" style="max-width:380px;">' +
+      '<button class="modal-close-x" '+(state.completingOrder?'disabled':'')+' onclick="POS.cancelIncomingApprove()">✕</button>' +
+      '<h2>Approve Order</h2>' +
+      (o.customerName || o.customerNote ? '<p class="sub-cat">'+escapeHtml([o.customerName,o.customerNote].filter(Boolean).join(' · '))+'</p>' : '') +
+      itemsHtml +
+      '<div class="r-divider"></div>' +
+      '<div class="summary-row"><span>Subtotal</span><span>'+formatMoney(draft.subtotal)+'</span></div>' +
+      '<div class="summary-row"><span>Discount (₭)</span><input type="text" inputmode="decimal" value="'+escapeHtml(String(p.discount||''))+'" placeholder="0" oninput="POS.setIncomingApproveDiscount(this.value)"/></div>' +
+      (draft.serviceCharge>0 ? '<div class="summary-row"><span>Service charge</span><span>'+formatMoney(draft.serviceCharge)+'</span></div>' : '') +
+      '<div class="summary-row total"><span>Total</span><span>'+formatMoney(draft.total)+'</span></div>' +
+      '<div class="opt-label">Payment method</div>' +
+      '<div class="pay-methods">'+payBtns+'</div>' +
+      (p.paymentMethod==='cash' ? (
+        '<div class="cash-row"><span>Cash received (₭)</span><input type="text" inputmode="decimal" placeholder="Exact amount" value="'+escapeHtml(p.amountReceived)+'" oninput="POS.setIncomingApproveAmount(this.value)"/></div>' +
+        (draft.displayChange!=null ? ('<div class="summary-row change-line '+(draft.displayChange<-0.005?'warn':'ok')+'"><span>'+(draft.displayChange<-0.005?'Short by':'Change due')+'</span><span>'+formatMoney(Math.abs(draft.displayChange))+'</span></div>') : '')
+      ) : '') +
+      '<button class="btn btn-primary" '+(state.completingOrder?'disabled':'')+' onclick="POS.confirmIncomingApprove()">'+(state.completingOrder?'Recording…':('Confirm &amp; Record Sale · '+formatMoney(draft.total)))+'</button>' +
+      '<p class="hint" style="margin-top:10px;">Need a discount in a foreign currency, a split payment, or to edit items? Reject this and enter it manually from the Order tab instead.</p>' +
+    '</div>' +
+  '</div>';
+}
+/* Where the shop hosts the public QR page — see buildSelfServiceUrl() and
+   the "Customer Self-Service" card in Settings. */
+function buildSelfServiceUrl(){
+  var base = (state.settings && state.settings.selfServiceBaseUrl) || '';
+  if(!base){
+    try{ base = window.location.href.replace(/[^\/]*$/, 'self-service.html'); }
+    catch(e){ base = 'self-service.html'; }
+  }
+  var loc = getActiveLocation();
+  var sep = base.indexOf('?')>-1 ? '&' : '?';
+  return base + (loc && loc.key && loc.key!=='main' ? (sep+'loc='+encodeURIComponent(loc.key)) : '');
 }
 /* The amount actually paid, in the currency actually paid — never converted to LAK for display. */
 function orderPaidAmount(o){
@@ -7879,6 +8115,8 @@ function buildSettingsTab(){
   }
   var privileged = state.loggedInRole==='manager' || state.loggedInRole==='admin';
   var f = state.settingsForm || state.settings;
+  var selfServiceUrl = buildSelfServiceUrl();
+  var selfServiceQr = renderQrDataUrl(selfServiceUrl);
   var byCat = {};
   state.menu.forEach(function(m){
     (byCat[m.category] = byCat[m.category]||[]).push(m);
@@ -7970,6 +8208,18 @@ function buildSettingsTab(){
           (lapnetQrIsValid(f.lapnetQrPayload)?tr('lapnet_qr_valid'):tr('lapnet_qr_invalid'))+
         '</p>' : '') +
     '</div>' +
+    '<button class="btn btn-primary" style="width:auto;margin-top:14px;" onclick="POS.saveSettings()">'+tr('save_settings')+'</button>' +
+  '</div>' +
+  '<div class="section-card">' +
+    '<h2>🧺 Customer Self-Service (QR Ordering)</h2>' +
+    '<p class="hint">Customers scan this to browse the menu and submit an order from their phone. Nothing is charged, and no stock is deducted, until you approve it from the Incoming Orders tab.</p>' +
+    '<div class="field" style="margin-bottom:12px;">' +
+      '<label>Self-service page URL</label>' +
+      '<input type="text" value="'+escapeHtml(f.selfServiceBaseUrl||'')+'" placeholder="e.g. https://yourshop.web.app/self-service.html" oninput="POS.updateSettingsForm(\'selfServiceBaseUrl\',this.value)"/>' +
+      '<p class="hint" style="margin-top:4px;">Where you host self-service.html. Leave blank to auto-guess from this page\'s own address.</p>' +
+    '</div>' +
+    (selfServiceQr ? '<div style="text-align:center;"><img src="'+selfServiceQr+'" alt="Self-service QR code" style="width:180px;height:180px;"/></div>' : '') +
+    '<p class="hint" style="text-align:center;word-break:break-all;margin-top:8px;">'+escapeHtml(selfServiceUrl)+'</p>' +
     '<button class="btn btn-primary" style="width:auto;margin-top:14px;" onclick="POS.saveSettings()">'+tr('save_settings')+'</button>' +
   '</div>' +
   '<div class="section-card">' +
@@ -9380,30 +9630,9 @@ var POS = {
     if(state.completingOrder) return;
     var draft = buildDraftOrder();
     if(!draft) return;
-    var cartSnapshot = draft.items;
     state.completingOrder = true;
     render();
-
-    var counterRef = db.collection('pos_meta').doc('counter');
-    var todayKey = todayDateKey();
-    db.runTransaction(function(tx){
-      return tx.get(counterRef).then(function(doc){
-        var data = doc.exists ? doc.data() : {};
-        var isNewDay = data.date !== todayKey;
-        var current = isNewDay ? 1 : ((Number(data.value)||1));
-        tx.set(counterRef, {value: current+1, date: todayKey});
-        return current;
-      });
-    }).then(function(orderNumber){
-      var order = Object.assign({}, draft, {
-        id: uid('order'),
-        number: orderNumber,
-        timestamp: new Date().toISOString(),
-        items: cartSnapshot
-      });
-      return db.collection('pos_orders').doc(order.id).set(order).then(function(){ return order; });
-    }).then(function(order){
-      deductStockForOrder(order.items);
+    recordCompletedOrder(draft).then(function(order){
       state.receiptOrder = order;
       state.receiptPreview = null;
       state.cart = [];
@@ -9420,6 +9649,63 @@ var POS = {
       state.completingOrder = false;
       render();
       window.alert('Could not complete the order — check your internet connection and try again.\n('+e.message+')');
+    });
+  },
+  /* ---- Incoming Orders (QR self-service approval) ---- */
+  toggleIncomingExpand: function(id){
+    state.expandedIncomingId = state.expandedIncomingId===id ? null : id;
+    render();
+  },
+  openIncomingApprove: function(id){
+    state.incomingApprovePrompt = {orderId:id, paymentMethod:'cash', amountReceived:'', discount:0};
+    render();
+  },
+  cancelIncomingApprove: function(){
+    if(state.completingOrder) return;
+    state.incomingApprovePrompt = null;
+    render();
+  },
+  setIncomingApprovePayment: function(pm){
+    state.incomingApprovePrompt.paymentMethod = pm;
+    state.incomingApprovePrompt.amountReceived = '';
+    render();
+  },
+  setIncomingApproveAmount: function(v){
+    state.incomingApprovePrompt.amountReceived = sanitizeDecimal(v);
+    render();
+  },
+  setIncomingApproveDiscount: function(v){
+    var d = sanitizeDecimal(v);
+    state.incomingApprovePrompt.discount = d==='' ? 0 : Number(d);
+    render();
+  },
+  confirmIncomingApprove: function(){
+    if(state.completingOrder) return;
+    var p = state.incomingApprovePrompt;
+    var o = (state.incomingOrders||[]).filter(function(x){return x.id===p.orderId;})[0];
+    if(!o){ state.incomingApprovePrompt = null; render(); return; }
+    var draft = buildDraftOrderFromIncoming(o, p);
+    state.completingOrder = true;
+    render();
+    recordCompletedOrder(draft).then(function(order){
+      return db.collection('pos_incoming_orders').doc(o.id).delete().then(function(){ return order; });
+    }).then(function(order){
+      state.receiptOrder = order;
+      state.incomingApprovePrompt = null;
+      state.expandedIncomingId = null;
+      state.completingOrder = false;
+      doRender();
+      triggerPrint(order);
+    }).catch(function(e){
+      state.completingOrder = false;
+      render();
+      window.alert('Could not approve this order — check your internet connection and try again.\n('+e.message+')');
+    });
+  },
+  rejectIncoming: function(id){
+    if(!window.confirm('Reject this order? The customer will need to re-submit or order at the counter instead.')) return;
+    db.collection('pos_incoming_orders').doc(id).delete().catch(function(e){
+      window.alert('Could not reject this order: '+e.message);
     });
   },
   closeReceipt: function(){ state.receiptOrder=null; state.testPrintMode=false; render(); },
