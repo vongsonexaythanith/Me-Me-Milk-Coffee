@@ -145,7 +145,19 @@ body{margin:0;background:var(--cream);}
 .qty-stepper{display:flex;align-items:center;gap:10px;margin-top:8px;}
 .qty-stepper button{width:26px;height:26px;border-radius:7px;border:1.5px solid var(--border);background:#fff;font-weight:700;color:var(--espresso);line-height:1;}
 .qty-stepper .qv{font-weight:700;font-size:13px;min-width:16px;text-align:center;}
-.remove-line{border:none;background:none;color:var(--danger);font-size:11.5px;font-weight:700;margin-left:auto;}
+.remove-line{border:1.5px solid var(--danger-light);background:#fff;color:var(--danger);font-size:11.5px;font-weight:700;margin-left:auto;padding:6px 12px;border-radius:8px;white-space:nowrap;flex-shrink:0;line-height:1.2;}
+.cart-line-toppings{margin-top:8px;display:flex;flex-direction:column;gap:6px;}
+.topping-chip{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;}
+.tc-left{display:flex;align-items:baseline;gap:6px;min-width:0;}
+.tc-name{font-size:12.5px;font-weight:700;color:var(--espresso);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tc-price{font-size:11.5px;font-weight:700;color:var(--caramel-dark);white-space:nowrap;}
+.tc-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.tc-right button{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border);background:#fff;font-weight:700;color:var(--espresso);line-height:1;font-size:13px;}
+.tc-qty{font-weight:700;font-size:12.5px;min-width:14px;text-align:center;}
+.add-topping-btn{border:1.5px dashed var(--border);background:#fff;color:var(--espresso-soft);font-size:12px;font-weight:700;padding:7px 12px;border-radius:9px;margin-top:8px;align-self:flex-start;}
+.add-topping-picker{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.add-topping-picker .hint{font-size:11.5px;color:var(--espresso-soft);margin:4px 0 0;}
+.required-mark{color:var(--danger);margin-left:2px;}
 
 .section-card{background:var(--paper);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow);}
 .section-card h2{font-size:15.5px;margin:0 0 10px;}
@@ -249,14 +261,16 @@ var TRANSLATIONS = {
     search_placeholder:'Search menu…', items_suffix:'item(s)', back_to_categories:'← Categories',
     size:'Size', sugar_level:'Sugar Level', ice_level:'Ice Level', toppings_extra:'Toppings (extra)',
     add_to_order:'Add to Order',
+    sugar_word:'sugar', add_more_toppings:'Add more toppings', all_toppings_added:'All toppings added',
     no_ice:'No Ice', less_ice:'Less Ice', normal_ice:'Normal', extra_ice:'Extra Ice',
     cart_title:'Your Order', cart_empty:'Your cart is empty. Tap a drink to add it.',
     view_cart:'View Cart', edit_order:'← Edit Order',
     subtotal:'Subtotal',
-    your_name_label:'Your name (optional)', your_name_placeholder:'e.g. Somchai',
+    your_name_label:'Your Name and Phone Number', your_name_placeholder:'e.g. Somchai, 020 5555 1234',
     table_note_label:'Table / note (optional)', table_note_placeholder:'e.g. Table 4, or "less ice please"',
     submit_order:'Send Order to Counter', submitting:'Sending…',
     submit_error_prefix:'Could not send your order — check your connection and try again.',
+    submit_error_missing_name:'Please enter your name and phone number before sending your order.',
     submitted_title:'Order Sent!', submitted_body:'Please wait — a staff member will confirm your order shortly and start preparing it.',
     submitted_start_new:'Start a New Order',
     unavailable_label:'Sold Out',
@@ -277,6 +291,13 @@ var TRANSLATIONS = {
     cart_title:'ອໍເດີຂອງທ່ານ', cart_empty:'ກະຕ່າຍັງວ່າງ. ແຕະເຄື່ອງດື່ມເພື່ອເພີ່ມ.',
     view_cart:'ເບິ່ງກະຕ່າ', edit_order:'← ແກ້ໄຂອໍເດີ',
     subtotal:'ລວມຍ່ອຍ',
+    your_name_label:'ຊື່ ແລະ ເບີໂທຂອງທ່ານ', your_name_placeholder:'ຕົວຢ່າງ: ສົມໃຈ, 020 5555 1234',
+    table_note_label:'ໂຕະ / ໝາຍເຫດ (ບໍ່ບັງຄັບ)', table_note_placeholder:'ຕົວຢ່າງ: ໂຕະ 4',
+    submit_order:'ສົ່ງອໍເດີໄປໂຕະບໍລິການ', submitting:'ກຳລັງສົ່ງ…',
+    submit_error_missing_name:'ກະລຸນາໃສ່ຊື່ ແລະ ເບີໂທກ່ອນສົ່ງອໍເດີ',
+    sugar_word:'ນ້ຳຕານ', add_more_toppings:'ເພີ່ມທັອບປິ້ງ', all_toppings_added:'ເພີ່ມທັອບປິ້ງໝົດແລ້ວ',
+    submitted_title:'ສົ່ງອໍເດີແລ້ວ!', submitted_body:'ກະລຸນາລໍຖ້າ — ພະນັກງານຈະຢືນຢັນອໍເດີຂອງທ່ານໃນໄວໆນີ້.',
+    submitted_start_new:'ສັ່ງອໍເດີໃໝ່',
     remove:'ລຶບ'
   },
   th: {
@@ -290,6 +311,13 @@ var TRANSLATIONS = {
     cart_title:'ออเดอร์ของคุณ', cart_empty:'ตะกร้าว่างเปล่า แตะเครื่องดื่มเพื่อเพิ่ม',
     view_cart:'ดูตะกร้า', edit_order:'← แก้ไขออเดอร์',
     subtotal:'ยอดรวมย่อย',
+    your_name_label:'ชื่อและเบอร์โทรศัพท์ของคุณ', your_name_placeholder:'เช่น สมชาย 020 5555 1234',
+    table_note_label:'โต๊ะ / หมายเหตุ (ไม่บังคับ)', table_note_placeholder:'เช่น โต๊ะ 4',
+    submit_order:'ส่งออเดอร์ไปที่เคาน์เตอร์', submitting:'กำลังส่ง…',
+    submit_error_missing_name:'กรุณากรอกชื่อและเบอร์โทรก่อนส่งออเดอร์',
+    sugar_word:'น้ำตาล', add_more_toppings:'เพิ่มท็อปปิ้ง', all_toppings_added:'เพิ่มท็อปปิ้งครบแล้ว',
+    submitted_title:'ส่งออเดอร์แล้ว!', submitted_body:'กรุณารอสักครู่ — พนักงานจะยืนยันออเดอร์ของคุณในไม่ช้า',
+    submitted_start_new:'สั่งออเดอร์ใหม่',
     remove:'ลบ'
   }
 };
@@ -387,12 +415,34 @@ function startListeners(){
     state.toppingsLoaded = true;
     render();
   }, onLoadError);
-  col('pos_photos').onSnapshot(function(snap){
+  // Only fetch the photo docs the customer page actually shows (item_* and
+  // category_thumb_* by document ID prefix) instead of the whole pos_photos
+  // collection, which also holds full-size category background photos, the
+  // page background, and the header background image (each up to ~1MB) that
+  // this page never displays. On a slow mobile connection those large,
+  // unused documents could delay the small ones this page needs, which is
+  // what looked like "photos not syncing."
+  var photoIdField = firebase.firestore.FieldPath.documentId();
+  var photoPrefixQueries = [
+    col('pos_photos').where(photoIdField, '>=', 'item_').where(photoIdField, '<', 'item_'),
+    col('pos_photos').where(photoIdField, '>=', 'category_thumb_').where(photoIdField, '<', 'category_thumb_')
+  ];
+  var photoSnapshots = [null, null];
+  function mergePhotoSnapshots(){
     var map = {};
-    snap.forEach(function(d){ var data = d.data(); if(data && data.data) map[d.id] = data.data; });
+    photoSnapshots.forEach(function(snap){
+      if(!snap) return;
+      snap.forEach(function(d){ var data = d.data(); if(data && data.data) map[d.id] = data.data; });
+    });
     state.photoMap = map;
     render();
-  }, function(err){ console.error('Photos load error (non-fatal)', err); });
+  }
+  photoPrefixQueries.forEach(function(q, i){
+    q.onSnapshot(function(snap){
+      photoSnapshots[i] = snap;
+      mergePhotoSnapshots();
+    }, function(err){ console.error('Photos load error (non-fatal)', err); });
+  });
 }
 function onLoadError(err){
   console.error('Menu load error', err);
@@ -610,14 +660,44 @@ function buildCartFab(){
 }
 function buildCartPage(){
   var linesHtml = state.cart.length===0 ? ('<div class="empty-note">'+tr('cart_empty')+'</div>') : state.cart.map(function(l, idx){
-    var toppingsText = l.toppings.length ? (' · '+l.toppings.map(function(t){return t.name;}).join(', ')) : '';
-    var meta = l.size+' · '+l.sugar+'% · '+iceLabel(l.ice)+toppingsText;
+    var meta = l.size+' · '+l.sugar+'% '+tr('sugar_word')+' · '+iceLabel(l.ice);
+    var toppingsHtml = l.toppings.length ? (
+      '<div class="cart-line-toppings">' +
+      l.toppings.map(function(t, tIdx){
+        var qty = Number(t.qty)||1;
+        var lineTotal = formatMoney((Number(t.price)||0)*qty);
+        return '' +
+        '<div class="topping-chip">' +
+          '<span class="tc-left"><span class="tc-name">'+escapeHtml(t.name)+'</span><span class="tc-price">+'+lineTotal+'</span></span>' +
+          '<span class="tc-right">' +
+            '<button onclick="APP.cartToppingQty('+idx+','+tIdx+',-1)" aria-label="'+tr('remove')+'">−</button>' +
+            '<span class="tc-qty">'+qty+'</span>' +
+            '<button onclick="APP.cartToppingQty('+idx+','+tIdx+',1)" aria-label="'+tr('add_to_order')+'">+</button>' +
+          '</span>' +
+        '</div>';
+      }).join('') +
+      '</div>'
+    ) : '';
+    var addToppingBtn = (state.toppings||[]).length ? '<button class="add-topping-btn" onclick="APP.toggleAddToppingPicker('+idx+')">+ '+tr('add_more_toppings')+'</button>' : '';
+    var addToppingPicker = '';
+    if(state.addToppingLineIdx===idx && (state.toppings||[]).length){
+      var existingIds = l.toppings.map(function(t){return t.id;});
+      var available = (state.toppings||[]).filter(function(t){ return existingIds.indexOf(t.id)===-1; });
+      addToppingPicker = '<div class="add-topping-picker">' +
+        (available.length ? available.map(function(t){
+          return '<button class="opt-pill" onclick="APP.addToppingToLine('+idx+',\''+t.id+'\')">'+escapeHtml(toppingDisplayName(t))+' <span class="pill-extra">+'+formatMoney(t.price)+'</span></button>';
+        }).join('') : '<p class="hint">'+tr('all_toppings_added')+'</p>') +
+      '</div>';
+    }
     return '' +
     '<div class="cart-line">' +
       '<div class="cart-line-top">' +
         '<div><div class="cart-line-name">'+escapeHtml(itemDisplayNameForLine(l))+'</div><div class="cart-line-meta">'+escapeHtml(meta)+'</div></div>' +
         '<div class="cart-line-price">'+formatMoney(cartLineTotal(l))+'</div>' +
       '</div>' +
+      toppingsHtml +
+      addToppingBtn +
+      addToppingPicker +
       '<div class="qty-stepper">' +
         '<button onclick="APP.cartQty('+idx+',-1)">−</button>' +
         '<span class="qv">'+l.qty+'</span>' +
@@ -627,7 +707,8 @@ function buildCartPage(){
     '</div>';
   }).join('');
 
-  var canSubmit = !state.submitting && state.cart.length>0;
+  var nameFilled = (state.customerName||'').trim().length>0;
+  var canSubmit = !state.submitting && state.cart.length>0 && nameFilled;
   return '' +
   '<div class="back-row"><button class="back-to-categories" onclick="APP.backToMenu()">'+tr('edit_order')+'</button></div>' +
   (state.submitError ? ('<div class="error-banner">'+escapeHtml(state.submitError)+'</div>') : '') +
@@ -637,7 +718,7 @@ function buildCartPage(){
     (state.cart.length ? ('<div class="summary-row total" style="margin-top:6px;"><span>'+tr('subtotal')+'</span><span>'+formatMoney(cartSubtotal())+'</span></div>') : '') +
   '</div>' +
   '<div class="section-card">' +
-    '<div class="field"><label>'+tr('your_name_label')+'</label><input id="cust-name" type="text" placeholder="'+tr('your_name_placeholder')+'" value="'+escapeHtml(state.customerName)+'" oninput="APP.setCustomerName(this.value)"/></div>' +
+    '<div class="field"><label>'+tr('your_name_label')+'<span class="required-mark">*</span></label><input id="cust-name" type="text" required placeholder="'+tr('your_name_placeholder')+'" value="'+escapeHtml(state.customerName)+'" oninput="APP.setCustomerName(this.value)"/></div>' +
     '<div class="field"><label>'+tr('table_note_label')+'</label><input id="cust-note" type="text" placeholder="'+tr('table_note_placeholder')+'" value="'+escapeHtml(state.customerNote)+'" oninput="APP.setCustomerNote(this.value)"/></div>' +
   '</div>' +
   '<button class="btn btn-primary" '+(canSubmit?'':'disabled')+' onclick="APP.submitOrder()">'+(state.submitting?tr('submitting'):tr('submit_order'))+'</button>';
@@ -715,12 +796,45 @@ var APP = {
     render();
   },
   removeCartLine: function(idx){ state.cart.splice(idx,1); render(); },
+  cartToppingQty: function(lineIdx, toppingIdx, delta){
+    var line = state.cart[lineIdx];
+    if(!line) return;
+    var t = line.toppings[toppingIdx];
+    if(!t) return;
+    var newQty = (Number(t.qty)||1) + delta;
+    if(newQty<=0){ line.toppings.splice(toppingIdx,1); }
+    else { t.qty = newQty; }
+    line.unitPrice = (Number(line.basePrice)||0) + line.toppings.reduce(function(s,tp){return s + (Number(tp.price)||0)*(Number(tp.qty)||1);},0);
+    render();
+  },
+  toggleAddToppingPicker: function(lineIdx){
+    state.addToppingLineIdx = (state.addToppingLineIdx===lineIdx) ? null : lineIdx;
+    render();
+  },
+  addToppingToLine: function(lineIdx, toppingId){
+    var line = state.cart[lineIdx];
+    if(!line) return;
+    var t = (state.toppings||[]).filter(function(x){return x.id===toppingId;})[0];
+    if(!t) return;
+    var existing = line.toppings.filter(function(x){return x.id===toppingId;})[0];
+    if(existing){ existing.qty = (Number(existing.qty)||1) + 1; }
+    else { line.toppings.push({id:t.id, name:toppingDisplayName(t), price:t.price, qty:1}); }
+    line.unitPrice = (Number(line.basePrice)||0) + line.toppings.reduce(function(s,tp){return s + (Number(tp.price)||0)*(Number(tp.qty)||1);},0);
+    render();
+  },
   goToCart: function(){ state.view='cart'; state.submitError=null; render(); window.scrollTo({top:0}); },
   backToMenu: function(){ state.view='items'; render(); window.scrollTo({top:0}); },
   setCustomerName: function(v){ state.customerName=v; render(); },
   setCustomerNote: function(v){ state.customerNote=v; render(); },
   submitOrder: function(){
     if(state.submitting || state.cart.length===0) return;
+    if((state.customerName||'').trim().length===0){
+      state.submitError = tr('submit_error_missing_name');
+      render();
+      var el = document.getElementById('cust-name');
+      if(el) el.focus();
+      return;
+    }
     state.submitting = true;
     state.submitError = null;
     render();
