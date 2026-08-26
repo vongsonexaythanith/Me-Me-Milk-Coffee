@@ -3686,6 +3686,10 @@ var TRANSLATIONS = {
     incoming_reject_confirm:'Reject this order? The customer will need to re-submit or order at the counter instead.',
     order_alert_new_order:'New order!', order_alert_title_flash:'New order!',
     order_alert_sound_on_btn:'Alerts on', order_alert_sound_off_btn:'Alerts muted',
+    order_alert_sound_upload_btn:'🎵 Upload sound', order_alert_sound_test_btn:'▶ Test',
+    order_alert_sound_reset_btn:'Use default chime', order_alert_sound_custom_label:'Custom sound active',
+    order_alert_sound_invalid_type:'Please choose an audio file (MP3, WAV, etc).',
+    order_alert_sound_too_large:'That file is too big — please choose a short clip under 500KB (a couple of seconds is plenty).',
     search_placeholder:'Search menu…',
     currency_label:'Currency',
     current_order:'Current Order',
@@ -3894,6 +3898,10 @@ var TRANSLATIONS = {
     incoming_reject_confirm:'ປະຕິເສດອໍເດີນີ້ບໍ? ລູກຄ້າຈະຕ້ອງສົ່ງອໍເດີໃໝ່ ຫຼື ສັ່ງທີ່ເຄົາເຕີແທນ.',
     order_alert_new_order:'ອໍເດີໃໝ່!', order_alert_title_flash:'ອໍເດີໃໝ່!',
     order_alert_sound_on_btn:'ເປີດສຽງແຈ້ງເຕືອນ', order_alert_sound_off_btn:'ປິດສຽງແຈ້ງເຕືອນ',
+    order_alert_sound_upload_btn:'🎵 ອັບໂຫລດສຽງ', order_alert_sound_test_btn:'▶ ທົດລອງ',
+    order_alert_sound_reset_btn:'ໃຊ້ສຽງເລີ່ມຕົ້ນ', order_alert_sound_custom_label:'ກຳລັງໃຊ້ສຽງທີ່ອັບໂຫລດເອງ',
+    order_alert_sound_invalid_type:'ກະລຸນາເລືອກໄຟລ໌ສຽງ (MP3, WAV ແລະອື່ນໆ).',
+    order_alert_sound_too_large:'ໄຟລ໌ນີ້ໃຫຍ່ເກີນໄປ — ກະລຸນາເລືອກສຽງສັ້ນໆ ຂະໜາດບໍ່ເກີນ 500KB (ສອງສາມວິນາທີກໍພຽງພໍ).',
     search_placeholder:'ຄົ້ນຫາເມນູ…',
     currency_label:'ສະກຸນເງິນ',
     current_order:'ອໍເດີປັດຈຸບັນ',
@@ -4102,6 +4110,10 @@ var TRANSLATIONS = {
     incoming_reject_confirm:'ปฏิเสธออเดอร์นี้หรือไม่? ลูกค้าจะต้องส่งออเดอร์ใหม่ หรือสั่งที่เคาน์เตอร์แทน',
     order_alert_new_order:'ออเดอร์ใหม่!', order_alert_title_flash:'ออเดอร์ใหม่!',
     order_alert_sound_on_btn:'เปิดเสียงแจ้งเตือน', order_alert_sound_off_btn:'ปิดเสียงแจ้งเตือน',
+    order_alert_sound_upload_btn:'🎵 อัปโหลดเสียง', order_alert_sound_test_btn:'▶ ทดสอบ',
+    order_alert_sound_reset_btn:'ใช้เสียงเริ่มต้น', order_alert_sound_custom_label:'กำลังใช้เสียงที่อัปโหลดเอง',
+    order_alert_sound_invalid_type:'กรุณาเลือกไฟล์เสียง (MP3, WAV และอื่นๆ)',
+    order_alert_sound_too_large:'ไฟล์นี้ใหญ่เกินไป — กรุณาเลือกเสียงสั้นๆ ขนาดไม่เกิน 500KB (สองสามวินาทีก็เพียงพอ)',
     search_placeholder:'ค้นหาเมนู…',
     currency_label:'สกุลเงิน',
     current_order:'ออเดอร์ปัจจุบัน',
@@ -4358,6 +4370,27 @@ function isOrderAlertSoundOn(){
 }
 function setOrderAlertSoundOn(on){
   try { window.localStorage.setItem(ORDER_ALERT_SOUND_KEY, on ? '1' : '0'); } catch(e){}
+}
+/* Optional custom alert sound — also per-device (localStorage), same
+   reasoning as above: one register's staff may want their own upload,
+   another may be happy with the default chime. Stored as a data: URL, not
+   in Firestore, both because it's device-specific and because it would
+   have nowhere good to live in `pos_settings` without risking that
+   document's own size. Capped well under typical localStorage quotas
+   (5-10MB/origin) so one long/high-bitrate upload can't crowd out the
+   rest of this app's local data (the location assignment, the PIN lock
+   state) on that device. */
+var ORDER_ALERT_CUSTOM_SOUND_KEY = 'pos_order_alert_custom_sound';
+var ORDER_ALERT_CUSTOM_SOUND_MAX_BYTES = 500000; // ~500KB — plenty for a short clip
+function getOrderAlertCustomSound(){
+  try { return window.localStorage.getItem(ORDER_ALERT_CUSTOM_SOUND_KEY) || null; } catch(e){ return null; }
+}
+function setOrderAlertCustomSound(dataUrl){
+  try {
+    if(dataUrl) window.localStorage.setItem(ORDER_ALERT_CUSTOM_SOUND_KEY, dataUrl);
+    else window.localStorage.removeItem(ORDER_ALERT_CUSTOM_SOUND_KEY);
+    return true;
+  } catch(e){ return false; } // e.g. quota exceeded — caller shows a warning
 }
 /* Location display names ("Donkoi", "Location 2") are editable at
    runtime (Settings -> Rename Locations, master-admin-only), which means
@@ -4890,6 +4923,14 @@ function dismissOrderAlert(alertId){
 var orderAlertAudioCtx = null;
 function playOrderAlertSound(){
   if(!isOrderAlertSoundOn()) return;
+  var customSound = getOrderAlertCustomSound();
+  if(customSound){
+    try{
+      var audio = new Audio(customSound);
+      audio.play().catch(function(){ /* blocked by the browser's autoplay policy — nothing more to do */ });
+    }catch(e){ /* corrupt/unsupported stored file — silently skip rather than break the toast */ }
+    return;
+  }
   try{
     if(!orderAlertAudioCtx) orderAlertAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
     var ctx = orderAlertAudioCtx;
@@ -6305,12 +6346,23 @@ function buildIncomingOrdersTab(){
     '</div>';
   }).join('');
   var soundOn = isOrderAlertSoundOn();
+  var hasCustomSound = !!getOrderAlertCustomSound();
+  var soundControlsHtml = '' +
+    '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;">' +
+      '<label class="btn btn-outline btn-small" style="white-space:nowrap;">'+tr('order_alert_sound_upload_btn')+'<input type="file" accept="audio/*" style="display:none" onchange="POS.handleOrderAlertSoundUpload(this)"/></label>' +
+      '<button class="btn btn-ghost btn-small" style="white-space:nowrap;" onclick="POS.testOrderAlertSound()">'+tr('order_alert_sound_test_btn')+'</button>' +
+      (hasCustomSound ? ('' +
+        '<span class="hint" style="margin:0;">'+tr('order_alert_sound_custom_label')+'</span>' +
+        '<button class="btn btn-ghost btn-small" style="white-space:nowrap;" onclick="POS.resetOrderAlertSound()">'+tr('order_alert_sound_reset_btn')+'</button>'
+      ) : '') +
+    '</div>';
   return syncNotice +
     '<div class="section-card">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
         '<div><h2>'+tr('tab_incoming')+'</h2><p class="hint">'+tr('incoming_tab_hint')+'</p></div>' +
         '<button class="btn btn-outline btn-small" style="white-space:nowrap;flex:none;" onclick="POS.toggleOrderAlertSound()">'+(soundOn?'🔔 '+tr('order_alert_sound_on_btn'):'🔕 '+tr('order_alert_sound_off_btn'))+'</button>' +
       '</div>' +
+      soundControlsHtml +
     '</div>' +
     cardsHtml;
 }
@@ -9923,6 +9975,37 @@ var POS = {
   toggleOrderAlertSound: function(){
     setOrderAlertSoundOn(!isOrderAlertSoundOn());
     render();
+  },
+  handleOrderAlertSoundUpload: function(inputEl){
+    var file = inputEl && inputEl.files && inputEl.files[0];
+    inputEl.value = ''; // clear so picking the same file again still fires onchange
+    if(!file) return;
+    if(!/^audio\//.test(file.type)){
+      window.alert(tr('order_alert_sound_invalid_type'));
+      return;
+    }
+    if(file.size > ORDER_ALERT_CUSTOM_SOUND_MAX_BYTES){
+      window.alert(tr('order_alert_sound_too_large'));
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(e){
+      if(!setOrderAlertCustomSound(e.target.result)){
+        window.alert(tr('order_alert_sound_too_large'));
+        return;
+      }
+      render();
+      playOrderAlertSound(); // immediate preview so staff can hear what they just picked
+    };
+    reader.onerror = function(){ window.alert(tr('order_alert_sound_invalid_type')); };
+    reader.readAsDataURL(file);
+  },
+  resetOrderAlertSound: function(){
+    setOrderAlertCustomSound(null);
+    render();
+  },
+  testOrderAlertSound: function(){
+    playOrderAlertSound();
   },
   toggleIncomingExpand: function(id){
     state.expandedIncomingId = state.expandedIncomingId===id ? null : id;
