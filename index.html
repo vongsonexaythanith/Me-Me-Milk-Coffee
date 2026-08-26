@@ -3156,7 +3156,8 @@ function todayDateKey(){
    receipt: matches buildReceiptContentHtml's content, laid out as a
    monospaced two-column table (name/value padded to the line width) since
    ePOS-Print has no simple "space-between" text layout. Logo/QR are not
-   included in this path yet. */
+   included in this path yet. Prints customer copy then kitchen copy in the
+   same job, same as every other print path — see buildEposPrintXml. */
 function eposCharWidth(){
   return (state.settings && state.settings.printerPaperWidth==='58mm') ? 32 : 48;
 }
@@ -3246,7 +3247,13 @@ function buildEposPrintXml(o){
     out += '<feed line="2"/><cut type="feed"/>';
     return out;
   }
-  return '<epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">' + buildCopy(false) + '</epos-print>';
+  /* buildCopy(false) then buildCopy(true) — customer copy, cut, kitchen
+     copy, cut, both in the one job the printer receives. This used to be
+     buildCopy(false) alone: the isKitchen branch above was already fully
+     written, just never actually invoked a second time, so this path
+     silently printed only the customer copy while every other print path
+     (OS print dialog, RawBT image mode) printed both. */
+  return '<epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">' + buildCopy(false) + buildCopy(true) + '</epos-print>';
 }
 /* POSTs the receipt to the printer's ePOS-Print endpoint. Resolves on a
    confirmed successful print, rejects with a human-readable reason
@@ -3386,7 +3393,12 @@ function buildEscPosReceipt(o){
     out += '\n\n\n'+ESCPOS_GS+'V'+String.fromCharCode(1); // feed clear of the cutter, then partial cut
     return out;
   }
-  return buildCopy(false);
+  /* Same fix as buildEposPrintXml above and for the same reason: this was
+     buildCopy(false) alone, printing only the customer copy even though
+     the isKitchen branch above exists specifically to produce a kitchen
+     copy. RawBT's "print as image" mode never had this bug — it renders
+     buildReceiptCopiesHtml directly — only this plain-text mode did. */
+  return buildCopy(false) + buildCopy(true);
 }
 /* Correct UTF-8-safe base64 encoding: btoa() only accepts single-byte
    (0x00-0xFF) input, so Lao/Thai/etc. text (which is multi-byte in UTF-8)
