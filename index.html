@@ -4628,6 +4628,47 @@ function teardownDataListeners(){
 function sanitizeCategoryKey(cat){
   return String(cat||'').replace(/\//g,'_').trim();
 }
+/* Renders `img` cover-fit onto a canvas of ~targetW x targetH, encoded as
+   JPEG, then shrinks quality (and if that's not enough, dimensions) until
+   the result stays under a safe byte budget. This exists because Firestore
+   rejects any document over 1,048,576 bytes total -- and a single busy,
+   high-detail photo (a real phone camera shot, not a stock photo) can
+   still land over 1MB even after a fixed resize + fixed JPEG quality, which
+   silently failed to save (the .catch() in savePhotoDoc alerted the error,
+   but the photo itself just never made it into pos_photos -- invisible to
+   self-service.html, which only ever reads what actually synced). Returns
+   {dataUrl, tooLarge} -- tooLarge stays true only if even the smallest
+   acceptable version didn't fit, so the caller can warn proactively instead
+   of the upload silently vanishing. */
+function compressImageToDataUrl(img, targetW, targetH, opts){
+  opts = opts || {};
+  var maxBytes = opts.maxBytes || 700000; // ~700KB -- well under Firestore's 1 MiB doc cap
+  var minQuality = opts.minQuality != null ? opts.minQuality : 0.5;
+  var quality = opts.startQuality != null ? opts.startQuality : 0.85;
+  var minScale = opts.minScale != null ? opts.minScale : 0.5;
+  function renderAt(w, h, q){
+    var canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(w));
+    canvas.height = Math.max(1, Math.round(h));
+    var ctx = canvas.getContext('2d');
+    var scale = Math.max(canvas.width/img.width, canvas.height/img.height);
+    var dw = img.width*scale, dh = img.height*scale;
+    var dx = (canvas.width-dw)/2, dy = (canvas.height-dh)/2;
+    ctx.drawImage(img, dx, dy, dw, dh);
+    return canvas.toDataURL('image/jpeg', q);
+  }
+  var scale = 1;
+  var dataUrl = renderAt(targetW*scale, targetH*scale, quality);
+  while(dataUrl.length > maxBytes && quality > minQuality){
+    quality = Math.max(minQuality, quality - 0.1);
+    dataUrl = renderAt(targetW*scale, targetH*scale, quality);
+  }
+  while(dataUrl.length > maxBytes && scale > minScale){
+    scale = Math.max(minScale, scale - 0.15);
+    dataUrl = renderAt(targetW*scale, targetH*scale, quality);
+  }
+  return { dataUrl: dataUrl, tooLarge: dataUrl.length > maxBytes };
+}
 function savePhotoDoc(id, dataUrl){
   return db.collection('pos_photos').doc(id).set({data: dataUrl}).catch(function(e){
     window.alert('Could not save photo: '+e.message);
@@ -10190,20 +10231,14 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var size = 800;
-        var canvas = document.createElement('canvas');
-        canvas.width = size; canvas.height = size;
-        var ctx = canvas.getContext('2d');
-        var scale = Math.max(size/img.width, size/img.height);
-        var w = img.width*scale, h = img.height*scale;
-        var x = (size-w)/2, y = (size-h)/2;
-        ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        var result = compressImageToDataUrl(img, 800, 800, {startQuality:0.85});
+        var dataUrl = result.dataUrl;
         var target = id ? state.menu.filter(function(m){return m.id===id;})[0] : state.newItemDraft;
         if(target){
           target.photo = dataUrl;
           if(id) savePhotoDoc('item_'+id, dataUrl); // new items: saved once saveItem() assigns an id
           render();
+          if(result.tooLarge) window.alert('This photo is unusually detailed and stayed large even after compression. It was saved, but if it does not show up on the self-service page, try a simpler or lower-resolution photo.');
         }
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
@@ -10228,19 +10263,13 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var w0 = 640, h0 = 427;
-        var canvas = document.createElement('canvas');
-        canvas.width = w0; canvas.height = h0;
-        var ctx = canvas.getContext('2d');
-        var scale = Math.max(w0/img.width, h0/img.height);
-        var w = img.width*scale, h = img.height*scale;
-        var x = (w0-w)/2, y = (h0-h)/2;
-        ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        var result = compressImageToDataUrl(img, 640, 427, {startQuality:0.85});
+        var dataUrl = result.dataUrl;
         if(!state.settings.categoryPhotos) state.settings.categoryPhotos = {};
         state.settings.categoryPhotos[cat] = dataUrl;
         savePhotoDoc('category_thumb_'+sanitizeCategoryKey(cat), dataUrl);
         render();
+        if(result.tooLarge) window.alert('This photo is unusually detailed and stayed large even after compression. It was saved, but if it does not show up on the self-service page, try a simpler or lower-resolution photo.');
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
       img.src = e.target.result;
@@ -10334,19 +10363,13 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var w0=1800, h0=1157;
-        var canvas = document.createElement('canvas');
-        canvas.width=w0; canvas.height=h0;
-        var ctx = canvas.getContext('2d');
-        var scale = Math.max(w0/img.width, h0/img.height);
-        var w=img.width*scale, h=img.height*scale;
-        var x=(w0-w)/2, y=(h0-h)/2;
-        ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        var result = compressImageToDataUrl(img, 1800, 1157, {startQuality:0.8});
+        var dataUrl = result.dataUrl;
         state.settings.pageBackgroundPhoto = dataUrl;
         if(state.settingsForm) state.settingsForm.pageBackgroundPhoto = dataUrl;
         savePhotoDoc('page_background', dataUrl);
         render();
+        if(result.tooLarge) window.alert('This photo is unusually detailed and stayed large even after compression. It was saved, but if it does not sync properly, try a simpler or lower-resolution photo.');
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
       img.src = e.target.result;
@@ -10371,19 +10394,13 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var w0=2000, h0=400;
-        var canvas = document.createElement('canvas');
-        canvas.width=w0; canvas.height=h0;
-        var ctx = canvas.getContext('2d');
-        var scale = Math.max(w0/img.width, h0/img.height);
-        var w=img.width*scale, h=img.height*scale;
-        var x=(w0-w)/2, y=(h0-h)/2;
-        ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        var result = compressImageToDataUrl(img, 2000, 400, {startQuality:0.8});
+        var dataUrl = result.dataUrl;
         state.settings.headerBackgroundPhoto = dataUrl;
         if(state.settingsForm) state.settingsForm.headerBackgroundPhoto = dataUrl;
         savePhotoDoc('header_background', dataUrl);
         render();
+        if(result.tooLarge) window.alert('This photo is unusually detailed and stayed large even after compression. It was saved, but if it does not sync properly, try a simpler or lower-resolution photo.');
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
       img.src = e.target.result;
@@ -10421,15 +10438,8 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var w0=1800, h0=1157;
-        var canvas = document.createElement('canvas');
-        canvas.width=w0; canvas.height=h0;
-        var ctx = canvas.getContext('2d');
-        var scale = Math.max(w0/img.width, h0/img.height);
-        var w=img.width*scale, h=img.height*scale;
-        var x=(w0-w)/2, y=(h0-h)/2;
-        ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        var result = compressImageToDataUrl(img, 1800, 1157, {startQuality:0.8});
+        var dataUrl = result.dataUrl;
         if(!state.settings.categoryBackgroundPhotos) state.settings.categoryBackgroundPhotos = {};
         state.settings.categoryBackgroundPhotos[cat] = dataUrl;
         if(state.settingsForm){
@@ -10438,6 +10448,7 @@ var POS = {
         }
         savePhotoDoc('category_bg_'+sanitizeCategoryKey(cat), dataUrl);
         render();
+        if(result.tooLarge) window.alert('This photo is unusually detailed and stayed large even after compression. It was saved, but if it does not sync properly, try a simpler or lower-resolution photo.');
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
       img.src = e.target.result;
