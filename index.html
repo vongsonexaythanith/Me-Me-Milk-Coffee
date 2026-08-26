@@ -5282,7 +5282,7 @@ function doRender(){
   fitCartList();
   if(savedId){
     var el = document.getElementById(savedId);
-    if(el){
+    if(el && el.tagName!=='SELECT'){
       el.focus();
       try{ if(selStart!=null && el.setSelectionRange) el.setSelectionRange(selStart, selEnd); }catch(e){}
     }
@@ -5296,37 +5296,59 @@ function doRender(){
    blocking the main thread on every single keystroke is exactly what makes
    fast typing feel like it's dropping or delaying characters: the browser
    can't get back to processing input events until the rebuild finishes.
-   So this is a genuine debounce (the wait timer RESETS on every call)
-   rather than a fixed-interval throttle — a burst of rapid calls (typing)
-   coalesces into a single rebuild shortly after the burst pauses, instead
-   of one rebuild per call. A maxWait ceiling still forces a rebuild at
-   least every ~200ms even under a continuous, uninterrupted stream of
-   calls, so a render-storm (e.g. a rapidly retrying network connection)
-   can't starve the UI indefinitely. An optional callback runs after the
-   DOM has actually been rebuilt — used, e.g., to trigger printing only
-   once the receipt is really on screen. Callbacks are queued (not
-   dropped) even when a call piggybacks on an already-scheduled render. */
+
+   This is a leading+trailing debounce, not a plain debounce: an ISOLATED
+   call (a button click, a dropdown selection, the first character typed
+   after a pause) fires on the very next tick so it still feels instant —
+   only calls that land while a render is already pending, or land very
+   soon after the last real rebuild, get treated as part of a rapid burst
+   and coalesced into one trailing rebuild after the burst settles. A
+   plain debounce (wait-then-fire on every call, no leading edge) was
+   tried first but made every single interaction — not just typing —
+   pay a mandatory minimum delay, which felt sluggish across the whole
+   app. A maxWait ceiling still forces a rebuild at least every ~200ms
+   even under a continuous, uninterrupted stream of calls, so a
+   render-storm (e.g. a rapidly retrying network connection) can't starve
+   the UI indefinitely. An optional callback runs after the DOM has
+   actually been rebuilt — used, e.g., to trigger printing only once the
+   receipt is really on screen. Callbacks are queued (not dropped) even
+   when a call piggybacks on an already-scheduled render. */
 var renderTimer = null;
 var renderBurstStartedAt = 0;
+var lastRenderAt = 0;
 var pendingRenderCallbacks = [];
 var RENDER_DEBOUNCE_MS = 60;
 var RENDER_MAX_WAIT_MS = 200;
+function runRenderNow(){
+  renderTimer = null;
+  lastRenderAt = Date.now();
+  doRender();
+  var callbacks = pendingRenderCallbacks;
+  pendingRenderCallbacks = [];
+  callbacks.forEach(function(cb){
+    try{ cb(); }catch(e){ console.error('render callback error', e); }
+  });
+}
 function render(afterRender){
   if(afterRender) pendingRenderCallbacks.push(afterRender);
   var now = Date.now();
-  if(!renderTimer) renderBurstStartedAt = now;
-  if(renderTimer) clearTimeout(renderTimer);
+  if(!renderTimer){
+    renderBurstStartedAt = now;
+    if(now - lastRenderAt >= RENDER_DEBOUNCE_MS){
+      // Leading edge — nothing pending, and it's been a little while
+      // since the last real rebuild. Treat as an isolated action.
+      renderTimer = setTimeout(runRenderNow, 0);
+      return;
+    }
+  } else {
+    clearTimeout(renderTimer);
+  }
+  // Trailing edge — either already mid-burst, or this call landed too
+  // soon after the last rebuild to be its own isolated action. Reset
+  // the wait timer (capped by the burst's maxWait ceiling).
   var waitLeftInBurst = RENDER_MAX_WAIT_MS - (now - renderBurstStartedAt);
   var delay = Math.max(0, Math.min(RENDER_DEBOUNCE_MS, waitLeftInBurst));
-  renderTimer = setTimeout(function(){
-    renderTimer = null;
-    doRender();
-    var callbacks = pendingRenderCallbacks;
-    pendingRenderCallbacks = [];
-    callbacks.forEach(function(cb){
-      try{ cb(); }catch(e){ console.error('render callback error', e); }
-    });
-  }, delay);
+  renderTimer = setTimeout(runRenderNow, delay);
 }
 
 /* ================= APP SHELL ================= */
