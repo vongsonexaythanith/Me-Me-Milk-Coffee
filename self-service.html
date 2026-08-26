@@ -471,6 +471,21 @@ function render(){
   if(renderTimer) return;
   renderTimer = setTimeout(function(){ renderTimer = null; doRender(); }, 0);
 }
+/* render() above only coalesces calls that happen in the same tick — real
+   typing speed still triggers one full doRender() per keystroke. That's
+   cheap everywhere EXCEPT the item grid (buildItemsView), where every
+   visible card's photo is a large embedded data-URI <img>; on a real
+   (non-desktop-class) phone, rebuilding dozens of those on every character
+   of a search is what "laggy typing" actually was. This debounces just
+   that one path — state.search itself still updates instantly (so nothing
+   downstream that reads state.search directly is stale), only the
+   expensive visual re-render of the grid waits for a short pause in
+   typing, same idea as any search-as-you-type box. */
+var searchRenderTimer = null;
+function renderSearchDebounced(){
+  if(searchRenderTimer) clearTimeout(searchRenderTimer);
+  searchRenderTimer = setTimeout(function(){ searchRenderTimer = null; doRender(); }, 220);
+}
 function doRender(){
   var active = document.activeElement;
   var savedId = null, selStart=null, selEnd=null;
@@ -746,7 +761,7 @@ var APP = {
   selectCategory: function(c){ state.activeCategory=c; state.view='items'; state.search=''; render(); window.scrollTo({top:0}); },
   setCategory: function(c){ state.activeCategory=c; render(); },
   backToCategories: function(){ state.view='categories'; render(); window.scrollTo({top:0}); },
-  setSearch: function(v){ state.search=v; render(); },
+  setSearch: function(v){ state.search=v; renderSearchDebounced(); },
   openItem: function(itemId){
     var m = (state.menu||[]).filter(function(i){return i.id===itemId;})[0];
     if(!m) return;
