@@ -678,6 +678,27 @@ html, body{touch-action:pan-x pan-y;}
 .scroll-nav-btn-disabled{opacity:0.35;pointer-events:none;}
 @media print{ .scroll-nav-buttons{display:none !important;} }
 .tab-badge{display:inline-block;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--coral,#DC5758);color:#fff;font-size:10px;font-weight:800;line-height:16px;text-align:center;margin-left:4px;vertical-align:middle;}
+.order-alert-stack{
+  position:fixed;top:14px;right:14px;z-index:200;display:flex;flex-direction:column;
+  gap:10px;max-width:320px;pointer-events:none;
+}
+.order-alert-toast{
+  pointer-events:auto;background:var(--paper,#fff);border:1.5px solid var(--taro,#8B6F9E);
+  border-left:5px solid var(--coral,#DC5758);border-radius:12px;padding:12px 14px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.18);display:flex;gap:10px;align-items:flex-start;
+  cursor:pointer;animation:order-alert-in .28s ease-out;
+}
+.order-alert-toast:active{transform:scale(0.98);}
+.order-alert-icon{font-size:20px;line-height:1;flex:none;}
+.order-alert-body{flex:1;min-width:0;}
+.order-alert-title{font-weight:800;font-size:13px;color:var(--espresso,#4A2E1A);}
+.order-alert-sub{font-size:11.5px;color:var(--espresso-soft);margin-top:2px;}
+.order-alert-close{flex:none;background:none;border:none;font-size:14px;color:var(--espresso-soft);cursor:pointer;padding:2px 4px;line-height:1;}
+.order-alert-close:hover{color:var(--espresso,#4A2E1A);}
+@keyframes order-alert-in{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:translateX(0);}}
+@media (max-width:480px){
+  .order-alert-stack{left:10px;right:10px;top:10px;max-width:none;}
+}
 </style>
 
 <div id="pos-root">
@@ -3663,6 +3684,8 @@ var TRANSLATIONS = {
     incoming_reject_hint:'Need a discount in a foreign currency, or to edit items? Reject this and enter it manually from the Order tab instead.',
     incoming_customer_requested_label:'Customer requested:',
     incoming_reject_confirm:'Reject this order? The customer will need to re-submit or order at the counter instead.',
+    order_alert_new_order:'New order!', order_alert_title_flash:'New order!',
+    order_alert_sound_on_btn:'Alerts on', order_alert_sound_off_btn:'Alerts muted',
     search_placeholder:'Search menu…',
     currency_label:'Currency',
     current_order:'Current Order',
@@ -3869,6 +3892,8 @@ var TRANSLATIONS = {
     incoming_reject_hint:'ຕ້ອງການສ່ວນຫຼຸດເປັນສະກຸນເງິນຕ່າງປະເທດ ຫຼື ແກ້ໄຂລາຍການບໍ? ປະຕິເສດອໍເດີນີ້ ແລະ ໃສ່ຂໍ້ມູນເອງຈາກແທັບອໍເດີແທນ.',
     incoming_customer_requested_label:'ລູກຄ້າຂໍຊຳລະດ້ວຍ:',
     incoming_reject_confirm:'ປະຕິເສດອໍເດີນີ້ບໍ? ລູກຄ້າຈະຕ້ອງສົ່ງອໍເດີໃໝ່ ຫຼື ສັ່ງທີ່ເຄົາເຕີແທນ.',
+    order_alert_new_order:'ອໍເດີໃໝ່!', order_alert_title_flash:'ອໍເດີໃໝ່!',
+    order_alert_sound_on_btn:'ເປີດສຽງແຈ້ງເຕືອນ', order_alert_sound_off_btn:'ປິດສຽງແຈ້ງເຕືອນ',
     search_placeholder:'ຄົ້ນຫາເມນູ…',
     currency_label:'ສະກຸນເງິນ',
     current_order:'ອໍເດີປັດຈຸບັນ',
@@ -4075,6 +4100,8 @@ var TRANSLATIONS = {
     incoming_reject_hint:'ต้องการส่วนลดเป็นสกุลเงินต่างประเทศ หรือแก้ไขรายการ? ปฏิเสธออเดอร์นี้แล้วกรอกข้อมูลเองจากแท็บออเดอร์แทน',
     incoming_customer_requested_label:'ลูกค้าขอชำระด้วย:',
     incoming_reject_confirm:'ปฏิเสธออเดอร์นี้หรือไม่? ลูกค้าจะต้องส่งออเดอร์ใหม่ หรือสั่งที่เคาน์เตอร์แทน',
+    order_alert_new_order:'ออเดอร์ใหม่!', order_alert_title_flash:'ออเดอร์ใหม่!',
+    order_alert_sound_on_btn:'เปิดเสียงแจ้งเตือน', order_alert_sound_off_btn:'ปิดเสียงแจ้งเตือน',
     search_placeholder:'ค้นหาเมนู…',
     currency_label:'สกุลเงิน',
     current_order:'ออเดอร์ปัจจุบัน',
@@ -4320,6 +4347,18 @@ var LOCATIONS = {
   }
 };
 var LOCATION_STORAGE_KEY = 'pos_active_location';
+/* New-order alert sound is a per-device preference (like the location
+   assignment above), not a shop-wide setting — a busy counter tablet and
+   a quiet back-office laptop logged into the same shop may want this on
+   or off independently, so this lives in localStorage rather than
+   pos_settings and is never Firestore-synced. Defaults ON. */
+var ORDER_ALERT_SOUND_KEY = 'pos_order_alert_sound';
+function isOrderAlertSoundOn(){
+  try { return window.localStorage.getItem(ORDER_ALERT_SOUND_KEY) !== '0'; } catch(e){ return true; }
+}
+function setOrderAlertSoundOn(on){
+  try { window.localStorage.setItem(ORDER_ALERT_SOUND_KEY, on ? '1' : '0'); } catch(e){}
+}
 /* Location display names ("Donkoi", "Location 2") are editable at
    runtime (Settings -> Rename Locations, master-admin-only), which means
    they can't just be the hardcoded defaults above forever. They're kept
@@ -4513,7 +4552,8 @@ var state = {
   incomingOrdersLoaded:false,
   incomingOrdersSyncError:false,
   incomingApprovePrompt:null, // {orderId, paymentMethod, amountReceived, discount}
-  expandedIncomingId:null
+  expandedIncomingId:null,
+  orderAlerts:[] // transient new-order pop-up toasts: [{id, title, itemCount, ts}]
 };
 
 /* ================= FIREBASE (multi-device sync + auth) ================= */
@@ -4808,6 +4848,89 @@ function syncPublicSettings(){
     console.error('Could not sync public settings for the self-service page', e);
   });
 }
+/* ===== New-order pop-up alerts (Incoming Orders) =====
+   Fired from the pos_incoming_orders listener below whenever a doc appears
+   that wasn't there a moment ago. Deliberately NOT fired for orders that
+   were already pending when the listener first attaches (e.g. right after
+   login, or reconnecting after the tab was asleep) — otherwise every app
+   open would immediately pop a toast per already-known order, which reads
+   as noise, not a notification. knownIncomingOrderIds is rebuilt from the
+   live snapshot every time, so an order that gets approved/rejected is
+   automatically forgotten (its id can safely "reappear" as new later,
+   though that shouldn't happen in practice). */
+var incomingOrdersFirstSnapshot = true;
+var knownIncomingOrderIds = {};
+function orderAlertTitle(o){
+  var bits = [];
+  if(o.customerName) bits.push(o.customerName);
+  if(o.customerNote) bits.push(o.customerNote);
+  return bits.length ? bits.join(' · ') : tr('incoming_guest_order');
+}
+function pushOrderAlert(o){
+  var alert = { id:'alert_'+o.id+'_'+Date.now(), orderId:o.id, title:orderAlertTitle(o), itemCount:(o.items||[]).length, ts:Date.now() };
+  state.orderAlerts.push(alert);
+  // Cap how many toasts stack up at once so a burst of orders can't cover
+  // the whole screen — oldest drops off first, newest always visible.
+  if(state.orderAlerts.length > 4) state.orderAlerts.shift();
+  playOrderAlertSound();
+  flashDocumentTitleForNewOrder();
+  setTimeout(function(){ dismissOrderAlert(alert.id); }, 9000);
+  render();
+}
+function dismissOrderAlert(alertId){
+  var before = state.orderAlerts.length;
+  state.orderAlerts = state.orderAlerts.filter(function(a){ return a.id!==alertId; });
+  if(state.orderAlerts.length !== before) render();
+}
+/* Short two-tone chime built with the Web Audio API instead of a bundled
+   audio file, so this stays a single self-contained HTML file. Wrapped in
+   try/catch: some browsers block audio before the page has had any user
+   interaction (e.g. right after a fresh page load), and this must never
+   break the toast itself just because the sound couldn't play. */
+var orderAlertAudioCtx = null;
+function playOrderAlertSound(){
+  if(!isOrderAlertSoundOn()) return;
+  try{
+    if(!orderAlertAudioCtx) orderAlertAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    var ctx = orderAlertAudioCtx;
+    if(ctx.state==='suspended') ctx.resume();
+    var now = ctx.currentTime;
+    [[880,now,0.14],[1175,now+0.15,0.18]].forEach(function(tone){
+      var osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = tone[0];
+      gain.gain.setValueAtTime(0.0001, tone[1]);
+      gain.gain.exponentialRampToValueAtTime(0.22, tone[1]+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, tone[1]+tone[2]);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(tone[1]); osc.stop(tone[1]+tone[2]+0.02);
+    });
+  }catch(e){ /* Web Audio unavailable/blocked — toast still shows without sound */ }
+}
+/* If the tab isn't visible (staff on another window/app), flash the
+   browser tab title so a new order is noticeable even without looking
+   directly at this screen. Reverts automatically the moment the tab
+   becomes visible again. */
+var orderAlertTitleFlashTimer = null;
+var orderAlertOriginalTitle = null;
+function flashDocumentTitleForNewOrder(){
+  if(typeof document.visibilityState !== 'undefined' && document.visibilityState !== 'hidden') return;
+  if(orderAlertOriginalTitle===null) orderAlertOriginalTitle = document.title;
+  if(orderAlertTitleFlashTimer) return;
+  var flashOn = false;
+  orderAlertTitleFlashTimer = setInterval(function(){
+    document.title = flashOn ? orderAlertOriginalTitle : '🔔 '+tr('order_alert_title_flash');
+    flashOn = !flashOn;
+  }, 1000);
+}
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState==='visible' && orderAlertTitleFlashTimer){
+    clearInterval(orderAlertTitleFlashTimer);
+    orderAlertTitleFlashTimer = null;
+    if(orderAlertOriginalTitle!==null) document.title = orderAlertOriginalTitle;
+  }
+});
+
 function setupDataListeners(){
   activeDataUnsubs.push(db.collection('pos_settings').doc('main').onSnapshot(function(doc){
     if(doc.exists){
@@ -4885,7 +5008,17 @@ function setupDataListeners(){
      Written by the public self-service.html page (unauthenticated,
      create-only per the Firestore rules), never by this app. */
   activeDataUnsubs.push(db.collection('pos_incoming_orders').orderBy('submittedAt','asc').onSnapshot(function(snap){
-    state.incomingOrders = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    var freshList = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    if(incomingOrdersFirstSnapshot){
+      incomingOrdersFirstSnapshot = false;
+    } else {
+      freshList.forEach(function(o){
+        if(!knownIncomingOrderIds[o.id]) pushOrderAlert(o);
+      });
+    }
+    knownIncomingOrderIds = {};
+    freshList.forEach(function(o){ knownIncomingOrderIds[o.id] = true; });
+    state.incomingOrders = freshList;
     state.incomingOrdersLoaded = true;
     state.incomingOrdersSyncError = false;
     render();
@@ -5565,6 +5698,7 @@ function buildAppHTML(){
   html += buildHeader();
   if(state.trainingMode) html += buildTrainingBanner();
   if(state.remoteViewLocation) html += buildRemoteViewBanner();
+  if(state.orderAlerts && state.orderAlerts.length) html += buildOrderAlertStack();
   html += '<div class="pos-main">';
   if(state.tab==='order') html += buildOrderTab();
   else if(state.tab==='incoming') html += buildIncomingOrdersTab();
@@ -5591,6 +5725,20 @@ function buildTrainingBanner(){
     '<span>🎓 '+tr('training_mode_active')+'</span>' +
     '<button class="btn btn-small" onclick="POS.quitTrainingMode()">'+tr('quit_training')+'</button>' +
   '</div>';
+}
+function buildOrderAlertStack(){
+  var toasts = state.orderAlerts.map(function(a){
+    return '' +
+    '<div class="order-alert-toast" onclick="POS.viewOrderAlert(\''+a.id+'\')">' +
+      '<div class="order-alert-icon">🔔</div>' +
+      '<div class="order-alert-body">' +
+        '<div class="order-alert-title">'+tr('order_alert_new_order')+'</div>' +
+        '<div class="order-alert-sub">'+escapeHtml(a.title)+' · '+a.itemCount+' '+tr('items_suffix')+'</div>' +
+      '</div>' +
+      '<button class="order-alert-close" onclick="event.stopPropagation();POS.dismissOrderAlert(\''+a.id+'\')">✕</button>' +
+    '</div>';
+  }).join('');
+  return '<div class="order-alert-stack">'+toasts+'</div>';
 }
 function buildRemoteViewBanner(){
   var loc = LOCATIONS[state.remoteViewLocation];
@@ -6156,8 +6304,14 @@ function buildIncomingOrdersTab(){
       ) : '') +
     '</div>';
   }).join('');
+  var soundOn = isOrderAlertSoundOn();
   return syncNotice +
-    '<div class="section-card"><h2>'+tr('tab_incoming')+'</h2><p class="hint">'+tr('incoming_tab_hint')+'</p></div>' +
+    '<div class="section-card">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
+        '<div><h2>'+tr('tab_incoming')+'</h2><p class="hint">'+tr('incoming_tab_hint')+'</p></div>' +
+        '<button class="btn btn-outline btn-small" style="white-space:nowrap;flex:none;" onclick="POS.toggleOrderAlertSound()">'+(soundOn?'🔔 '+tr('order_alert_sound_on_btn'):'🔕 '+tr('order_alert_sound_off_btn'))+'</button>' +
+      '</div>' +
+    '</div>' +
     cardsHtml;
 }
 function buildIncomingApproveModal(){
@@ -9756,6 +9910,20 @@ var POS = {
     });
   },
   /* ---- Incoming Orders (QR self-service approval) ---- */
+  dismissOrderAlert: function(alertId){
+    dismissOrderAlert(alertId);
+  },
+  viewOrderAlert: function(alertId){
+    var a = (state.orderAlerts||[]).filter(function(x){return x.id===alertId;})[0];
+    dismissOrderAlert(alertId);
+    POS.setTab('incoming');
+    if(a) state.expandedIncomingId = a.orderId;
+    render();
+  },
+  toggleOrderAlertSound: function(){
+    setOrderAlertSoundOn(!isOrderAlertSoundOn());
+    render();
+  },
   toggleIncomingExpand: function(id){
     state.expandedIncomingId = state.expandedIncomingId===id ? null : id;
     render();
