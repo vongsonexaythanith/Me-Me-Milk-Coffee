@@ -680,20 +680,20 @@ html, body{touch-action:pan-x pan-y;}
 .tab-badge{display:inline-block;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--coral,#DC5758);color:#fff;font-size:10px;font-weight:800;line-height:16px;text-align:center;margin-left:4px;vertical-align:middle;}
 .order-alert-stack{
   position:fixed;top:14px;right:14px;z-index:200;display:flex;flex-direction:column;
-  gap:10px;max-width:320px;pointer-events:none;
+  gap:20px;max-width:min(640px, calc(100vw - 28px));pointer-events:none;
 }
 .order-alert-toast{
-  pointer-events:auto;background:var(--paper,#fff);border:1.5px solid var(--taro,#8B6F9E);
-  border-left:5px solid var(--coral,#DC5758);border-radius:12px;padding:12px 14px;
-  box-shadow:0 8px 24px rgba(0,0,0,0.18);display:flex;gap:10px;align-items:flex-start;
+  pointer-events:auto;background:var(--paper,#fff);border:3px solid var(--taro,#8B6F9E);
+  border-left:10px solid var(--coral,#DC5758);border-radius:24px;padding:24px 28px;
+  box-shadow:0 16px 48px rgba(0,0,0,0.18);display:flex;gap:20px;align-items:flex-start;
   cursor:pointer;animation:order-alert-in .28s ease-out;
 }
 .order-alert-toast:active{transform:scale(0.98);}
-.order-alert-icon{font-size:20px;line-height:1;flex:none;}
+.order-alert-icon{font-size:40px;line-height:1;flex:none;}
 .order-alert-body{flex:1;min-width:0;}
-.order-alert-title{font-weight:800;font-size:13px;color:var(--espresso,#4A2E1A);}
-.order-alert-sub{font-size:11.5px;color:var(--espresso-soft);margin-top:2px;}
-.order-alert-close{flex:none;background:none;border:none;font-size:14px;color:var(--espresso-soft);cursor:pointer;padding:2px 4px;line-height:1;}
+.order-alert-title{font-weight:800;font-size:26px;color:var(--espresso,#4A2E1A);}
+.order-alert-sub{font-size:23px;color:var(--espresso-soft);margin-top:4px;}
+.order-alert-close{flex:none;background:none;border:none;font-size:28px;color:var(--espresso-soft);cursor:pointer;padding:4px 8px;line-height:1;}
 .order-alert-close:hover{color:var(--espresso,#4A2E1A);}
 @keyframes order-alert-in{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:translateX(0);}}
 @media (max-width:480px){
@@ -4907,7 +4907,10 @@ function pushOrderAlert(o){
   if(state.orderAlerts.length > 4) state.orderAlerts.shift();
   playOrderAlertSound();
   flashDocumentTitleForNewOrder();
-  setTimeout(function(){ dismissOrderAlert(alert.id); }, 9000);
+  // Deliberately no auto-dismiss timer — this toast is meant to stay put
+  // until staff actually deal with it (tap it to open the order, or tap
+  // the ✕ to dismiss), so a new order can never silently disappear from
+  // the screen unnoticed.
   render();
 }
 function dismissOrderAlert(alertId){
@@ -5650,6 +5653,7 @@ function doRender(){
     return;
   }
   fitCartList();
+  positionOrderAlertStack();
   if(savedId){
     var el = document.getElementById(savedId);
     if(el && el.tagName!=='SELECT'){
@@ -5766,6 +5770,23 @@ function buildTrainingBanner(){
     '<span>🎓 '+tr('training_mode_active')+'</span>' +
     '<button class="btn btn-small" onclick="POS.quitTrainingMode()">'+tr('quit_training')+'</button>' +
   '</div>';
+}
+/* The toast is a fixed overlay (so it can appear/disappear without
+   shifting the rest of the page, and stays visible while a tab scrolls),
+   but the header itself already has controls in that same top-right
+   corner (language chips, cart, lock). Now that the toast is twice its
+   original size it would otherwise sit right on top of those — so after
+   every render, nudge it down to clear the header (and the training/
+   remote-view banner, when either is showing) instead of covering them. */
+function positionOrderAlertStack(){
+  var stack = document.querySelector('.order-alert-stack');
+  if(!stack) return;
+  var clearBelow = 14;
+  var header = document.querySelector('.pos-header');
+  if(header) clearBelow = Math.max(clearBelow, header.getBoundingClientRect().bottom + 10);
+  var banner = document.querySelector('.training-banner');
+  if(banner) clearBelow = Math.max(clearBelow, banner.getBoundingClientRect().bottom + 10);
+  stack.style.top = clearBelow + 'px';
 }
 function buildOrderAlertStack(){
   var toasts = state.orderAlerts.map(function(a){
