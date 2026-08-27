@@ -3774,11 +3774,12 @@ var TRANSLATIONS = {
     order_alert_queue_hint:'+{n} more order(s) waiting',
     order_alert_sound_on_btn:'Alerts on', order_alert_sound_off_btn:'Alerts muted',
     order_alert_sound_upload_btn:'🎵 Upload sound', order_alert_sound_test_btn:'▶ Test',
-    order_alert_sound_reset_btn:'Use default chime', order_alert_sound_custom_label:'Custom sound active',
+    order_alert_sound_reset_btn:'Use default chime', order_alert_sound_custom_label:'Custom sound active (shared on all devices)',
     order_alert_sound_invalid_type:'Please choose an audio file (MP3, WAV, etc).',
     order_alert_sound_too_large:'That file is too big — please choose a short clip under 500KB (a couple of seconds is plenty).',
     order_alert_sound_pending_label:'Pending upload:', order_alert_sound_preview_btn:'▶ Preview',
     order_alert_sound_save_btn:'Save sound', order_alert_sound_cancel_btn:'Cancel',
+    order_alert_sound_saving_label:'Saving…', order_alert_sound_sync_error:'Could not sync the alert sound — showing this device\'s last known copy.',
     search_placeholder:'Search menu…',
     currency_label:'Currency',
     current_order:'Current Order',
@@ -3990,11 +3991,12 @@ var TRANSLATIONS = {
     order_alert_queue_hint:'+{n} ອໍເດີເພີ່ມເຕີມລໍຖ້າຢູ່',
     order_alert_sound_on_btn:'ເປີດສຽງແຈ້ງເຕືອນ', order_alert_sound_off_btn:'ປິດສຽງແຈ້ງເຕືອນ',
     order_alert_sound_upload_btn:'🎵 ອັບໂຫລດສຽງ', order_alert_sound_test_btn:'▶ ທົດລອງ',
-    order_alert_sound_reset_btn:'ໃຊ້ສຽງເລີ່ມຕົ້ນ', order_alert_sound_custom_label:'ກຳລັງໃຊ້ສຽງທີ່ອັບໂຫລດເອງ',
+    order_alert_sound_reset_btn:'ໃຊ້ສຽງເລີ່ມຕົ້ນ', order_alert_sound_custom_label:'ກຳລັງໃຊ້ສຽງທີ່ອັບໂຫລດເອງ (ໃຊ້ຮ່ວມກັນທຸກອຸປະກອນ)',
     order_alert_sound_invalid_type:'ກະລຸນາເລືອກໄຟລ໌ສຽງ (MP3, WAV ແລະອື່ນໆ).',
     order_alert_sound_too_large:'ໄຟລ໌ນີ້ໃຫຍ່ເກີນໄປ — ກະລຸນາເລືອກສຽງສັ້ນໆ ຂະໜາດບໍ່ເກີນ 500KB (ສອງສາມວິນາທີກໍພຽງພໍ).',
     order_alert_sound_pending_label:'ໄຟລ໌ທີ່ລໍຖ້າບັນທຶກ:', order_alert_sound_preview_btn:'▶ ທົດລອງຟັງ',
     order_alert_sound_save_btn:'ບັນທຶກສຽງ', order_alert_sound_cancel_btn:'ຍົກເລີກ',
+    order_alert_sound_saving_label:'ກຳລັງບັນທຶກ…', order_alert_sound_sync_error:'ບໍ່ສາມາດຊິງສຽງແຈ້ງເຕືອນໄດ້ — ສະແດງສຽງລ້າສຸດທີ່ຮູ້ຈັກຢູ່ອຸປະກອນນີ້.',
     search_placeholder:'ຄົ້ນຫາເມນູ…',
     currency_label:'ສະກຸນເງິນ',
     current_order:'ອໍເດີປັດຈຸບັນ',
@@ -4206,11 +4208,12 @@ var TRANSLATIONS = {
     order_alert_queue_hint:'+{n} ออเดอร์เพิ่มเติมรอคิวอยู่',
     order_alert_sound_on_btn:'เปิดเสียงแจ้งเตือน', order_alert_sound_off_btn:'ปิดเสียงแจ้งเตือน',
     order_alert_sound_upload_btn:'🎵 อัปโหลดเสียง', order_alert_sound_test_btn:'▶ ทดสอบ',
-    order_alert_sound_reset_btn:'ใช้เสียงเริ่มต้น', order_alert_sound_custom_label:'กำลังใช้เสียงที่อัปโหลดเอง',
+    order_alert_sound_reset_btn:'ใช้เสียงเริ่มต้น', order_alert_sound_custom_label:'กำลังใช้เสียงที่อัปโหลดเอง (ใช้ร่วมกันทุกอุปกรณ์)',
     order_alert_sound_invalid_type:'กรุณาเลือกไฟล์เสียง (MP3, WAV และอื่นๆ)',
     order_alert_sound_too_large:'ไฟล์นี้ใหญ่เกินไป — กรุณาเลือกเสียงสั้นๆ ขนาดไม่เกิน 500KB (สองสามวินาทีก็เพียงพอ)',
     order_alert_sound_pending_label:'ไฟล์ที่รอบันทึก:', order_alert_sound_preview_btn:'▶ ทดลองฟัง',
     order_alert_sound_save_btn:'บันทึกเสียง', order_alert_sound_cancel_btn:'ยกเลิก',
+    order_alert_sound_saving_label:'กำลังบันทึก…', order_alert_sound_sync_error:'ไม่สามารถซิงค์เสียงแจ้งเตือนได้ — แสดงเสียงล่าสุดที่ทราบบนอุปกรณ์นี้',
     search_placeholder:'ค้นหาเมนู…',
     currency_label:'สกุลเงิน',
     current_order:'ออเดอร์ปัจจุบัน',
@@ -4469,26 +4472,25 @@ function isOrderAlertSoundOn(){
 function setOrderAlertSoundOn(on){
   try { window.localStorage.setItem(ORDER_ALERT_SOUND_KEY, on ? '1' : '0'); } catch(e){}
 }
-/* Optional custom alert sound — also per-device (localStorage), same
-   reasoning as above: one register's staff may want their own upload,
-   another may be happy with the default chime. Stored as a data: URL, not
-   in Firestore, both because it's device-specific and because it would
-   have nowhere good to live in `pos_settings` without risking that
-   document's own size. Capped well under typical localStorage quotas
-   (5-10MB/origin) so one long/high-bitrate upload can't crowd out the
-   rest of this app's local data (the location assignment, the PIN lock
-   state) on that device. */
-var ORDER_ALERT_CUSTOM_SOUND_KEY = 'pos_order_alert_custom_sound';
-var ORDER_ALERT_CUSTOM_SOUND_MAX_BYTES = 500000; // ~500KB — plenty for a short clip
+/* Optional custom alert sound — UNLIKE the mute toggle above, this IS
+   synced shop-wide via Firestore (pos_alert_sound/main, one small
+   document holding just {dataUrl}), so uploading a sound on one device
+   plays on every device at that location within a second or two, the
+   same way a menu or settings change does. It lives in its own
+   collection rather than embedded in pos_settings for the same reason
+   photos do (see setupDataListeners) — a ~500KB audio clip could
+   otherwise eat most of pos_settings' own 1 MiB Firestore document
+   budget. state.orderAlertCustomSound is kept up to date by that
+   collection's onSnapshot listener; getOrderAlertCustomSound() just
+   reads the in-memory copy, while setOrderAlertCustomSound() writes
+   through to Firestore and returns a Promise (the listener then updates
+   state.orderAlertCustomSound itself once the write round-trips back). */
+var ORDER_ALERT_CUSTOM_SOUND_MAX_BYTES = 500000; // ~500KB — plenty for a short clip, keeps the Firestore doc well under its 1 MiB limit
 function getOrderAlertCustomSound(){
-  try { return window.localStorage.getItem(ORDER_ALERT_CUSTOM_SOUND_KEY) || null; } catch(e){ return null; }
+  return state.orderAlertCustomSound || null;
 }
 function setOrderAlertCustomSound(dataUrl){
-  try {
-    if(dataUrl) window.localStorage.setItem(ORDER_ALERT_CUSTOM_SOUND_KEY, dataUrl);
-    else window.localStorage.removeItem(ORDER_ALERT_CUSTOM_SOUND_KEY);
-    return true;
-  } catch(e){ return false; } // e.g. quota exceeded — caller shows a warning
+  return db.collection('pos_alert_sound').doc('main').set({dataUrl: dataUrl || null});
 }
 /* Location display names ("Donkoi", "Location 2") are editable at
    runtime (Settings -> Rename Locations, master-admin-only), which means
@@ -4622,6 +4624,9 @@ var state = {
   testPrintMode:false,
   receiptIsFreshCheckout:false, // true only right after a normal Order-tab checkout — see scheduleReceiptAutoClose()
   orderAlertSoundDraft:null, // {name, dataUrl} of a freshly-picked-but-not-yet-saved alert sound — see buildOrderAlertSoundControls()
+  orderAlertCustomSound:null, // synced shop-wide from pos_alert_sound/main — see getOrderAlertCustomSound()
+  orderAlertSoundSaving:false, // true while a Save/reset is actually round-tripping to Firestore
+  alertSoundSyncError:false,
   receiptPreview:null,
   refundEvidence:null, // {orderId, photo, reason} — set while capturing evidence and through the approval step
   trainingMode:false,
@@ -4806,6 +4811,16 @@ function handleIncomingOrdersSyncError(label){
   return function(err){
     console.error('Incoming orders sync error ('+label+')', err);
     state.incomingOrdersSyncError = true;
+    render();
+  };
+}
+/* Same idea for pos_alert_sound — a missing rule or transient error here
+   must never block the core ordering app; the alert just plays the
+   default chime until this resolves. */
+function handleAlertSoundSyncError(label){
+  return function(err){
+    console.error('Alert sound sync error ('+label+')', err);
+    state.alertSoundSyncError = true;
     render();
   };
 }
@@ -5130,6 +5145,17 @@ function setupDataListeners(){
     applyPhotoMap();
     render();
   }, handlePhotosSyncError('photos')));
+
+  /* Custom new-order alert sound (shop-wide, NOT per-device — see
+     getOrderAlertCustomSound above for why this lives in its own
+     collection). Missing/erroring here must never block the core app
+     from loading, same as photos — worst case, the alert just falls back
+     to the default chime until this resolves. */
+  activeDataUnsubs.push(db.collection('pos_alert_sound').doc('main').onSnapshot(function(doc){
+    state.orderAlertCustomSound = (doc.exists && doc.data().dataUrl) || null;
+    state.alertSoundSyncError = false;
+    render();
+  }, handleAlertSoundSyncError('alert-sound')));
 
   activeDataUnsubs.push(db.collection('pos_toppings').doc('main').onSnapshot(function(doc){
     if(doc.exists && doc.data().items){
@@ -6485,27 +6511,31 @@ function buildIncomingOrdersTab(){
 function buildOrderAlertSoundControls(){
   var hasCustomSound = !!getOrderAlertCustomSound();
   var draft = state.orderAlertSoundDraft;
+  var saving = state.orderAlertSoundSaving;
   var uploadRow = '' +
     '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;">' +
       '<label class="btn btn-outline btn-small" style="white-space:nowrap;">'+tr('order_alert_sound_upload_btn')+'<input type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.opus,.wma" style="display:none" onchange="POS.handleOrderAlertSoundUpload(this)"/></label>' +
       '<button class="btn btn-ghost btn-small" style="white-space:nowrap;" onclick="POS.testOrderAlertSound()">'+tr('order_alert_sound_test_btn')+'</button>' +
       (hasCustomSound ? ('' +
         '<span class="hint" style="margin:0;">'+tr('order_alert_sound_custom_label')+'</span>' +
-        '<button class="btn btn-ghost btn-small" style="white-space:nowrap;" onclick="POS.resetOrderAlertSound()">'+tr('order_alert_sound_reset_btn')+'</button>'
+        '<button class="btn btn-ghost btn-small" '+(saving?'disabled':'')+' style="white-space:nowrap;" onclick="POS.resetOrderAlertSound()">'+tr('order_alert_sound_reset_btn')+'</button>'
       ) : '') +
-    '</div>';
+    '</div>' +
+    (state.alertSoundSyncError ? '<p class="hint" style="color:var(--danger);margin-top:4px;">'+tr('order_alert_sound_sync_error')+'</p>' : '');
   /* A freshly-picked file sits here as a draft — audible via Preview,
-     but NOT yet written over the working sound — until Save is tapped.
-     This is the confirm step: uploading alone no longer replaces
+     but NOT yet written over the shared working sound — until Save is
+     tapped. This is the confirm step: uploading alone no longer replaces
      anything, so there's no way to overwrite a sound that already works
-     with a bad pick by accident. Cancel discards the pick entirely and
-     leaves whatever was already saved untouched. */
+     (for every device at this shop, since Save syncs shop-wide via
+     Firestore — see getOrderAlertCustomSound) with a bad pick by
+     accident. Cancel discards the pick entirely and leaves whatever was
+     already saved untouched. */
   var draftRow = draft ? ('' +
     '<div class="order-alert-sound-draft-row" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;padding:8px 10px;background:var(--cream-dark,#F3E9DD);border-radius:10px;">' +
       '<span style="font-size:12px;font-weight:700;">'+tr('order_alert_sound_pending_label')+' '+escapeHtml(draft.name)+'</span>' +
-      '<button class="btn btn-ghost btn-small" style="white-space:nowrap;" onclick="POS.previewOrderAlertSoundDraft()">'+tr('order_alert_sound_preview_btn')+'</button>' +
-      '<button class="btn btn-primary btn-small" style="width:auto;white-space:nowrap;" onclick="POS.saveOrderAlertSoundDraft()">'+tr('order_alert_sound_save_btn')+'</button>' +
-      '<button class="btn btn-ghost btn-small" style="white-space:nowrap;" onclick="POS.cancelOrderAlertSoundDraft()">'+tr('order_alert_sound_cancel_btn')+'</button>' +
+      '<button class="btn btn-ghost btn-small" '+(saving?'disabled':'')+' style="white-space:nowrap;" onclick="POS.previewOrderAlertSoundDraft()">'+tr('order_alert_sound_preview_btn')+'</button>' +
+      '<button class="btn btn-primary btn-small" '+(saving?'disabled':'')+' style="width:auto;white-space:nowrap;" onclick="POS.saveOrderAlertSoundDraft()">'+(saving?tr('order_alert_sound_saving_label'):tr('order_alert_sound_save_btn'))+'</button>' +
+      '<button class="btn btn-ghost btn-small" '+(saving?'disabled':'')+' style="white-space:nowrap;" onclick="POS.cancelOrderAlertSoundDraft()">'+tr('order_alert_sound_cancel_btn')+'</button>' +
     '</div>'
   ) : '';
   return uploadRow + draftRow;
@@ -10201,21 +10231,38 @@ var POS = {
   },
   saveOrderAlertSoundDraft: function(){
     var draft = state.orderAlertSoundDraft;
-    if(!draft) return;
-    if(!setOrderAlertCustomSound(draft.dataUrl)){
-      window.alert(tr('order_alert_sound_too_large'));
-      return;
-    }
-    state.orderAlertSoundDraft = null;
+    if(!draft || state.orderAlertSoundSaving) return;
+    state.orderAlertSoundSaving = true;
     render();
+    setOrderAlertCustomSound(draft.dataUrl).then(function(){
+      // The pos_alert_sound listener will update state.orderAlertCustomSound
+      // itself once this write round-trips back — just clear the draft and
+      // the "saving" flag here so the draft row disappears.
+      state.orderAlertSoundDraft = null;
+      state.orderAlertSoundSaving = false;
+      render();
+    }).catch(function(e){
+      state.orderAlertSoundSaving = false;
+      render();
+      window.alert('Could not save the alert sound — check your internet connection and try again.\n('+e.message+')');
+    });
   },
   cancelOrderAlertSoundDraft: function(){
     state.orderAlertSoundDraft = null;
     render();
   },
   resetOrderAlertSound: function(){
-    setOrderAlertCustomSound(null);
+    if(state.orderAlertSoundSaving) return;
+    state.orderAlertSoundSaving = true;
     render();
+    setOrderAlertCustomSound(null).then(function(){
+      state.orderAlertSoundSaving = false;
+      render();
+    }).catch(function(e){
+      state.orderAlertSoundSaving = false;
+      render();
+      window.alert('Could not reset the alert sound — check your internet connection and try again.\n('+e.message+')');
+    });
   },
   testOrderAlertSound: function(){
     playOrderAlertSound();
