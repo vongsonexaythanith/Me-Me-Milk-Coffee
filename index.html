@@ -682,7 +682,18 @@ html, body{touch-action:pan-x pan-y;}
   position:fixed;top:14px;right:14px;z-index:200;display:flex;flex-direction:column;
   gap:20px;max-width:min(640px, calc(100vw - 28px));pointer-events:none;
 }
+.order-alert-stack-inner{position:relative;}
+.order-alert-peek{
+  position:absolute;inset:0;pointer-events:none;
+  background:var(--paper,#fff);border:3px solid var(--taro,#8B6F9E);
+  border-left:10px solid var(--coral,#DC5758);border-radius:24px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.12);
+  transform:translate(calc(var(--peek-i) * 7px), calc(var(--peek-i) * 9px)) scale(calc(1 - var(--peek-i) * 0.035));
+  opacity:calc(1 - var(--peek-i) * 0.32);
+  z-index:0;
+}
 .order-alert-toast{
+  position:relative;z-index:1;
   pointer-events:auto;background:var(--paper,#fff);border:3px solid var(--taro,#8B6F9E);
   border-left:10px solid var(--coral,#DC5758);border-radius:24px;padding:24px 28px;
   box-shadow:0 16px 48px rgba(0,0,0,0.18);display:flex;gap:20px;align-items:flex-start;
@@ -693,6 +704,13 @@ html, body{touch-action:pan-x pan-y;}
 .order-alert-body{flex:1;min-width:0;}
 .order-alert-title{font-weight:800;font-size:26px;color:var(--espresso,#4A2E1A);}
 .order-alert-sub{font-size:23px;color:var(--espresso-soft);margin-top:4px;}
+.order-alert-queue-hint{font-size:16px;font-weight:700;color:var(--taro,#8B6F9E);margin-top:8px;}
+.order-alert-count-badge{
+  position:absolute;top:-14px;left:-14px;min-width:32px;height:32px;padding:0 9px;
+  border-radius:999px;background:var(--coral,#DC5758);color:#fff;font-size:15px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,0.25);
+  z-index:2;
+}
 .order-alert-close{flex:none;background:none;border:none;font-size:28px;color:var(--espresso-soft);cursor:pointer;padding:4px 8px;line-height:1;}
 .order-alert-close:hover{color:var(--espresso,#4A2E1A);}
 @keyframes order-alert-in{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:translateX(0);}}
@@ -3685,6 +3703,7 @@ var TRANSLATIONS = {
     incoming_customer_requested_label:'Customer requested:',
     incoming_reject_confirm:'Reject this order? The customer will need to re-submit or order at the counter instead.',
     order_alert_new_order:'New order!', order_alert_title_flash:'New order!',
+    order_alert_queue_hint:'+{n} more order(s) waiting',
     order_alert_sound_on_btn:'Alerts on', order_alert_sound_off_btn:'Alerts muted',
     order_alert_sound_upload_btn:'🎵 Upload sound', order_alert_sound_test_btn:'▶ Test',
     order_alert_sound_reset_btn:'Use default chime', order_alert_sound_custom_label:'Custom sound active',
@@ -3897,6 +3916,7 @@ var TRANSLATIONS = {
     incoming_customer_requested_label:'ລູກຄ້າຂໍຊຳລະດ້ວຍ:',
     incoming_reject_confirm:'ປະຕິເສດອໍເດີນີ້ບໍ? ລູກຄ້າຈະຕ້ອງສົ່ງອໍເດີໃໝ່ ຫຼື ສັ່ງທີ່ເຄົາເຕີແທນ.',
     order_alert_new_order:'ອໍເດີໃໝ່!', order_alert_title_flash:'ອໍເດີໃໝ່!',
+    order_alert_queue_hint:'+{n} ອໍເດີເພີ່ມເຕີມລໍຖ້າຢູ່',
     order_alert_sound_on_btn:'ເປີດສຽງແຈ້ງເຕືອນ', order_alert_sound_off_btn:'ປິດສຽງແຈ້ງເຕືອນ',
     order_alert_sound_upload_btn:'🎵 ອັບໂຫລດສຽງ', order_alert_sound_test_btn:'▶ ທົດລອງ',
     order_alert_sound_reset_btn:'ໃຊ້ສຽງເລີ່ມຕົ້ນ', order_alert_sound_custom_label:'ກຳລັງໃຊ້ສຽງທີ່ອັບໂຫລດເອງ',
@@ -4109,6 +4129,7 @@ var TRANSLATIONS = {
     incoming_customer_requested_label:'ลูกค้าขอชำระด้วย:',
     incoming_reject_confirm:'ปฏิเสธออเดอร์นี้หรือไม่? ลูกค้าจะต้องส่งออเดอร์ใหม่ หรือสั่งที่เคาน์เตอร์แทน',
     order_alert_new_order:'ออเดอร์ใหม่!', order_alert_title_flash:'ออเดอร์ใหม่!',
+    order_alert_queue_hint:'+{n} ออเดอร์เพิ่มเติมรอคิวอยู่',
     order_alert_sound_on_btn:'เปิดเสียงแจ้งเตือน', order_alert_sound_off_btn:'ปิดเสียงแจ้งเตือน',
     order_alert_sound_upload_btn:'🎵 อัปโหลดเสียง', order_alert_sound_test_btn:'▶ ทดสอบ',
     order_alert_sound_reset_btn:'ใช้เสียงเริ่มต้น', order_alert_sound_custom_label:'กำลังใช้เสียงที่อัปโหลดเอง',
@@ -4901,10 +4922,12 @@ function orderAlertTitle(o){
 }
 function pushOrderAlert(o){
   var alert = { id:'alert_'+o.id+'_'+Date.now(), orderId:o.id, title:orderAlertTitle(o), itemCount:(o.items||[]).length, ts:Date.now() };
+  // No cap here — these queue up (oldest first) behind a single visible
+  // card instead of stacking vertically down the screen, so a burst of
+  // orders stays reviewable one at a time rather than getting silently
+  // dropped. See buildOrderAlertStack() for how only the front one and a
+  // "peek" of the rest actually render.
   state.orderAlerts.push(alert);
-  // Cap how many toasts stack up at once so a burst of orders can't cover
-  // the whole screen — oldest drops off first, newest always visible.
-  if(state.orderAlerts.length > 4) state.orderAlerts.shift();
   playOrderAlertSound();
   flashDocumentTitleForNewOrder();
   // Deliberately no auto-dismiss timer — this toast is meant to stay put
@@ -5788,19 +5811,37 @@ function positionOrderAlertStack(){
   if(banner) clearBelow = Math.max(clearBelow, banner.getBoundingClientRect().bottom + 10);
   stack.style.top = clearBelow + 'px';
 }
+/* Multiple pending alerts show as one card (the oldest — first come, first
+   reviewed) with a couple of faint "peek" cards fanned out behind it and a
+   count badge, like a stack of order tickets — not a full vertical list of
+   every toast, which used to push down the screen as orders piled up.
+   Handling the front card (tap to review, or ✕ to dismiss) reveals the
+   next one on the very next render — nothing is ever silently dropped,
+   they just queue up one at a time. */
 function buildOrderAlertStack(){
-  var toasts = state.orderAlerts.map(function(a){
-    return '' +
-    '<div class="order-alert-toast" onclick="POS.viewOrderAlert(\''+a.id+'\')">' +
+  var alerts = state.orderAlerts;
+  if(!alerts.length) return '';
+  var front = alerts[0];
+  var behindCount = alerts.length - 1;
+  var peekLayers = '';
+  var peekCount = Math.min(behindCount, 2); // purely decorative — capped at 2 regardless of real queue length
+  for(var i=peekCount; i>=1; i--){
+    peekLayers += '<div class="order-alert-peek" style="--peek-i:'+i+'"></div>';
+  }
+  var countBadge = behindCount>0 ? ('<div class="order-alert-count-badge">+'+behindCount+'</div>') : '';
+  var queueHint = behindCount>0 ? ('<div class="order-alert-queue-hint">'+tr('order_alert_queue_hint').replace('{n}', behindCount)+'</div>') : '';
+  var frontCard = '' +
+    '<div class="order-alert-toast" onclick="POS.viewOrderAlert(\''+front.id+'\')">' +
       '<div class="order-alert-icon">🔔</div>' +
       '<div class="order-alert-body">' +
         '<div class="order-alert-title">'+tr('order_alert_new_order')+'</div>' +
-        '<div class="order-alert-sub">'+escapeHtml(a.title)+' · '+a.itemCount+' '+tr('items_suffix')+'</div>' +
+        '<div class="order-alert-sub">'+escapeHtml(front.title)+' · '+front.itemCount+' '+tr('items_suffix')+'</div>' +
+        queueHint +
       '</div>' +
-      '<button class="order-alert-close" onclick="event.stopPropagation();POS.dismissOrderAlert(\''+a.id+'\')">✕</button>' +
+      countBadge +
+      '<button class="order-alert-close" onclick="event.stopPropagation();POS.dismissOrderAlert(\''+front.id+'\')">✕</button>' +
     '</div>';
-  }).join('');
-  return '<div class="order-alert-stack">'+toasts+'</div>';
+  return '<div class="order-alert-stack"><div class="order-alert-stack-inner">'+peekLayers+frontCard+'</div></div>';
 }
 function buildRemoteViewBanner(){
   var loc = LOCATIONS[state.remoteViewLocation];
