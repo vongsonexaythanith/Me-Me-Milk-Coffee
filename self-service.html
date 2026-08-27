@@ -856,8 +856,35 @@ var APP = {
   },
   goToCart: function(){ state.view='cart'; state.submitError=null; render(); window.scrollTo({top:0}); },
   backToMenu: function(){ state.view='items'; render(); window.scrollTo({top:0}); },
-  setCustomerName: function(v){ state.customerName=v; render(); },
-  setCustomerNote: function(v){ state.customerNote=v; render(); },
+  /* Real root cause of the laggy typing AND the on-screen keyboard
+     silently flipping from numeric back to alphabetic after one digit:
+     render() used to fire on every single keystroke here, and doRender()
+     always does a full innerHTML rebuild of the whole page — which
+     destroys and recreates this very input's DOM node every time. Focus
+     and cursor position get restored right after (see doRender below),
+     but most phone keyboards still reset their sublayout when the
+     element they're attached to gets swapped out from under them, even
+     for a split second — exactly what "press shift for numbers, one
+     digit, and it's back to letters" is.
+     Nothing on screen actually depends on the live text of these two
+     fields except: whether the Send Order button is enabled (which only
+     cares whether the name is empty or not, not its exact contents), and
+     whether the "please enter a name" error banner should still be
+     showing. So state is always kept in sync on every keystroke (so
+     submission and validation are never stale), but a real re-render
+     only happens when one of those two things could actually change —
+     i.e. essentially never mid-word, only right as you start or clear
+     the field. The table/note field never gates anything, so it never
+     needs to re-render at all. */
+  setCustomerName: function(v){
+    var wasFilled = (state.customerName||'').trim().length>0;
+    state.customerName = v;
+    var isFilled = v.trim().length>0;
+    var hadError = !!state.submitError;
+    if(isFilled && state.submitError) state.submitError = null;
+    if(isFilled !== wasFilled || (hadError && isFilled)) render();
+  },
+  setCustomerNote: function(v){ state.customerNote=v; },
   setPaymentChoice: function(v){ state.paymentChoice=v; state.submitError=null; render(); },
   submitOrder: function(){
     if(state.submitting || state.cart.length===0) return;
