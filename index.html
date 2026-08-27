@@ -632,6 +632,17 @@ html, body{touch-action:pan-x pan-y;}
 .receipt-copy-label{text-align:center;font-weight:800;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--espresso-soft);margin-bottom:8px;}
 
 @media print{
+  /* This was the actual bug behind "only one copy prints": .print-only
+     elements (the kitchen copy, and the customer-copy label) are hidden
+     with display:none above so the on-screen preview modal only ever
+     shows one copy — but nothing anywhere ever set them visible again
+     for the print itself, print media included. So even the OS print
+     dialog (window.print()) was silently printing only the customer
+     copy this whole time, the same bug as the two direct-printer text
+     paths fixed earlier, just one layer up (CSS instead of string
+     concatenation). This is what actually un-hides the kitchen copy
+     when a real browser print happens. */
+  .print-only{display:block !important;}
   @page{ margin:6mm; }
   html, body{ margin:0 !important; padding:0 !important; height:auto !important; background:#fff !important; }
   #app > .pos-header, #app > .pos-main{ display:none !important; }
@@ -3522,6 +3533,19 @@ async function buildEscPosReceiptImage(order){
     container.style.fontFamily = "'Noto Sans Lao','Inter',sans-serif";
   }
   container.innerHTML = buildReceiptCopiesHtml(order, false);
+  /* buildReceiptCopiesHtml marks the kitchen copy (and the customer-copy
+     label) with the .print-only class, which is display:none by default
+     so the on-screen receipt preview only ever shows one copy — the
+     @media print rule elsewhere un-hides it for a real browser print,
+     but html2canvas does NOT evaluate @media print at all, it just
+     rasterizes this container's current on-screen computed styles. Left
+     alone, that meant the kitchen copy silently never made it into the
+     printed image no matter what — this container only ever exists to
+     be screenshotted (it's positioned off-screen, never actually shown
+     to anyone), so there's no reason to keep it hidden here at all. */
+  Array.prototype.forEach.call(container.querySelectorAll('.print-only'), function(el){
+    el.style.display = 'block';
+  });
   document.body.appendChild(container);
   try {
     /* html2canvas has long-standing, widely-reported bugs with custom/
@@ -3625,6 +3649,27 @@ function sendToRawBT(order){
    Printer settings, and falls back to the print dialog automatically if
    a direct print attempt fails, so a checkout is never blocked by a
    printer issue. */
+/* Auto-close the receipt after a normal checkout, so staff aren't
+   required to tap "New Order" every single time just to get back to
+   ordering — see completeOrder() and closeReceipt() below. Only ever
+   scheduled for a fresh checkout (never for a reprint from History, a
+   Settings test print, or an Incoming Order approval), and only ever one
+   pending timer at a time: cancelReceiptAutoClose() is called before
+   scheduling a new one and from closeReceipt() itself, so an early
+   manual close can't be followed by a stale auto-close firing later on a
+   screen that's already moved on to something else. */
+var receiptAutoCloseTimer = null;
+var RECEIPT_AUTO_CLOSE_MS = 2000;
+function scheduleReceiptAutoClose(){
+  cancelReceiptAutoClose();
+  receiptAutoCloseTimer = setTimeout(function(){
+    receiptAutoCloseTimer = null;
+    POS.closeReceipt();
+  }, RECEIPT_AUTO_CLOSE_MS);
+}
+function cancelReceiptAutoClose(){
+  if(receiptAutoCloseTimer){ clearTimeout(receiptAutoCloseTimer); receiptAutoCloseTimer = null; }
+}
 function triggerPrint(order){
   var mode = state.settings && state.settings.printerConnectionMode;
   if(mode==='epson_epos'){
@@ -3736,6 +3781,7 @@ var TRANSLATIONS = {
     remove:'Remove',
     receipt_payment:'Payment', receipt_change:'Change', paid_in:'Paid in',
     order_number:'Order #', new_order:'New Order', print_receipt:'Print Receipt',
+    receipt_auto_close_hint:'Closing automatically — tap New Order to skip the wait.',
     today:'Today', last_7_days:'Last 7 Days', all_time:'All Time', custom_range:'📅 Custom',
     export_csv:'Export CSV',
     revenue_by_payment:'Revenue by Payment Method', revenue_by_payment_hint:'Daily revenue in the currency it was actually paid in — never converted.',
@@ -3949,6 +3995,7 @@ var TRANSLATIONS = {
     remove:'ລຶບ',
     receipt_payment:'ການຊຳລະ', receipt_change:'ເງິນທອນ', paid_in:'ຈ່າຍເປັນ',
     order_number:'ອໍເດີເລກທີ #', new_order:'ອໍເດີໃໝ່', print_receipt:'ພິມໃບບິນ',
+    receipt_auto_close_hint:'ກຳລັງປິດອັດຕະໂນມັດ — ກົດ "ອໍເດີໃໝ່" ເພື່ອຂ້າມການລໍຖ້າ.',
     today:'ມື້ນີ້', last_7_days:'7 ວັນຫຼ້າສຸດ', all_time:'ທັງໝົດ', custom_range:'📅 ກຳນົດເອງ',
     export_csv:'ສົ່ງອອກ CSV',
     revenue_by_payment:'ລາຍຮັບຕາມວິທີຊຳລະ', revenue_by_payment_hint:'ລາຍຮັບປະຈຳວັນຕາມສະກຸນເງິນທີ່ຈ່າຍຈິງ — ບໍ່ປ່ຽນສະກຸນເງິນ.',
@@ -4162,6 +4209,7 @@ var TRANSLATIONS = {
     remove:'ลบ',
     receipt_payment:'การชำระเงิน', receipt_change:'เงินทอน', paid_in:'ชำระเป็น',
     order_number:'ออเดอร์ #', new_order:'ออเดอร์ใหม่', print_receipt:'พิมพ์ใบเสร็จ',
+    receipt_auto_close_hint:'กำลังปิดอัตโนมัติ — กด "ออเดอร์ใหม่" เพื่อข้ามการรอ',
     today:'วันนี้', last_7_days:'7 วันล่าสุด', all_time:'ทั้งหมด', custom_range:'📅 กำหนดเอง',
     export_csv:'ส่งออก CSV',
     revenue_by_payment:'รายได้ตามวิธีชำระเงิน', revenue_by_payment_hint:'รายได้รายวันในสกุลเงินที่ชำระจริง — ไม่มีการแปลงสกุลเงิน',
@@ -4543,6 +4591,7 @@ var state = {
   splitTransfer:'',
   receiptOrder:null,
   testPrintMode:false,
+  receiptIsFreshCheckout:false, // true only right after a normal Order-tab checkout — see scheduleReceiptAutoClose()
   receiptPreview:null,
   refundEvidence:null, // {orderId, photo, reason} — set while capturing evidence and through the approval step
   trainingMode:false,
@@ -6411,7 +6460,7 @@ function buildIncomingOrdersTab(){
   var hasCustomSound = !!getOrderAlertCustomSound();
   var soundControlsHtml = '' +
     '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;">' +
-      '<label class="btn btn-outline btn-small" style="white-space:nowrap;">'+tr('order_alert_sound_upload_btn')+'<input type="file" accept="audio/*" style="display:none" onchange="POS.handleOrderAlertSoundUpload(this)"/></label>' +
+      '<label class="btn btn-outline btn-small" style="white-space:nowrap;">'+tr('order_alert_sound_upload_btn')+'<input type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.opus,.wma" style="display:none" onchange="POS.handleOrderAlertSoundUpload(this)"/></label>' +
       '<button class="btn btn-ghost btn-small" style="white-space:nowrap;" onclick="POS.testOrderAlertSound()">'+tr('order_alert_sound_test_btn')+'</button>' +
       (hasCustomSound ? ('' +
         '<span class="hint" style="margin:0;">'+tr('order_alert_sound_custom_label')+'</span>' +
@@ -6896,6 +6945,7 @@ function buildReceiptModal(){
         '<button class="btn btn-ghost" onclick="POS.closeReceipt()">'+(state.testPrintMode ? tr('close_recipe') : tr('new_order'))+'</button>' +
         '<button class="btn btn-primary" onclick="POS.printCurrentReceipt()">'+tr('print_receipt')+'</button>' +
       '</div>' +
+      (state.receiptIsFreshCheckout ? '<p class="hint" style="text-align:center;margin-top:8px;">'+tr('receipt_auto_close_hint')+'</p>' : '') +
     '</div>' +
   '</div>';
 }
@@ -10006,6 +10056,7 @@ var POS = {
     render();
     recordCompletedOrder(draft).then(function(order){
       state.receiptOrder = order;
+      state.receiptIsFreshCheckout = true;
       state.receiptPreview = null;
       state.cart = [];
       state.discount = 0;
@@ -10017,6 +10068,7 @@ var POS = {
       state.mobileCartOpen = false;
       doRender();
       triggerPrint(order);
+      scheduleReceiptAutoClose();
     }).catch(function(e){
       state.completingOrder = false;
       render();
@@ -10042,7 +10094,19 @@ var POS = {
     var file = inputEl && inputEl.files && inputEl.files[0];
     inputEl.value = ''; // clear so picking the same file again still fires onchange
     if(!file) return;
-    if(!/^audio\//.test(file.type)){
+    /* file.type alone isn't reliable enough to gate on: plenty of real
+       browser/OS combinations (this is a known issue with .m4a in
+       particular, and with any file whose OS-level MIME mapping is
+       missing or unusual) hand back an empty string or a non-"audio/"
+       type for a perfectly valid audio file, which would otherwise
+       reject it here even after the browser's own file picker let
+       someone select it. Falling back to the file extension for those
+       known formats keeps this from being stricter than the file picker
+       itself — genuinely wrong file types (a .txt or .png) still get
+       caught by neither check. */
+    var looksLikeAudioByType = /^audio\//.test(file.type);
+    var looksLikeAudioByExt = /\.(mp3|wav|m4a|aac|ogg|oga|flac|opus|wma|weba)$/i.test(file.name||'');
+    if(!looksLikeAudioByType && !looksLikeAudioByExt){
       window.alert(tr('order_alert_sound_invalid_type'));
       return;
     }
@@ -10147,7 +10211,26 @@ var POS = {
       window.alert('Could not reject this order: '+e.message);
     });
   },
-  closeReceipt: function(){ state.receiptOrder=null; state.testPrintMode=false; render(); },
+  closeReceipt: function(){
+    cancelReceiptAutoClose();
+    var wasFreshCheckout = state.receiptIsFreshCheckout;
+    state.receiptOrder = null;
+    state.testPrintMode = false;
+    state.receiptIsFreshCheckout = false;
+    if(wasFreshCheckout){
+      /* Only for a just-completed sale (never a reprint from History, a
+         Settings test print, or an Incoming Order approval) — whether
+         this fires automatically or staff tapped "New Order" early,
+         landing back on the drink categories grid is what "ready for
+         the next customer" actually looks like, rather than staying on
+         whatever category/search the previous order happened to leave
+         behind. */
+      state.orderView = 'categories';
+      state.activeCategory = 'All';
+      state.search = '';
+    }
+    render();
+  },
   printCurrentReceipt: function(){ if(state.receiptOrder) triggerPrint(state.receiptOrder); },
   /* Builds a synthetic sample order (no real order needed) so staff can
      check a receipt actually fits the selected paper width before
