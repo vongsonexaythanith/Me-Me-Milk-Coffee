@@ -3471,6 +3471,37 @@ function bytesToBase64(bytes){
   for(var i=0;i<bytes.length;i++) binary += String.fromCharCode(bytes[i]);
   return btoa(binary);
 }
+/* Converts one already-rendered canvas into ESC/POS raster print commands
+   (GS v 0), split into row chunks since sending one huge raster command
+   can overrun some printers'/RawBT's buffer. Pulled out of
+   buildEscPosReceiptImage below so it can be called once per copy — see
+   that function's own comment for why that split matters. */
+function canvasToEscPosRasterBytes(canvas){
+  var w = canvas.width, h = canvas.height;
+  var ctx = canvas.getContext('2d');
+  var imgData = ctx.getImageData(0, 0, w, h).data;
+  var bytesPerRow = Math.ceil(w / 8);
+  var bytes = [];
+  var CHUNK_ROWS = 256;
+  for(var startRow=0; startRow<h; startRow+=CHUNK_ROWS){
+    var rows = Math.min(CHUNK_ROWS, h-startRow);
+    var rowBytes = new Array(bytesPerRow*rows).fill(0);
+    for(var y=0; y<rows; y++){
+      for(var x=0; x<w; x++){
+        var idx = ((startRow+y)*w + x) * 4;
+        var r=imgData[idx], g=imgData[idx+1], b=imgData[idx+2], a=imgData[idx+3];
+        var lum = a<128 ? 255 : (0.299*r + 0.587*g + 0.114*b);
+        if(lum < 200){
+          var byteIndex = y*bytesPerRow + (x>>3);
+          rowBytes[byteIndex] |= (1 << (7-(x&7)));
+        }
+      }
+    }
+    var header = [0x1D,0x76,0x30,0x00, bytesPerRow&0xFF,(bytesPerRow>>8)&0xFF, rows&0xFF,(rows>>8)&0xFF];
+    bytes = bytes.concat(header, rowBytes);
+  }
+  return bytes;
+}
 /* Renders the receipt as an actual image and prints it via ESC/POS
    raster commands (GS v 0), instead of sending text — this is how to
    get genuine visual parity with the on-screen receipt (fonts, bold,
@@ -3481,11 +3512,18 @@ function bytesToBase64(bytes){
    codepage at all — it's just "turn on these dots" — so this is
    actually more likely to work reliably than the text formatting
    commands that failed earlier, not less.
-   Captures the SAME markup the on-screen receipt uses (buildReceiptCopiesHtml)
-   via html2canvas, so what prints is a direct rendering of what's on screen,
-   not a re-implementation. 384/576 dots are the standard raster widths for
-   58mm/80mm thermal printers. Split into row chunks since sending one huge
-   raster command can overrun some printers'/RawBT's buffer. */
+   Captures the SAME markup the on-screen receipt uses
+   (buildReceiptContentHtml) via html2canvas, so what prints is a direct
+   rendering of what's on screen, not a re-implementation. 384/576 dots
+   are the standard raster widths for 58mm/80mm thermal printers.
+   Customer and kitchen copies are captured and rasterized as two
+   SEPARATE images, each ending in its own feed+cut command — not one
+   combined image with a single cut at the very end. That used to be the
+   bug here: both copies printed, but back-to-back with nothing but a
+   paper feed between them, because the cut command only ever ran once,
+   after the whole two-copy image. A printer can only cut where a cut
+   command tells it to, so "two copies, cut once at the end" meant one
+   long uncut strip. */
 async function buildEscPosReceiptImage(order){
   var paperWidthDots = (state.settings && state.settings.printerPaperWidth==='58mm') ? 384 : 576;
   /* The font size here must be picked in proportion to paperWidthDots to
@@ -3502,51 +3540,48 @@ async function buildEscPosReceiptImage(order){
      preview reproduces the same shape at print resolution. */
   var previewSpec = RECEIPT_PAPER_SIZES[(state.settings && state.settings.printerPaperWidth) || '80mm'] || RECEIPT_PAPER_SIZES['80mm'];
   var imageFontSize = Math.round(previewSpec.font * (paperWidthDots / previewSpec.width));
-  var container = document.createElement('div');
-  /* id="receipt-content" (not just a class) is required here: all the
+  /* Builds one full off-screen copy (customer or kitchen) as its OWN
+     container, rather than one container holding both — that's what
+     makes it possible to capture and cut each one independently below.
+     id="receipt-content" (not just a class) is required here: all the
      centering, logo circular-crop, and font-size rules in <style> are
-     scoped specifically to "#receipt-content .r-xxx" selectors. Without
-     this exact id, none of that styling applies at all — which is why
-     the logo and header text weren't centered before. Nothing else in
-     the app looks this id up via getElementById, so a second element
-     sharing it (this container, alongside the real visible receipt
-     modal when printing right after checkout) is safe — CSS id selectors
-     match every element with that id, not just one. */
-  container.id = 'receipt-content';
-  container.className = 'pos-print-capture';
-  container.style.position = 'fixed';
-  container.style.left = '-9999px';
-  container.style.top = '0';
-  container.style.width = paperWidthDots+'px';
-  container.style.background = '#ffffff';
-  container.style.boxSizing = 'border-box';
-  container.style.padding = '10px';
-  container.style.fontSize = imageFontSize+'px'; // bigger than the on-screen preview size — that was tuned for a small modal, not a full-width printout
-  /* This container is appended straight to document.body (see below),
-     outside #pos-root entirely — so it never inherits the app's own
-     "font-family:'Noto Sans Lao'" rule (#pos-root.lang-lo), which only
-     applies inside that tree. Set it explicitly here so a Lao-language
-     receipt actually uses the same embedded font as the rest of the app,
-     not just whatever generic font the browser falls back to for Lao
-     script. */
-  if(state.language==='lo'){
-    container.style.fontFamily = "'Noto Sans Lao','Inter',sans-serif";
+     scoped specifically to "#receipt-content .r-xxx" selectors. CSS id
+     selectors match EVERY element with that id, not just one, so both
+     copies' containers — and the real visible receipt modal, if one
+     happens to be open — can safely share it at the same time. */
+  function buildCopyContainer(labelKey){
+    var el = document.createElement('div');
+    el.id = 'receipt-content';
+    el.className = 'pos-print-capture';
+    el.style.position = 'fixed';
+    el.style.left = '-9999px';
+    el.style.top = '0';
+    el.style.width = paperWidthDots+'px';
+    el.style.background = '#ffffff';
+    el.style.boxSizing = 'border-box';
+    el.style.padding = '10px';
+    el.style.fontSize = imageFontSize+'px'; // bigger than the on-screen preview size — that was tuned for a small modal, not a full-width printout
+    /* Appended straight to document.body (see below), outside #pos-root
+       entirely — so it never inherits the app's own
+       "font-family:'Noto Sans Lao'" rule (#pos-root.lang-lo), which only
+       applies inside that tree. Set it explicitly here so a Lao-language
+       receipt actually uses the same embedded font as the rest of the
+       app, not just whatever generic font the browser falls back to for
+       Lao script. */
+    if(state.language==='lo'){
+      el.style.fontFamily = "'Noto Sans Lao','Inter',sans-serif";
+    }
+    /* This container only ever exists to be screenshotted (it's
+       positioned off-screen, never actually shown to anyone), so the
+       label is included plainly — no need for the .print-only /
+       @media print visibility dance the on-screen modal uses to keep
+       the kitchen copy hidden until a real print happens. */
+    el.innerHTML = '<div class="receipt-copy-label">'+tr(labelKey)+'</div>' + buildReceiptContentHtml(order, false);
+    document.body.appendChild(el);
+    return el;
   }
-  container.innerHTML = buildReceiptCopiesHtml(order, false);
-  /* buildReceiptCopiesHtml marks the kitchen copy (and the customer-copy
-     label) with the .print-only class, which is display:none by default
-     so the on-screen receipt preview only ever shows one copy — the
-     @media print rule elsewhere un-hides it for a real browser print,
-     but html2canvas does NOT evaluate @media print at all, it just
-     rasterizes this container's current on-screen computed styles. Left
-     alone, that meant the kitchen copy silently never made it into the
-     printed image no matter what — this container only ever exists to
-     be screenshotted (it's positioned off-screen, never actually shown
-     to anyone), so there's no reason to keep it hidden here at all. */
-  Array.prototype.forEach.call(container.querySelectorAll('.print-only'), function(el){
-    el.style.display = 'block';
-  });
-  document.body.appendChild(container);
+  var customerContainer = buildCopyContainer('customer_copy_label');
+  var kitchenContainer = buildCopyContainer('kitchen_copy_label');
   try {
     /* html2canvas has long-standing, widely-reported bugs with custom/
        embedded fonts (including this exact "loaded but rendered with the
@@ -3572,7 +3607,7 @@ async function buildEscPosReceiptImage(order){
        keeps firing regardless of visibility, so this can't get stuck. */
     await new Promise(function(r){ setTimeout(r, 50); });
     await new Promise(function(r){ setTimeout(r, 150); });
-    var canvas = await html2canvas(container, {
+    var html2canvasOpts = {
       backgroundColor: '#ffffff',
       width: paperWidthDots,
       windowWidth: paperWidthDots,
@@ -3580,37 +3615,25 @@ async function buildEscPosReceiptImage(order){
       useCORS: true,
       onclone: function(clonedDoc){
         if(state.language!=='lo') return;
-        var clonedEl = clonedDoc.getElementById('receipt-content');
-        if(clonedEl) clonedEl.style.fontFamily = "'Noto Sans Lao','Inter',sans-serif";
+        /* Both copy containers share id="receipt-content", and
+           getElementById only ever returns the first match — using
+           querySelectorAll here instead makes sure whichever copy is
+           being captured this call still gets the font-family fix,
+           regardless of which container that first match happens to be. */
+        var clonedEls = clonedDoc.querySelectorAll('#receipt-content');
+        Array.prototype.forEach.call(clonedEls, function(el){ el.style.fontFamily = "'Noto Sans Lao','Inter',sans-serif"; });
       }
-    });
-    var w = canvas.width, h = canvas.height;
-    var ctx = canvas.getContext('2d');
-    var imgData = ctx.getImageData(0, 0, w, h).data;
-    var bytesPerRow = Math.ceil(w / 8);
+    };
+    var customerCanvas = await html2canvas(customerContainer, html2canvasOpts);
+    var kitchenCanvas = await html2canvas(kitchenContainer, html2canvasOpts);
+    var CUT = [0x0A,0x0A,0x0A, 0x1D,0x56,0x01]; // feed clear of cutter, partial cut
     var allBytes = [0x1B, 0x40]; // ESC @ (initialize printer)
-    var CHUNK_ROWS = 256;
-    for(var startRow=0; startRow<h; startRow+=CHUNK_ROWS){
-      var rows = Math.min(CHUNK_ROWS, h-startRow);
-      var rowBytes = new Array(bytesPerRow*rows).fill(0);
-      for(var y=0; y<rows; y++){
-        for(var x=0; x<w; x++){
-          var idx = ((startRow+y)*w + x) * 4;
-          var r=imgData[idx], g=imgData[idx+1], b=imgData[idx+2], a=imgData[idx+3];
-          var lum = a<128 ? 255 : (0.299*r + 0.587*g + 0.114*b);
-          if(lum < 200){
-            var byteIndex = y*bytesPerRow + (x>>3);
-            rowBytes[byteIndex] |= (1 << (7-(x&7)));
-          }
-        }
-      }
-      var header = [0x1D,0x76,0x30,0x00, bytesPerRow&0xFF,(bytesPerRow>>8)&0xFF, rows&0xFF,(rows>>8)&0xFF];
-      allBytes = allBytes.concat(header, rowBytes);
-    }
-    allBytes = allBytes.concat([0x0A,0x0A,0x0A, 0x1D,0x56,0x01]); // feed clear of cutter, partial cut
+    allBytes = allBytes.concat(canvasToEscPosRasterBytes(customerCanvas)).concat(CUT);
+    allBytes = allBytes.concat(canvasToEscPosRasterBytes(kitchenCanvas)).concat(CUT);
     return new Uint8Array(allBytes);
   } finally {
-    document.body.removeChild(container);
+    document.body.removeChild(customerContainer);
+    document.body.removeChild(kitchenContainer);
   }
 }
 /* Fires the RawBT intent and hands off to Android — there's no callback to
@@ -3754,6 +3777,8 @@ var TRANSLATIONS = {
     order_alert_sound_reset_btn:'Use default chime', order_alert_sound_custom_label:'Custom sound active',
     order_alert_sound_invalid_type:'Please choose an audio file (MP3, WAV, etc).',
     order_alert_sound_too_large:'That file is too big — please choose a short clip under 500KB (a couple of seconds is plenty).',
+    order_alert_sound_pending_label:'Pending upload:', order_alert_sound_preview_btn:'▶ Preview',
+    order_alert_sound_save_btn:'Save sound', order_alert_sound_cancel_btn:'Cancel',
     search_placeholder:'Search menu…',
     currency_label:'Currency',
     current_order:'Current Order',
@@ -3968,6 +3993,8 @@ var TRANSLATIONS = {
     order_alert_sound_reset_btn:'ໃຊ້ສຽງເລີ່ມຕົ້ນ', order_alert_sound_custom_label:'ກຳລັງໃຊ້ສຽງທີ່ອັບໂຫລດເອງ',
     order_alert_sound_invalid_type:'ກະລຸນາເລືອກໄຟລ໌ສຽງ (MP3, WAV ແລະອື່ນໆ).',
     order_alert_sound_too_large:'ໄຟລ໌ນີ້ໃຫຍ່ເກີນໄປ — ກະລຸນາເລືອກສຽງສັ້ນໆ ຂະໜາດບໍ່ເກີນ 500KB (ສອງສາມວິນາທີກໍພຽງພໍ).',
+    order_alert_sound_pending_label:'ໄຟລ໌ທີ່ລໍຖ້າບັນທຶກ:', order_alert_sound_preview_btn:'▶ ທົດລອງຟັງ',
+    order_alert_sound_save_btn:'ບັນທຶກສຽງ', order_alert_sound_cancel_btn:'ຍົກເລີກ',
     search_placeholder:'ຄົ້ນຫາເມນູ…',
     currency_label:'ສະກຸນເງິນ',
     current_order:'ອໍເດີປັດຈຸບັນ',
@@ -4182,6 +4209,8 @@ var TRANSLATIONS = {
     order_alert_sound_reset_btn:'ใช้เสียงเริ่มต้น', order_alert_sound_custom_label:'กำลังใช้เสียงที่อัปโหลดเอง',
     order_alert_sound_invalid_type:'กรุณาเลือกไฟล์เสียง (MP3, WAV และอื่นๆ)',
     order_alert_sound_too_large:'ไฟล์นี้ใหญ่เกินไป — กรุณาเลือกเสียงสั้นๆ ขนาดไม่เกิน 500KB (สองสามวินาทีก็เพียงพอ)',
+    order_alert_sound_pending_label:'ไฟล์ที่รอบันทึก:', order_alert_sound_preview_btn:'▶ ทดลองฟัง',
+    order_alert_sound_save_btn:'บันทึกเสียง', order_alert_sound_cancel_btn:'ยกเลิก',
     search_placeholder:'ค้นหาเมนู…',
     currency_label:'สกุลเงิน',
     current_order:'ออเดอร์ปัจจุบัน',
@@ -4592,6 +4621,7 @@ var state = {
   receiptOrder:null,
   testPrintMode:false,
   receiptIsFreshCheckout:false, // true only right after a normal Order-tab checkout — see scheduleReceiptAutoClose()
+  orderAlertSoundDraft:null, // {name, dataUrl} of a freshly-picked-but-not-yet-saved alert sound — see buildOrderAlertSoundControls()
   receiptPreview:null,
   refundEvidence:null, // {orderId, photo, reason} — set while capturing evidence and through the approval step
   trainingMode:false,
@@ -4996,9 +5026,13 @@ function dismissOrderAlert(alertId){
    interaction (e.g. right after a fresh page load), and this must never
    break the toast itself just because the sound couldn't play. */
 var orderAlertAudioCtx = null;
-function playOrderAlertSound(){
-  if(!isOrderAlertSoundOn()) return;
-  var customSound = getOrderAlertCustomSound();
+/* overrideDataUrl lets the sound-settings screen preview a freshly-picked
+   (not-yet-saved) file straight from its in-memory draft, using the exact
+   same playback path a real incoming order would use — without touching
+   isOrderAlertSoundOn() or localStorage at all. */
+function playOrderAlertSound(overrideDataUrl){
+  if(!overrideDataUrl && !isOrderAlertSoundOn()) return;
+  var customSound = overrideDataUrl || getOrderAlertCustomSound();
   if(customSound){
     try{
       var audio = new Audio(customSound);
@@ -6424,10 +6458,60 @@ function buildIncomingOrdersTab(){
   var syncNotice = state.incomingOrdersSyncError
     ? '<div class="section-card" style="background:#FFFBF9;border-color:var(--danger-light);"><p class="hint" style="color:var(--danger);">'+tr('incoming_sync_error')+'</p></div>'
     : '';
-  if(!orders.length){
-    return syncNotice + '<div class="section-card"><h2>'+tr('tab_incoming')+'</h2><p class="empty-note">'+tr('incoming_empty_note')+'</p></div>';
-  }
-  var cardsHtml = orders.map(function(o){
+  var ordersBodyHtml = orders.length
+    ? buildIncomingOrdersCards(orders)
+    : '<div class="section-card"><p class="empty-note">'+tr('incoming_empty_note')+'</p></div>';
+  return syncNotice +
+    '<div class="section-card">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
+        '<div><h2>'+tr('tab_incoming')+'</h2><p class="hint">'+tr('incoming_tab_hint')+'</p></div>' +
+        '<button class="btn btn-outline btn-small" style="white-space:nowrap;flex:none;" onclick="POS.toggleOrderAlertSound()">'+(isOrderAlertSoundOn()?'🔔 '+tr('order_alert_sound_on_btn'):'🔕 '+tr('order_alert_sound_off_btn'))+'</button>' +
+      '</div>' +
+      buildOrderAlertSoundControls() +
+    '</div>' +
+    ordersBodyHtml;
+}
+/* Pulled out of buildIncomingOrdersTab so the mute toggle, upload button,
+   and (when relevant) the save/preview/cancel controls for a pending
+   upload are ALWAYS visible at the top of this tab — they used to live
+   inside the same branch as the order cards themselves, which meant the
+   entire sound-settings row disappeared the moment the queue emptied out
+   (the normal, common state — orders only sit in the queue briefly).
+   That's what made uploading a new sound look like it "didn't save": the
+   button you'd used to upload it could vanish from under you as soon as
+   an order was approved/rejected elsewhere, with no way to get back to
+   it — including to upload a REPLACEMENT — until a new order happened to
+   come in. */
+function buildOrderAlertSoundControls(){
+  var hasCustomSound = !!getOrderAlertCustomSound();
+  var draft = state.orderAlertSoundDraft;
+  var uploadRow = '' +
+    '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;">' +
+      '<label class="btn btn-outline btn-small" style="white-space:nowrap;">'+tr('order_alert_sound_upload_btn')+'<input type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.opus,.wma" style="display:none" onchange="POS.handleOrderAlertSoundUpload(this)"/></label>' +
+      '<button class="btn btn-ghost btn-small" style="white-space:nowrap;" onclick="POS.testOrderAlertSound()">'+tr('order_alert_sound_test_btn')+'</button>' +
+      (hasCustomSound ? ('' +
+        '<span class="hint" style="margin:0;">'+tr('order_alert_sound_custom_label')+'</span>' +
+        '<button class="btn btn-ghost btn-small" style="white-space:nowrap;" onclick="POS.resetOrderAlertSound()">'+tr('order_alert_sound_reset_btn')+'</button>'
+      ) : '') +
+    '</div>';
+  /* A freshly-picked file sits here as a draft — audible via Preview,
+     but NOT yet written over the working sound — until Save is tapped.
+     This is the confirm step: uploading alone no longer replaces
+     anything, so there's no way to overwrite a sound that already works
+     with a bad pick by accident. Cancel discards the pick entirely and
+     leaves whatever was already saved untouched. */
+  var draftRow = draft ? ('' +
+    '<div class="order-alert-sound-draft-row" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;padding:8px 10px;background:var(--cream-dark,#F3E9DD);border-radius:10px;">' +
+      '<span style="font-size:12px;font-weight:700;">'+tr('order_alert_sound_pending_label')+' '+escapeHtml(draft.name)+'</span>' +
+      '<button class="btn btn-ghost btn-small" style="white-space:nowrap;" onclick="POS.previewOrderAlertSoundDraft()">'+tr('order_alert_sound_preview_btn')+'</button>' +
+      '<button class="btn btn-primary btn-small" style="width:auto;white-space:nowrap;" onclick="POS.saveOrderAlertSoundDraft()">'+tr('order_alert_sound_save_btn')+'</button>' +
+      '<button class="btn btn-ghost btn-small" style="white-space:nowrap;" onclick="POS.cancelOrderAlertSoundDraft()">'+tr('order_alert_sound_cancel_btn')+'</button>' +
+    '</div>'
+  ) : '';
+  return uploadRow + draftRow;
+}
+function buildIncomingOrdersCards(orders){
+  return orders.map(function(o){
     var expanded = state.expandedIncomingId === o.id;
     var subtotal = computeIncomingOrderSubtotal(o.items);
     var itemLines = (o.items||[]).map(function(l){
@@ -6456,26 +6540,6 @@ function buildIncomingOrdersTab(){
       ) : '') +
     '</div>';
   }).join('');
-  var soundOn = isOrderAlertSoundOn();
-  var hasCustomSound = !!getOrderAlertCustomSound();
-  var soundControlsHtml = '' +
-    '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;">' +
-      '<label class="btn btn-outline btn-small" style="white-space:nowrap;">'+tr('order_alert_sound_upload_btn')+'<input type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.opus,.wma" style="display:none" onchange="POS.handleOrderAlertSoundUpload(this)"/></label>' +
-      '<button class="btn btn-ghost btn-small" style="white-space:nowrap;" onclick="POS.testOrderAlertSound()">'+tr('order_alert_sound_test_btn')+'</button>' +
-      (hasCustomSound ? ('' +
-        '<span class="hint" style="margin:0;">'+tr('order_alert_sound_custom_label')+'</span>' +
-        '<button class="btn btn-ghost btn-small" style="white-space:nowrap;" onclick="POS.resetOrderAlertSound()">'+tr('order_alert_sound_reset_btn')+'</button>'
-      ) : '') +
-    '</div>';
-  return syncNotice +
-    '<div class="section-card">' +
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
-        '<div><h2>'+tr('tab_incoming')+'</h2><p class="hint">'+tr('incoming_tab_hint')+'</p></div>' +
-        '<button class="btn btn-outline btn-small" style="white-space:nowrap;flex:none;" onclick="POS.toggleOrderAlertSound()">'+(soundOn?'🔔 '+tr('order_alert_sound_on_btn'):'🔕 '+tr('order_alert_sound_off_btn'))+'</button>' +
-      '</div>' +
-      soundControlsHtml +
-    '</div>' +
-    cardsHtml;
 }
 function buildIncomingApproveModal(){
   var p = state.incomingApprovePrompt;
@@ -10116,15 +10180,38 @@ var POS = {
     }
     var reader = new FileReader();
     reader.onload = function(e){
-      if(!setOrderAlertCustomSound(e.target.result)){
-        window.alert(tr('order_alert_sound_too_large'));
-        return;
-      }
+      /* Stage only — do NOT touch localStorage yet. Picking a file used to
+         overwrite the working sound immediately, which is what made this
+         look broken: staff would pick a file, hear nothing obviously
+         different happen, and have no way to tell whether it had actually
+         taken effect. Now the pick just becomes a draft (with a Preview /
+         Save / Cancel row shown right under the upload button — see
+         buildOrderAlertSoundControls()) and nothing is overwritten until
+         Save is tapped. */
+      state.orderAlertSoundDraft = { name: file.name, dataUrl: e.target.result };
       render();
-      playOrderAlertSound(); // immediate preview so staff can hear what they just picked
     };
     reader.onerror = function(){ window.alert(tr('order_alert_sound_invalid_type')); };
     reader.readAsDataURL(file);
+  },
+  previewOrderAlertSoundDraft: function(){
+    var draft = state.orderAlertSoundDraft;
+    if(!draft) return;
+    playOrderAlertSound(draft.dataUrl);
+  },
+  saveOrderAlertSoundDraft: function(){
+    var draft = state.orderAlertSoundDraft;
+    if(!draft) return;
+    if(!setOrderAlertCustomSound(draft.dataUrl)){
+      window.alert(tr('order_alert_sound_too_large'));
+      return;
+    }
+    state.orderAlertSoundDraft = null;
+    render();
+  },
+  cancelOrderAlertSoundDraft: function(){
+    state.orderAlertSoundDraft = null;
+    render();
   },
   resetOrderAlertSound: function(){
     setOrderAlertCustomSound(null);
