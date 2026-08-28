@@ -9692,16 +9692,42 @@ var POS = {
       // printer settings, receipt QR, etc at the target are untouched.
       targetSettings.categories = JSON.parse(JSON.stringify(sourceSettings.categories || []));
       targetSettings.categoryTranslations = JSON.parse(JSON.stringify(sourceSettings.categoryTranslations || {}));
-      targetSettings.categoryPhotos = JSON.parse(JSON.stringify(sourceSettings.categoryPhotos || {}));
-      targetSettings.categoryBackgroundPhotos = JSON.parse(JSON.stringify(sourceSettings.categoryBackgroundPhotos || {}));
-      return Promise.all([
-        realDb.collection(targetPrefix+'pos_ingredients').doc('main').set({items: ingredientsItems}),
-        realDb.collection(targetPrefix+'pos_premix').doc('main').set({items: premixItems}),
-        realDb.collection(targetPrefix+'pos_menu').doc('main').set({items: menuItems}),
-        realDb.collection(targetPrefix+'pos_recipes').doc('main').set({items: recipeItems}),
-        realDb.collection(targetPrefix+'pos_toppings').doc('main').set({items: toppingItems}),
-        realDb.collection(targetPrefix+'pos_settings').doc('main').set(targetSettings)
-      ]);
+      /* Category thumbnail/background photos live in pos_photos, not
+         embedded in pos_settings (see settingsForSave()) — copying them
+         by cloning sourceSettings.categoryPhotos straight into
+         targetSettings would (a) do nothing useful, since a healthy
+         pos_settings document never actually carries that field anymore,
+         and (b) is exactly the mistake that bloats pos_settings past
+         Firestore's 1 MiB write limit and breaks EVERY future settings
+         save at that location, including totally unrelated ones like a
+         staff name. The actual photo docs get copied further down,
+         straight into the target location's own pos_photos collection.
+         These two lines also strip out anything already wrongly embedded
+         here (from before this fix, or from a still-stale target
+         document), so this write self-heals a bloated document instead
+         of perpetuating it. */
+      delete targetSettings.categoryPhotos;
+      delete targetSettings.categoryBackgroundPhotos;
+      delete targetSettings.pageBackgroundPhoto;
+      delete targetSettings.headerBackgroundPhoto;
+      return realDb.collection(sourcePrefix+'pos_photos').get().then(function(photoSnap){
+        var photoWrites = [];
+        photoSnap.forEach(function(d){
+          // Only category_thumb_*/category_bg_* are relevant here — this
+          // feature copies stock/menu setup, not individual item photos.
+          if(/^category_(thumb|bg)_/.test(d.id)){
+            photoWrites.push(realDb.collection(targetPrefix+'pos_photos').doc(d.id).set(d.data()));
+          }
+        });
+        return Promise.all([
+          realDb.collection(targetPrefix+'pos_ingredients').doc('main').set({items: ingredientsItems}),
+          realDb.collection(targetPrefix+'pos_premix').doc('main').set({items: premixItems}),
+          realDb.collection(targetPrefix+'pos_menu').doc('main').set({items: menuItems}),
+          realDb.collection(targetPrefix+'pos_recipes').doc('main').set({items: recipeItems}),
+          realDb.collection(targetPrefix+'pos_toppings').doc('main').set({items: toppingItems}),
+          realDb.collection(targetPrefix+'pos_settings').doc('main').set(targetSettings)
+        ].concat(photoWrites));
+      });
     }).then(function(){
       state.copyStockSetupBusy = false;
       render();
@@ -9827,14 +9853,23 @@ var POS = {
         if(!existingSettings.categoryTranslations) existingSettings.categoryTranslations = {};
         existingSettings.categoryTranslations[categoryName] = catTranslation;
       }
-      if(catPhoto){
-        if(!existingSettings.categoryPhotos) existingSettings.categoryPhotos = {};
-        existingSettings.categoryPhotos[categoryName] = catPhoto;
-      }
-      if(catBgPhoto){
-        if(!existingSettings.categoryBackgroundPhotos) existingSettings.categoryBackgroundPhotos = {};
-        existingSettings.categoryBackgroundPhotos[categoryName] = catBgPhoto;
-      }
+      /* catPhoto/catBgPhoto go straight into the target's pos_photos
+         collection below, NOT embedded into existingSettings — embedding
+         a photo data URL into pos_settings is exactly what bloats that
+         document past Firestore's 1 MiB write limit and breaks every
+         future settings save at that location (see saveSettings() and
+         copyStockSetupToLocation() for the same fix). The two deletes
+         also strip out anything already wrongly embedded here, from
+         before this fix, so this write self-heals a bloated target
+         document instead of perpetuating it. */
+      delete existingSettings.categoryPhotos;
+      delete existingSettings.categoryBackgroundPhotos;
+      delete existingSettings.pageBackgroundPhoto;
+      delete existingSettings.headerBackgroundPhoto;
+      var photoWrites = [];
+      var catKey = sanitizeCategoryKey(categoryName);
+      if(catPhoto) photoWrites.push(realDb.collection(targetPrefix+'pos_photos').doc('category_thumb_'+catKey).set({data: catPhoto}));
+      if(catBgPhoto) photoWrites.push(realDb.collection(targetPrefix+'pos_photos').doc('category_bg_'+catKey).set({data: catBgPhoto}));
 
       return Promise.all([
         realDb.collection(targetPrefix+'pos_ingredients').doc('main').set({items: mergedRaw}),
@@ -9843,7 +9878,7 @@ var POS = {
         realDb.collection(targetPrefix+'pos_menu').doc('main').set({items: mergedMenu}),
         realDb.collection(targetPrefix+'pos_recipes').doc('main').set({items: existingRecipes}),
         realDb.collection(targetPrefix+'pos_settings').doc('main').set(existingSettings)
-      ]);
+      ].concat(photoWrites));
     }).then(function(){
       state.duplicateItemBusyId = null;
       render();
@@ -11210,7 +11245,20 @@ var POS = {
   saveSettings: function(){
     var merged = Object.assign({}, state.settings, state.settingsForm);
     state.settings = merged;
-    db.collection('pos_settings').doc('main').set(merged).then(function(){
+    /* Must go through settingsForSave() like every other settings write —
+       state.settings (and settingsForm, cloned from it) carries the live
+       category/page/header photo data URLs that applyPhotoMap() attaches
+       for on-screen display, and writing those straight into pos_settings
+       is exactly what silently bloated that document past Firestore's
+       1 MiB limit and made every future save here — even something as
+       small as a staff name — fail outright. This was the one settings
+       save path that had been missed when photos were split into their
+       own pos_photos collection; every other save on this screen already
+       used settingsForSave(). Because this always does a full document
+       overwrite (not a merge), the next successful save here also
+       self-heals an already-bloated document — no separate cleanup step
+       needed. */
+    db.collection('pos_settings').doc('main').set(settingsForSave()).then(function(){
       window.alert('Settings saved.');
     }).catch(function(e){ window.alert('Could not save settings: '+e.message); });
     render();
