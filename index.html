@@ -625,24 +625,7 @@ html, body{touch-action:pan-x pan-y;}
   display:inline-block;background:rgba(255,255,255,0.92);color:#1A1A1A;
   border-radius:999px;padding:1px 8px;font-size:10.5px;font-weight:800;margin-left:2px;white-space:nowrap;
 }
-/* Kitchen copy only exists for printing — never shown while reviewing the
-   receipt on screen. The customer-copy label is print-only too, since on
-   screen there's only ever one copy visible and a label would be noise. */
-.print-only{display:none;}
-.receipt-copy-label{text-align:center;font-weight:800;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--espresso-soft);margin-bottom:8px;}
-
 @media print{
-  /* This was the actual bug behind "only one copy prints": .print-only
-     elements (the kitchen copy, and the customer-copy label) are hidden
-     with display:none above so the on-screen preview modal only ever
-     shows one copy — but nothing anywhere ever set them visible again
-     for the print itself, print media included. So even the OS print
-     dialog (window.print()) was silently printing only the customer
-     copy this whole time, the same bug as the two direct-printer text
-     paths fixed earlier, just one layer up (CSS instead of string
-     concatenation). This is what actually un-hides the kitchen copy
-     when a real browser print happens. */
-  .print-only{display:block !important;}
   @page{ margin:6mm; }
   html, body{ margin:0 !important; padding:0 !important; height:auto !important; background:#fff !important; }
   #app > .pos-header, #app > .pos-main{ display:none !important; }
@@ -3206,8 +3189,8 @@ function todayDateKey(){
    receipt: matches buildReceiptContentHtml's content, laid out as a
    monospaced two-column table (name/value padded to the line width) since
    ePOS-Print has no simple "space-between" text layout. Logo/QR are not
-   included in this path yet. Prints customer copy then kitchen copy in the
-   same job, same as every other print path — see buildEposPrintXml. */
+   included in this path yet. Single copy per print, same as every other
+   print path — see buildEposPrintXml. */
 function eposCharWidth(){
   return (state.settings && state.settings.printerPaperWidth==='58mm') ? 32 : 48;
 }
@@ -3248,62 +3231,57 @@ function eposPadLine(left, right, width){
   }
   return left + new Array(Math.max(1,space)+1).join(' ') + right;
 }
+/* Single receipt only — this used to print a customer copy followed by a
+   kitchen copy in the same job, but that meant burning twice the paper on
+   every sale for a second slip most shops never actually needed. Now
+   builds just the one copy; the customer/kitchen-copy labels are gone
+   too, since there's nothing left to distinguish it from. */
 function buildEposPrintXml(o){
   var s = state.settings;
   var W = eposCharWidth();
-  function buildCopy(isKitchen){
-    var out = '';
-    out += '<text align="center" em="true" width="2" height="2"/>';
-    out += eposText(s.shopName || '');
-    out += '<text em="false" width="1" height="1"/>';
-    if(s.address) eposWrapLines(s.address, W).forEach(function(ln){ out += eposText(ln); });
-    if(s.phone) out += eposText(s.phone);
-    var d = new Date(o.timestamp);
-    var metaLine = tr('order_number')+String(o.number).padStart(4,'0')+' - '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    out += eposText(metaLine);
-    out += eposText(isKitchen ? ('*** '+tr('kitchen_copy_label')+' ***') : tr('customer_copy_label'));
-    out += '<text align="left"/>';
-    out += eposText(new Array(W+1).join('-'));
-    o.items.forEach(function(l){
-      var priceStr = escposMoney(l.unitPrice*l.qty);
-      var nameStr = l.qty+'x '+cartLineName(l);
-      var nameLines = eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1));
-      nameLines.forEach(function(ln,i){
-        out += eposText(i===0 ? eposPadLine(ln, priceStr, W) : ln);
-      });
-      var meta = l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice);
-      eposWrapLines(meta, W-2).forEach(function(ln){ out += eposText('  '+ln); });
-      l.toppings.forEach(function(t){
-        eposWrapLines(cartLineToppingDisplay(t), W-4).forEach(function(ln){ out += eposText('    '+ln); });
-      });
+  var out = '';
+  out += '<text align="center" em="true" width="2" height="2"/>';
+  out += eposText(s.shopName || '');
+  out += '<text em="false" width="1" height="1"/>';
+  if(s.address) eposWrapLines(s.address, W).forEach(function(ln){ out += eposText(ln); });
+  if(s.phone) out += eposText(s.phone);
+  var d = new Date(o.timestamp);
+  var metaLine = tr('order_number')+String(o.number).padStart(4,'0')+' - '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  out += eposText(metaLine);
+  out += '<text align="left"/>';
+  out += eposText(new Array(W+1).join('-'));
+  o.items.forEach(function(l){
+    var priceStr = escposMoney(l.unitPrice*l.qty);
+    var nameStr = l.qty+'x '+cartLineName(l);
+    var nameLines = eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1));
+    nameLines.forEach(function(ln,i){
+      out += eposText(i===0 ? eposPadLine(ln, priceStr, W) : ln);
     });
-    out += eposText(new Array(W+1).join('-'));
-    out += eposText(eposPadLine(tr('subtotal'), escposMoney(o.subtotal), W));
-    if(o.discount>0) out += eposText(eposPadLine(tr('discount'), '-'+escposMoney(o.discount), W));
-    if(o.serviceCharge>0) out += eposText(eposPadLine(tr('service_charge'), escposMoney(o.serviceCharge), W));
-    out += '<text em="true"/>';
-    out += eposText(eposPadLine(tr('total'), escposMoney(o.total), W));
-    out += '<text em="false"/>';
-    out += eposText(eposPadLine(tr('receipt_payment'), paymentDisplayFor(o), W));
-    if(o.placedByAccount) out += eposText(eposPadLine(tr('served_by_label'), staffNameFor(o.placedByAccount), W));
-    if(o.paymentMethod==='cash'){
-      out += eposText(eposPadLine(tr('cash_received'), escposMoney(o.amountReceived), W));
-      out += eposText(eposPadLine(tr('receipt_change'), escposMoney(o.change), W));
-    }
-    out += '<text align="center"/>';
-    String(s.footerMessage||'').split('\n').forEach(function(line){
-      eposWrapLines(line, W).forEach(function(ln){ out += eposText(ln); });
+    var meta = l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice);
+    eposWrapLines(meta, W-2).forEach(function(ln){ out += eposText('  '+ln); });
+    l.toppings.forEach(function(t){
+      eposWrapLines(cartLineToppingDisplay(t), W-4).forEach(function(ln){ out += eposText('    '+ln); });
     });
-    out += '<feed line="2"/><cut type="feed"/>';
-    return out;
+  });
+  out += eposText(new Array(W+1).join('-'));
+  out += eposText(eposPadLine(tr('subtotal'), escposMoney(o.subtotal), W));
+  if(o.discount>0) out += eposText(eposPadLine(tr('discount'), '-'+escposMoney(o.discount), W));
+  if(o.serviceCharge>0) out += eposText(eposPadLine(tr('service_charge'), escposMoney(o.serviceCharge), W));
+  out += '<text em="true"/>';
+  out += eposText(eposPadLine(tr('total'), escposMoney(o.total), W));
+  out += '<text em="false"/>';
+  out += eposText(eposPadLine(tr('receipt_payment'), paymentDisplayFor(o), W));
+  if(o.placedByAccount) out += eposText(eposPadLine(tr('served_by_label'), staffNameFor(o.placedByAccount), W));
+  if(o.paymentMethod==='cash'){
+    out += eposText(eposPadLine(tr('cash_received'), escposMoney(o.amountReceived), W));
+    out += eposText(eposPadLine(tr('receipt_change'), escposMoney(o.change), W));
   }
-  /* buildCopy(false) then buildCopy(true) — customer copy, cut, kitchen
-     copy, cut, both in the one job the printer receives. This used to be
-     buildCopy(false) alone: the isKitchen branch above was already fully
-     written, just never actually invoked a second time, so this path
-     silently printed only the customer copy while every other print path
-     (OS print dialog, RawBT image mode) printed both. */
-  return '<epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">' + buildCopy(false) + buildCopy(true) + '</epos-print>';
+  out += '<text align="center"/>';
+  String(s.footerMessage||'').split('\n').forEach(function(line){
+    eposWrapLines(line, W).forEach(function(ln){ out += eposText(ln); });
+  });
+  out += '<feed line="2"/><cut type="feed"/>';
+  return '<epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">' + out + '</epos-print>';
 }
 /* POSTs the receipt to the printer's ePOS-Print endpoint. Resolves on a
    confirmed successful print, rejects with a human-readable reason
@@ -3388,67 +3366,60 @@ function escposMoney(n){
   n = Math.round(Number(n)||0);
   return 'LAK '+n.toLocaleString('en-US');
 }
+/* Single receipt only — see buildEposPrintXml above for why the old
+   customer-copy-then-kitchen-copy behavior was removed. */
 function buildEscPosReceipt(o){
   var s = state.settings;
   var W = eposCharWidth();
   var sz = escposSanitize;
-  function buildCopy(isKitchen){
-    var out = ESCPOS_ESC+'@'; // initialize printer
-    /* No bold (ESC E) or double-size (GS !) here — this printer/RawBT
-       combination doesn't reliably execute them and was printing the raw
-       command bytes as garbage text instead. Align + plain "====" / "----"
-       separator lines give the same visual hierarchy without relying on
-       any formatting command beyond the very safe, near-universal align. */
-    out += escposAlign(1);
-    out += escposLine(new Array(W+1).join('='));
-    out += escposLine(sz(s.shopName || ''));
-    out += escposLine(new Array(W+1).join('='));
-    if(s.address) eposWrapLines(sz(s.address), W).forEach(function(ln){ out += escposLine(ln); });
-    if(s.phone) out += escposLine(sz(s.phone));
-    var d = new Date(o.timestamp);
-    var metaLine = sz(tr('order_number'))+String(o.number).padStart(4,'0')+' - '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    out += escposLine(metaLine);
-    out += escposLine(sz(isKitchen ? ('*** '+tr('kitchen_copy_label')+' ***') : tr('customer_copy_label')));
-    out += escposAlign(0);
-    out += escposLine(new Array(W+1).join('-'));
-    o.items.forEach(function(l){
-      var priceStr = escposMoney(l.unitPrice*l.qty);
-      var nameStr = sz(l.qty+'x '+cartLineName(l));
-      eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1)).forEach(function(ln,i){
-        out += escposLine(i===0 ? eposPadLine(ln, priceStr, W) : ln);
-      });
-      var meta = sz(l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice));
-      eposWrapLines(meta, W-2).forEach(function(ln){ out += escposLine('  '+ln); });
-      l.toppings.forEach(function(t){
-        eposWrapLines(sz(cartLineToppingDisplay(t)), W-4).forEach(function(ln){ out += escposLine('    '+ln); });
-      });
+  var out = ESCPOS_ESC+'@'; // initialize printer
+  /* No bold (ESC E) or double-size (GS !) here — this printer/RawBT
+     combination doesn't reliably execute them and was printing the raw
+     command bytes as garbage text instead. Align + plain "====" / "----"
+     separator lines give the same visual hierarchy without relying on
+     any formatting command beyond the very safe, near-universal align. */
+  out += escposAlign(1);
+  out += escposLine(new Array(W+1).join('='));
+  out += escposLine(sz(s.shopName || ''));
+  out += escposLine(new Array(W+1).join('='));
+  if(s.address) eposWrapLines(sz(s.address), W).forEach(function(ln){ out += escposLine(ln); });
+  if(s.phone) out += escposLine(sz(s.phone));
+  var d = new Date(o.timestamp);
+  var metaLine = sz(tr('order_number'))+String(o.number).padStart(4,'0')+' - '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  out += escposLine(metaLine);
+  out += escposAlign(0);
+  out += escposLine(new Array(W+1).join('-'));
+  o.items.forEach(function(l){
+    var priceStr = escposMoney(l.unitPrice*l.qty);
+    var nameStr = sz(l.qty+'x '+cartLineName(l));
+    eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1)).forEach(function(ln,i){
+      out += escposLine(i===0 ? eposPadLine(ln, priceStr, W) : ln);
     });
-    out += escposLine(new Array(W+1).join('-'));
-    out += escposLine(eposPadLine(sz(tr('subtotal')), escposMoney(o.subtotal), W));
-    if(o.discount>0) out += escposLine(eposPadLine(sz(tr('discount')), '-'+escposMoney(o.discount), W));
-    if(o.serviceCharge>0) out += escposLine(eposPadLine(sz(tr('service_charge')), escposMoney(o.serviceCharge), W));
-    out += escposLine(new Array(W+1).join('='));
-    out += escposLine(eposPadLine(sz(tr('total')), escposMoney(o.total), W));
-    out += escposLine(new Array(W+1).join('='));
-    out += escposLine(eposPadLine(sz(tr('receipt_payment')), sz(paymentDisplayFor(o)), W));
-    if(o.placedByAccount) out += escposLine(eposPadLine(sz(tr('served_by_label')), sz(staffNameFor(o.placedByAccount)), W));
-    if(o.paymentMethod==='cash'){
-      out += escposLine(eposPadLine(sz(tr('cash_received')), escposMoney(o.amountReceived), W));
-      out += escposLine(eposPadLine(sz(tr('receipt_change')), escposMoney(o.change), W));
-    }
-    out += escposAlign(1);
-    String(s.footerMessage||'').split('\n').forEach(function(line){
-      eposWrapLines(sz(line), W).forEach(function(ln){ out += escposLine(ln); });
+    var meta = sz(l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice));
+    eposWrapLines(meta, W-2).forEach(function(ln){ out += escposLine('  '+ln); });
+    l.toppings.forEach(function(t){
+      eposWrapLines(sz(cartLineToppingDisplay(t)), W-4).forEach(function(ln){ out += escposLine('    '+ln); });
     });
-    out += '\n\n\n'+ESCPOS_GS+'V'+String.fromCharCode(1); // feed clear of the cutter, then partial cut
-    return out;
+  });
+  out += escposLine(new Array(W+1).join('-'));
+  out += escposLine(eposPadLine(sz(tr('subtotal')), escposMoney(o.subtotal), W));
+  if(o.discount>0) out += escposLine(eposPadLine(sz(tr('discount')), '-'+escposMoney(o.discount), W));
+  if(o.serviceCharge>0) out += escposLine(eposPadLine(sz(tr('service_charge')), escposMoney(o.serviceCharge), W));
+  out += escposLine(new Array(W+1).join('='));
+  out += escposLine(eposPadLine(sz(tr('total')), escposMoney(o.total), W));
+  out += escposLine(new Array(W+1).join('='));
+  out += escposLine(eposPadLine(sz(tr('receipt_payment')), sz(paymentDisplayFor(o)), W));
+  if(o.placedByAccount) out += escposLine(eposPadLine(sz(tr('served_by_label')), sz(staffNameFor(o.placedByAccount)), W));
+  if(o.paymentMethod==='cash'){
+    out += escposLine(eposPadLine(sz(tr('cash_received')), escposMoney(o.amountReceived), W));
+    out += escposLine(eposPadLine(sz(tr('receipt_change')), escposMoney(o.change), W));
   }
-  /* Same fix as buildEposPrintXml above and for the same reason: this was
-     buildCopy(false) alone, printing only the customer copy even though
-     the isKitchen branch above exists specifically to produce a kitchen
-     copy. RawBT's "print as image" mode never had this bug — it renders
-     buildReceiptCopiesHtml directly — only this plain-text mode did. */
-  return buildCopy(false) + buildCopy(true);
+  out += escposAlign(1);
+  String(s.footerMessage||'').split('\n').forEach(function(line){
+    eposWrapLines(sz(line), W).forEach(function(ln){ out += escposLine(ln); });
+  });
+  out += '\n\n\n'+ESCPOS_GS+'V'+String.fromCharCode(1); // feed clear of the cutter, then partial cut
+  return out;
 }
 /* Correct UTF-8-safe base64 encoding: btoa() only accepts single-byte
    (0x00-0xFF) input, so Lao/Thai/etc. text (which is multi-byte in UTF-8)
@@ -3516,14 +3487,9 @@ function canvasToEscPosRasterBytes(canvas){
    (buildReceiptContentHtml) via html2canvas, so what prints is a direct
    rendering of what's on screen, not a re-implementation. 384/576 dots
    are the standard raster widths for 58mm/80mm thermal printers.
-   Customer and kitchen copies are captured and rasterized as two
-   SEPARATE images, each ending in its own feed+cut command — not one
-   combined image with a single cut at the very end. That used to be the
-   bug here: both copies printed, but back-to-back with nothing but a
-   paper feed between them, because the cut command only ever ran once,
-   after the whole two-copy image. A printer can only cut where a cut
-   command tells it to, so "two copies, cut once at the end" meant one
-   long uncut strip. */
+   Single copy only — this used to also capture and print a second
+   "kitchen copy" image right after, but that doubled the paper used on
+   every sale for a second slip most shops never actually needed. */
 async function buildEscPosReceiptImage(order){
   var paperWidthDots = (state.settings && state.settings.printerPaperWidth==='58mm') ? 384 : 576;
   /* The font size here must be picked in proportion to paperWidthDots to
@@ -3540,48 +3506,29 @@ async function buildEscPosReceiptImage(order){
      preview reproduces the same shape at print resolution. */
   var previewSpec = RECEIPT_PAPER_SIZES[(state.settings && state.settings.printerPaperWidth) || '80mm'] || RECEIPT_PAPER_SIZES['80mm'];
   var imageFontSize = Math.round(previewSpec.font * (paperWidthDots / previewSpec.width));
-  /* Builds one full off-screen copy (customer or kitchen) as its OWN
-     container, rather than one container holding both — that's what
-     makes it possible to capture and cut each one independently below.
-     id="receipt-content" (not just a class) is required here: all the
-     centering, logo circular-crop, and font-size rules in <style> are
-     scoped specifically to "#receipt-content .r-xxx" selectors. CSS id
-     selectors match EVERY element with that id, not just one, so both
-     copies' containers — and the real visible receipt modal, if one
-     happens to be open — can safely share it at the same time. */
-  function buildCopyContainer(labelKey){
-    var el = document.createElement('div');
-    el.id = 'receipt-content';
-    el.className = 'pos-print-capture';
-    el.style.position = 'fixed';
-    el.style.left = '-9999px';
-    el.style.top = '0';
-    el.style.width = paperWidthDots+'px';
-    el.style.background = '#ffffff';
-    el.style.boxSizing = 'border-box';
-    el.style.padding = '10px';
-    el.style.fontSize = imageFontSize+'px'; // bigger than the on-screen preview size — that was tuned for a small modal, not a full-width printout
-    /* Appended straight to document.body (see below), outside #pos-root
-       entirely — so it never inherits the app's own
-       "font-family:'Noto Sans Lao'" rule (#pos-root.lang-lo), which only
-       applies inside that tree. Set it explicitly here so a Lao-language
-       receipt actually uses the same embedded font as the rest of the
-       app, not just whatever generic font the browser falls back to for
-       Lao script. */
-    if(state.language==='lo'){
-      el.style.fontFamily = "'Noto Sans Lao','Inter',sans-serif";
-    }
-    /* This container only ever exists to be screenshotted (it's
-       positioned off-screen, never actually shown to anyone), so the
-       label is included plainly — no need for the .print-only /
-       @media print visibility dance the on-screen modal uses to keep
-       the kitchen copy hidden until a real print happens. */
-    el.innerHTML = '<div class="receipt-copy-label">'+tr(labelKey)+'</div>' + buildReceiptContentHtml(order, false);
-    document.body.appendChild(el);
-    return el;
+  var container = document.createElement('div');
+  container.id = 'receipt-content';
+  container.className = 'pos-print-capture';
+  container.style.position = 'fixed';
+  container.style.left = '-9999px';
+  container.style.top = '0';
+  container.style.width = paperWidthDots+'px';
+  container.style.background = '#ffffff';
+  container.style.boxSizing = 'border-box';
+  container.style.padding = '10px';
+  container.style.fontSize = imageFontSize+'px'; // bigger than the on-screen preview size — that was tuned for a small modal, not a full-width printout
+  /* Appended straight to document.body (see below), outside #pos-root
+     entirely — so it never inherits the app's own
+     "font-family:'Noto Sans Lao'" rule (#pos-root.lang-lo), which only
+     applies inside that tree. Set it explicitly here so a Lao-language
+     receipt actually uses the same embedded font as the rest of the
+     app, not just whatever generic font the browser falls back to for
+     Lao script. */
+  if(state.language==='lo'){
+    container.style.fontFamily = "'Noto Sans Lao','Inter',sans-serif";
   }
-  var customerContainer = buildCopyContainer('customer_copy_label');
-  var kitchenContainer = buildCopyContainer('kitchen_copy_label');
+  container.innerHTML = buildReceiptContentHtml(order, false);
+  document.body.appendChild(container);
   try {
     /* html2canvas has long-standing, widely-reported bugs with custom/
        embedded fonts (including this exact "loaded but rendered with the
@@ -3615,25 +3562,17 @@ async function buildEscPosReceiptImage(order){
       useCORS: true,
       onclone: function(clonedDoc){
         if(state.language!=='lo') return;
-        /* Both copy containers share id="receipt-content", and
-           getElementById only ever returns the first match — using
-           querySelectorAll here instead makes sure whichever copy is
-           being captured this call still gets the font-family fix,
-           regardless of which container that first match happens to be. */
-        var clonedEls = clonedDoc.querySelectorAll('#receipt-content');
-        Array.prototype.forEach.call(clonedEls, function(el){ el.style.fontFamily = "'Noto Sans Lao','Inter',sans-serif"; });
+        var clonedEl = clonedDoc.getElementById('receipt-content');
+        if(clonedEl) clonedEl.style.fontFamily = "'Noto Sans Lao','Inter',sans-serif";
       }
     };
-    var customerCanvas = await html2canvas(customerContainer, html2canvasOpts);
-    var kitchenCanvas = await html2canvas(kitchenContainer, html2canvasOpts);
+    var canvas = await html2canvas(container, html2canvasOpts);
     var CUT = [0x0A,0x0A,0x0A, 0x1D,0x56,0x01]; // feed clear of cutter, partial cut
     var allBytes = [0x1B, 0x40]; // ESC @ (initialize printer)
-    allBytes = allBytes.concat(canvasToEscPosRasterBytes(customerCanvas)).concat(CUT);
-    allBytes = allBytes.concat(canvasToEscPosRasterBytes(kitchenCanvas)).concat(CUT);
+    allBytes = allBytes.concat(canvasToEscPosRasterBytes(canvas)).concat(CUT);
     return new Uint8Array(allBytes);
   } finally {
-    document.body.removeChild(customerContainer);
-    document.body.removeChild(kitchenContainer);
+    document.body.removeChild(container);
   }
 }
 /* Fires the RawBT intent and hands off to Android — there's no callback to
@@ -3941,7 +3880,7 @@ var TRANSLATIONS = {
     photo_visibility_label:'Photo visibility',
     preview_receipt:'Preview Receipt', preview_label:'🧾 Preview — not yet saved', back_to_cart:'← Back to Cart', confirm_order:'Confirm & Complete Order',
     reset_menu_title:'Reset menu to default?', reset_menu_sub:'This permanently replaces your menu and toppings with the default list. Enter the admin PIN to confirm.',
-    reprint_receipt:'🖨 Reprint Receipt', customer_copy_label:'🧾 Customer Copy', kitchen_copy_label:'🍳 Kitchen Copy',
+    reprint_receipt:'🖨 Reprint Receipt',
     refund_order:'↩ Refund', refunded_label:'Refunded', refunded_at_label:'Refunded at', refunded_by_label:'Refunded by',
     refunded_by_admin:'Administrator', refunded_by_manager:'Manager', refund_reason_label:'Reason',
     refund_evidence_hint:'Take a photo as evidence before this refund can be processed.',
@@ -4158,7 +4097,7 @@ var TRANSLATIONS = {
     photo_visibility_label:'ຄວາມຊັດເຈນຂອງຮູບ',
     preview_receipt:'ເບິ່ງຕົວຢ່າງໃບບິນ', preview_label:'🧾 ຕົວຢ່າງ — ຍັງບໍ່ໄດ້ບັນທຶກ', back_to_cart:'← ກັບຄືນກະຕ່າ', confirm_order:'ຢືນຢັນ ແລະ ສຳເລັດອໍເດີ',
     reset_menu_title:'ຣີເຊັດເມນູກັບຄືນຄ່າເລີ່ມຕົ້ນ?', reset_menu_sub:'ນີ້ຈະປ່ຽນແທນເມນູ ແລະ ທັອບປິ້ງຂອງທ່ານດ້ວຍລາຍການເລີ່ມຕົ້ນຖາວອນ. ໃສ່ລະຫັດຜູ້ດູແລລະບົບເພື່ອຢືນຢັນ.',
-    reprint_receipt:'🖨 ພິມໃບບິນຄືນ', customer_copy_label:'🧾 ສຳເນົາລູກຄ້າ', kitchen_copy_label:'🍳 ສຳເນົາຄົວ',
+    reprint_receipt:'🖨 ພິມໃບບິນຄືນ',
     refund_order:'↩ ຄືນເງິນ', refunded_label:'ຄືນເງິນແລ້ວ', refunded_at_label:'ຄືນເງິນເມື່ອ', refunded_by_label:'ຄືນເງິນໂດຍ',
     refunded_by_admin:'ຜູ້ດູແລລະບົບ', refunded_by_manager:'ຜູ້ຈັດການ', refund_reason_label:'ເຫດຜົນ',
     refund_evidence_hint:'ຖ່າຍຮູບເປັນຫຼັກຖານກ່ອນທີ່ຈະດຳເນີນການຄືນເງິນນີ້.',
@@ -4375,7 +4314,7 @@ var TRANSLATIONS = {
     photo_visibility_label:'ความชัดเจนของภาพ',
     preview_receipt:'ดูตัวอย่างใบเสร็จ', preview_label:'🧾 ตัวอย่าง — ยังไม่ได้บันทึก', back_to_cart:'← กลับไปที่ตะกร้า', confirm_order:'ยืนยันและทำรายการให้เสร็จสิ้น',
     reset_menu_title:'รีเซ็ตเมนูเป็นค่าเริ่มต้น?', reset_menu_sub:'การดำเนินการนี้จะแทนที่เมนูและท็อปปิ้งของคุณด้วยรายการเริ่มต้นอย่างถาวร ป้อนรหัส PIN ผู้ดูแลระบบเพื่อยืนยัน',
-    reprint_receipt:'🖨 พิมพ์ใบเสร็จซ้ำ', customer_copy_label:'🧾 สำเนาลูกค้า', kitchen_copy_label:'🍳 สำเนาครัว',
+    reprint_receipt:'🖨 พิมพ์ใบเสร็จซ้ำ',
     refund_order:'↩ คืนเงิน', refunded_label:'คืนเงินแล้ว', refunded_at_label:'คืนเงินเมื่อ', refunded_by_label:'คืนเงินโดย',
     refunded_by_admin:'ผู้ดูแลระบบ', refunded_by_manager:'ผู้จัดการ', refund_reason_label:'เหตุผล',
     refund_evidence_hint:'ถ่ายภาพเป็นหลักฐานก่อนดำเนินการคืนเงินนี้',
@@ -7011,30 +6950,12 @@ function buildReceiptContentHtml(o, isPreview){
     '<div class="r-footer">'+nl2br(s.footerMessage)+'</div>' +
     lapnetQrHtml;
 }
-/* Wraps the receipt content in two copies for printing — a customer copy
-   (always the one shown on screen) and a kitchen copy, so every checkout
-   prints both in a single print job. The kitchen copy is completely
-   hidden on screen (.print-only) and only appears in the print output,
-   separated by a dashed cut line and a forced page break so they come out
-   as two distinct slips even on a continuous receipt roll. */
-function buildReceiptCopiesHtml(o, isPreview){
-  var content = buildReceiptContentHtml(o, isPreview);
-  return '' +
-    '<div class="receipt-copy">' +
-      '<div class="receipt-copy-label print-only">'+tr('customer_copy_label')+'</div>' +
-      content +
-    '</div>' +
-    '<div class="receipt-copy receipt-copy-kitchen print-only">' +
-      '<div class="receipt-copy-label">'+tr('kitchen_copy_label')+'</div>' +
-      content +
-    '</div>';
-}
 function buildReceiptModal(){
   var o = state.receiptOrder;
   return '' +
   '<div class="pos-overlay" onclick="if(event.target===this) POS.closeReceipt()">' +
     '<div class="pos-modal receipt-modal">' +
-      '<div id="receipt-content">' + buildReceiptCopiesHtml(o, false) + '</div>' +
+      '<div id="receipt-content">' + buildReceiptContentHtml(o, false) + '</div>' +
       '<div class="receipt-actions">' +
         '<button class="btn btn-ghost" onclick="POS.closeReceipt()">'+(state.testPrintMode ? tr('close_recipe') : tr('new_order'))+'</button>' +
         '<button class="btn btn-primary" onclick="POS.printCurrentReceipt()">'+tr('print_receipt')+'</button>' +
