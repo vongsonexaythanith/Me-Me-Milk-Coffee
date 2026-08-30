@@ -3687,7 +3687,16 @@ var DEFAULT_INGREDIENTS = [];
 var DEFAULT_RECIPES = {};
 var DEFAULT_PREMIX = [];
 
-var SUGAR_LEVELS = [0,25,50,75,100,125];
+/* 0/25/50/75% hidden per shop request — only 100% and 125% are offered
+   to customers/staff now. This only trims the picker: sugarMultiplier()
+   (the recipe-scaling function) reads whatever value ends up stored on
+   the cart line and divides by a hardcoded 100, so it doesn't read this
+   array at all — nothing about stock deduction changes. Any already-
+   placed order with an older 0/25/50/75% line (from before this change)
+   still displays and deducts correctly; it just can't be newly chosen
+   from the picker anymore. To bring a level back, just add it to this
+   array. */
+var SUGAR_LEVELS = [100,125];
 var ICE_LEVELS = [
   {id:'none', label:'No Ice'},
   {id:'less', label:'Less Ice'},
