@@ -8122,10 +8122,30 @@ function buildStockTargetBox(ing, field, labelKey, stockField, extraStockField){
   } else if(needed<=0){
     statusHtml = '<div class="stock-target-status">✓ '+tr('fully_stocked_label')+'</div>';
   } else {
+    /* Shown for ANY status with a real shortfall — red, yellow, AND
+       green — not just red/yellow. Green still means "not urgent," but
+       green only means the stock hasn't dropped far enough to be a red/
+       yellow emergency; it doesn't mean the target is actually met (that
+       case is the needed<=0 "Fully stocked" branch above, entered
+       separately). A green item can still be short of its target, and
+       staff still need to know how many sets to deposit to close that
+       gap, same as they would for red/yellow — this used to only show
+       up once the item had already slid into yellow or red. */
     var setsBadge = '';
-    if((status==='red' || status==='yellow') && Number(ing.amountPerSet)>0){
-      var setsNeeded = Math.ceil(needed / Number(ing.amountPerSet));
-      setsBadge = ' <span class="sets-needed-badge">'+setsNeeded+' '+tr('sets_needed_suffix')+'</span>';
+    if(Number(ing.amountPerSet)>0){
+      /* Round to the nearest whole set instead of always rounding up
+         (Math.ceil) — a shortfall that's only a small fraction of one
+         set (e.g. 9.1 sets) shouldn't be nudged up to a whole extra set
+         just because it's not an exact multiple. Only round UP once the
+         remainder is at least half a set (9.5 or above); anything below
+         that rounds down, same as normal rounding. If that rounds all
+         the way down to 0 (the shortfall is under half of one set), the
+         badge is skipped entirely rather than showing "0 sets" — the
+         "Need X <unit>" text right next to it already says so. */
+      var setsNeeded = Math.round(needed / Number(ing.amountPerSet));
+      if(setsNeeded > 0){
+        setsBadge = ' <span class="sets-needed-badge">'+setsNeeded+' '+tr('sets_needed_suffix')+'</span>';
+      }
     }
     statusHtml = '<div class="stock-target-status">'+tr('deposit_needed_prefix')+' '+formatIngredientAmount(needed)+' '+escapeHtml(ing.unit)+setsBadge+'</div>';
   }
