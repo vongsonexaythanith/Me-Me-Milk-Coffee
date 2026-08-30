@@ -621,6 +621,10 @@ html, body{touch-action:pan-x pan-y;}
 .stock-target-box.status-yellow .stock-target-status{color:#1A1A1A;}
 .stock-target-box.status-green .stock-target-status{color:#fff;}
 .stock-target-status.status-none{color:var(--espresso-soft);font-weight:600;}
+.stock-target-combined-note{font-size:9.5px;font-weight:600;margin-top:3px;opacity:0.75;}
+.stock-target-box.status-red .stock-target-combined-note{color:rgba(255,255,255,0.85);}
+.stock-target-box.status-yellow .stock-target-combined-note{color:rgba(26,26,26,0.65);}
+.stock-target-box.status-green .stock-target-combined-note{color:rgba(255,255,255,0.85);}
 .sets-needed-badge{
   display:inline-block;background:rgba(255,255,255,0.92);color:#1A1A1A;
   border-radius:999px;padding:1px 8px;font-size:10.5px;font-weight:800;margin-left:2px;white-space:nowrap;
@@ -3868,6 +3872,7 @@ var TRANSLATIONS = {
     size_label:'Size', recipe_admin_only_hint:'Only an administrator can edit recipes.',
     weekly_target_label:'Weekly Target', monthly_target_label:'Monthly Target',
     deposit_needed_prefix:'Need', fully_stocked_label:'Fully stocked', no_target_set:'No target set',
+    monthly_target_combined_note:'Counts Shop Stock + House Stock combined',
     sets_needed_suffix:'sets needed',
     amount_per_set_label:'Amount Per Set', amount_per_set_hint:'Used to calculate sets needed',
     privileged_session_hint:'You are signed in with full access to this area for your whole session — no PIN needed again until you log out.',
@@ -4085,6 +4090,7 @@ var TRANSLATIONS = {
     size_label:'ຂະໜາດ', recipe_admin_only_hint:'ມີແຕ່ຜູ້ດູແລລະບົບເທົ່ານັ້ນທີ່ສາມາດແກ້ໄຂສູດໄດ້.',
     weekly_target_label:'ເປົ້າໝາຍລາຍອາທິດ', monthly_target_label:'ເປົ້າໝາຍລາຍເດືອນ',
     deposit_needed_prefix:'ຕ້ອງການ', fully_stocked_label:'ສະຕັອກພຽງພໍ', no_target_set:'ຍັງບໍ່ໄດ້ຕັ້ງເປົ້າໝາຍ',
+    monthly_target_combined_note:'ນັບລວມສະຕັອກຮ້ານ + ສະຕັອກສາງ',
     sets_needed_suffix:'ຊຸດທີ່ຕ້ອງການ',
     amount_per_set_label:'ຈຳນວນຕໍ່ຊຸດ', amount_per_set_hint:'ໃຊ້ຄິດໄລ່ຈຳນວນຊຸດທີ່ຕ້ອງການ',
     privileged_session_hint:'ທ່ານໄດ້ເຂົ້າສູ່ລະບົບດ້ວຍສິດເຂົ້າເຖິງເຕັມສ່ວນນີ້ຕະຫຼອດການນຳໃຊ້ — ບໍ່ຕ້ອງໃສ່ລະຫັດອີກຈົນກວ່າຈະອອກຈາກລະບົບ.',
@@ -4302,6 +4308,7 @@ var TRANSLATIONS = {
     size_label:'ขนาด', recipe_admin_only_hint:'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถแก้ไขสูตรได้',
     weekly_target_label:'เป้าหมายรายสัปดาห์', monthly_target_label:'เป้าหมายรายเดือน',
     deposit_needed_prefix:'ต้องการ', fully_stocked_label:'สต็อกเพียงพอ', no_target_set:'ยังไม่ได้ตั้งเป้าหมาย',
+    monthly_target_combined_note:'นับรวมสต็อกร้าน + สต็อกคลัง',
     sets_needed_suffix:'ชุดที่ต้องการ',
     amount_per_set_label:'จำนวนต่อชุด', amount_per_set_hint:'ใช้คำนวณจำนวนชุดที่ต้องการ',
     privileged_session_hint:'คุณเข้าสู่ระบบด้วยสิทธิ์เข้าถึงส่วนนี้เต็มรูปแบบตลอดเซสชัน — ไม่ต้องใส่รหัส PIN อีกจนกว่าจะออกจากระบบ',
@@ -7691,10 +7698,10 @@ function buildHouseStockRawSubTab(){
     return '' +
     '<div class="mgmt-row" style="flex-wrap:wrap;row-gap:10px;">' +
       '<span class="em">'+ingredientEmoji(ing.unit)+'</span>' +
-      '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+tr('house_stock_qty_label')+': '+formatIngredientAmount(ing.houseStock)+' '+escapeHtml(ing.unit)+'</div></div>' +
+      '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+tr('current_stock_label')+': '+formatIngredientAmount(ing.stock)+' '+escapeHtml(ing.unit)+' · '+tr('house_stock_qty_label')+': '+formatIngredientAmount(ing.houseStock)+' '+escapeHtml(ing.unit)+'</div></div>' +
       '<div class="acts"><button class="btn btn-outline btn-small" onclick="POS.editHouseStock(\''+ing.id+'\')">'+tr('edit')+'</button></div>' +
       '<div class="stock-target-grid">' +
-        buildStockTargetBox(ing, 'monthlyTarget', 'monthly_target_label', 'houseStock') +
+        buildStockTargetBox(ing, 'monthlyTarget', 'monthly_target_label', 'houseStock', 'stock') +
         buildAmountPerSetBox(ing) +
       '</div>' +
     '</div>';
@@ -8096,12 +8103,19 @@ function stockStatusFor(stock, target){
   if(pct <= 0.5) return 'yellow';
   return 'green';
 }
-function buildStockTargetBox(ing, field, labelKey, stockField){
+/* extraStockField (optional) makes the target comparison count a SECOND
+   stock field alongside stockField, rather than stockField alone — this
+   is what House Stock's monthly target uses (extraStockField='stock') so
+   "amount needed monthly" reflects what's actually on hand shop-wide
+   (Shop Stock + House Stock combined), not just what's sitting in the
+   warehouse. Shop Stock's own weekly target box never passes this, so
+   its calculation (weeklyTarget - stock) is completely unchanged. */
+function buildStockTargetBox(ing, field, labelKey, stockField, extraStockField){
   stockField = stockField || 'stock';
-  var stockValue = ing[stockField];
+  var stockValue = (Number(ing[stockField])||0) + (extraStockField ? (Number(ing[extraStockField])||0) : 0);
   var target = ing[field];
   var status = stockStatusFor(stockValue, target);
-  var needed = Math.max(0, (Number(target)||0) - (Number(stockValue)||0));
+  var needed = Math.max(0, (Number(target)||0) - stockValue);
   var statusHtml;
   if(status===null){
     statusHtml = '<div class="stock-target-status status-none">'+tr('no_target_set')+'</div>';
@@ -8122,6 +8136,7 @@ function buildStockTargetBox(ing, field, labelKey, stockField){
       'oninput="POS.updateIngredientTarget(\''+ing.id+'\',\''+field+'\',this.value)" ' +
       'onblur="POS.persistIngredientTarget(\''+ing.id+'\')"/>' +
     statusHtml +
+    (extraStockField ? '<div class="stock-target-combined-note">'+tr('monthly_target_combined_note')+'</div>' : '') +
   '</div>';
 }
 function buildAmountPerSetBox(ing){
@@ -8145,11 +8160,14 @@ function ingredientSeverity(ing){
   return wStatus!=null ? STOCK_SEVERITY_RANK[wStatus] : 3;
 }
 /* Same idea, but for House Stock: sorts by MONTHLY target status against
-   houseStock instead of weekly target against stock. Kept as a separate
-   function (rather than parameterizing ingredientSeverity) so each tab's
-   sort rule stays easy to read on its own. */
+   Shop Stock + House Stock COMBINED (matching buildStockTargetBox's own
+   monthly-target calculation below — see its comment for why), rather
+   than weekly target against stock alone. Kept as a separate function
+   (rather than parameterizing ingredientSeverity) so each tab's sort
+   rule stays easy to read on its own. */
 function ingredientSeverityHouseStock(ing){
-  var mStatus = stockStatusFor(ing.houseStock, ing.monthlyTarget);
+  var combined = (Number(ing.houseStock)||0) + (Number(ing.stock)||0);
+  var mStatus = stockStatusFor(combined, ing.monthlyTarget);
   return mStatus!=null ? STOCK_SEVERITY_RANK[mStatus] : 3;
 }
 function buildRawMaterialsSubTab(){
