@@ -621,16 +621,14 @@ html, body{touch-action:pan-x pan-y;}
 .stock-target-box.status-yellow .stock-target-status{color:#1A1A1A;}
 .stock-target-box.status-green .stock-target-status{color:#fff;}
 .stock-target-status.status-none{color:var(--espresso-soft);font-weight:600;}
+.stock-target-combined-note{font-size:9.5px;font-weight:600;margin-top:3px;opacity:0.75;}
+.stock-target-box.status-red .stock-target-combined-note{color:rgba(255,255,255,0.85);}
+.stock-target-box.status-yellow .stock-target-combined-note{color:rgba(26,26,26,0.65);}
+.stock-target-box.status-green .stock-target-combined-note{color:rgba(255,255,255,0.85);}
 .sets-needed-badge{
   display:inline-block;background:rgba(255,255,255,0.92);color:#1A1A1A;
   border-radius:999px;padding:1px 8px;font-size:10.5px;font-weight:800;margin-left:2px;white-space:nowrap;
 }
-/* Kitchen copy only exists for printing — never shown while reviewing the
-   receipt on screen. The customer-copy label is print-only too, since on
-   screen there's only ever one copy visible and a label would be noise. */
-.print-only{display:none;}
-.receipt-copy-label{text-align:center;font-weight:800;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--espresso-soft);margin-bottom:8px;}
-
 @media print{
   @page{ margin:6mm; }
   html, body{ margin:0 !important; padding:0 !important; height:auto !important; background:#fff !important; }
@@ -677,6 +675,46 @@ html, body{touch-action:pan-x pan-y;}
 .scroll-nav-btn:hover{background:rgba(255,255,255,0.92);}
 .scroll-nav-btn-disabled{opacity:0.35;pointer-events:none;}
 @media print{ .scroll-nav-buttons{display:none !important;} }
+.tab-badge{display:inline-block;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--coral,#DC5758);color:#fff;font-size:10px;font-weight:800;line-height:16px;text-align:center;margin-left:4px;vertical-align:middle;}
+.order-alert-stack{
+  position:fixed;top:14px;right:14px;z-index:200;display:flex;flex-direction:column;
+  gap:20px;max-width:min(640px, calc(100vw - 28px));pointer-events:none;
+}
+.order-alert-stack-inner{position:relative;}
+.order-alert-peek{
+  position:absolute;inset:0;pointer-events:none;
+  background:var(--paper,#fff);border:3px solid var(--taro,#8B6F9E);
+  border-left:10px solid var(--coral,#DC5758);border-radius:24px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.12);
+  transform:translate(calc(var(--peek-i) * 7px), calc(var(--peek-i) * 9px)) scale(calc(1 - var(--peek-i) * 0.035));
+  opacity:calc(1 - var(--peek-i) * 0.32);
+  z-index:0;
+}
+.order-alert-toast{
+  position:relative;z-index:1;
+  pointer-events:auto;background:var(--paper,#fff);border:3px solid var(--taro,#8B6F9E);
+  border-left:10px solid var(--coral,#DC5758);border-radius:24px;padding:24px 28px;
+  box-shadow:0 16px 48px rgba(0,0,0,0.18);display:flex;gap:20px;align-items:flex-start;
+  cursor:pointer;animation:order-alert-in .28s ease-out;
+}
+.order-alert-toast:active{transform:scale(0.98);}
+.order-alert-icon{font-size:40px;line-height:1;flex:none;}
+.order-alert-body{flex:1;min-width:0;}
+.order-alert-title{font-weight:800;font-size:26px;color:var(--espresso,#4A2E1A);}
+.order-alert-sub{font-size:23px;color:var(--espresso-soft);margin-top:4px;}
+.order-alert-queue-hint{font-size:16px;font-weight:700;color:var(--taro,#8B6F9E);margin-top:8px;}
+.order-alert-count-badge{
+  position:absolute;top:-14px;left:-14px;min-width:32px;height:32px;padding:0 9px;
+  border-radius:999px;background:var(--coral,#DC5758);color:#fff;font-size:15px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,0.25);
+  z-index:2;
+}
+.order-alert-close{flex:none;background:none;border:none;font-size:28px;color:var(--espresso-soft);cursor:pointer;padding:4px 8px;line-height:1;}
+.order-alert-close:hover{color:var(--espresso,#4A2E1A);}
+@keyframes order-alert-in{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:translateX(0);}}
+@media (max-width:480px){
+  .order-alert-stack{left:10px;right:10px;top:10px;max-width:none;}
+}
 </style>
 
 <div id="pos-root">
@@ -3109,7 +3147,8 @@ var DEFAULT_SETTINGS = {
   printerIpAddress: "",
   printerDeviceId: "local_printer",
   printerRawbtImageMode: false,
-  categoryTranslations: {} // { "CategoryName": {lo:"...", th:"..."} }
+  categoryTranslations: {}, // { "CategoryName": {lo:"...", th:"..."} }
+  selfServiceBaseUrl: "" // Customer self-service portal base URL (e.g. https://yourshop.web.app/self-service.html). Leave blank to auto-guess from this page's own address.
 };
 /* Fallback labels shown for any account key not yet given a custom name in
    Settings — e.g. before the shop owner has typed in each team member's
@@ -3154,7 +3193,8 @@ function todayDateKey(){
    receipt: matches buildReceiptContentHtml's content, laid out as a
    monospaced two-column table (name/value padded to the line width) since
    ePOS-Print has no simple "space-between" text layout. Logo/QR are not
-   included in this path yet. */
+   included in this path yet. Single copy per print, same as every other
+   print path — see buildEposPrintXml. */
 function eposCharWidth(){
   return (state.settings && state.settings.printerPaperWidth==='58mm') ? 32 : 48;
 }
@@ -3195,56 +3235,57 @@ function eposPadLine(left, right, width){
   }
   return left + new Array(Math.max(1,space)+1).join(' ') + right;
 }
+/* Single receipt only — this used to print a customer copy followed by a
+   kitchen copy in the same job, but that meant burning twice the paper on
+   every sale for a second slip most shops never actually needed. Now
+   builds just the one copy; the customer/kitchen-copy labels are gone
+   too, since there's nothing left to distinguish it from. */
 function buildEposPrintXml(o){
   var s = state.settings;
   var W = eposCharWidth();
-  function buildCopy(isKitchen){
-    var out = '';
-    out += '<text align="center" em="true" width="2" height="2"/>';
-    out += eposText(s.shopName || '');
-    out += '<text em="false" width="1" height="1"/>';
-    if(s.address) eposWrapLines(s.address, W).forEach(function(ln){ out += eposText(ln); });
-    if(s.phone) out += eposText(s.phone);
-    var d = new Date(o.timestamp);
-    var metaLine = tr('order_number')+String(o.number).padStart(4,'0')+' - '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    out += eposText(metaLine);
-    out += eposText(isKitchen ? ('*** '+tr('kitchen_copy_label')+' ***') : tr('customer_copy_label'));
-    out += '<text align="left"/>';
-    out += eposText(new Array(W+1).join('-'));
-    o.items.forEach(function(l){
-      var priceStr = escposMoney(l.unitPrice*l.qty);
-      var nameStr = l.qty+'x '+cartLineName(l);
-      var nameLines = eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1));
-      nameLines.forEach(function(ln,i){
-        out += eposText(i===0 ? eposPadLine(ln, priceStr, W) : ln);
-      });
-      var meta = l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice);
-      eposWrapLines(meta, W-2).forEach(function(ln){ out += eposText('  '+ln); });
-      l.toppings.forEach(function(t){
-        eposWrapLines(cartLineToppingDisplay(t), W-4).forEach(function(ln){ out += eposText('    '+ln); });
-      });
+  var out = '';
+  out += '<text align="center" em="true" width="2" height="2"/>';
+  out += eposText(s.shopName || '');
+  out += '<text em="false" width="1" height="1"/>';
+  if(s.address) eposWrapLines(s.address, W).forEach(function(ln){ out += eposText(ln); });
+  if(s.phone) out += eposText(s.phone);
+  var d = new Date(o.timestamp);
+  var metaLine = tr('order_number')+String(o.number).padStart(4,'0')+' - '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  out += eposText(metaLine);
+  out += '<text align="left"/>';
+  out += eposText(new Array(W+1).join('-'));
+  o.items.forEach(function(l){
+    var priceStr = escposMoney(l.unitPrice*l.qty);
+    var nameStr = l.qty+'x '+cartLineName(l);
+    var nameLines = eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1));
+    nameLines.forEach(function(ln,i){
+      out += eposText(i===0 ? eposPadLine(ln, priceStr, W) : ln);
     });
-    out += eposText(new Array(W+1).join('-'));
-    out += eposText(eposPadLine(tr('subtotal'), escposMoney(o.subtotal), W));
-    if(o.discount>0) out += eposText(eposPadLine(tr('discount'), '-'+escposMoney(o.discount), W));
-    if(o.serviceCharge>0) out += eposText(eposPadLine(tr('service_charge'), escposMoney(o.serviceCharge), W));
-    out += '<text em="true"/>';
-    out += eposText(eposPadLine(tr('total'), escposMoney(o.total), W));
-    out += '<text em="false"/>';
-    out += eposText(eposPadLine(tr('receipt_payment'), paymentDisplayFor(o), W));
-    if(o.placedByAccount) out += eposText(eposPadLine(tr('served_by_label'), staffNameFor(o.placedByAccount), W));
-    if(o.paymentMethod==='cash'){
-      out += eposText(eposPadLine(tr('cash_received'), escposMoney(o.amountReceived), W));
-      out += eposText(eposPadLine(tr('receipt_change'), escposMoney(o.change), W));
-    }
-    out += '<text align="center"/>';
-    String(s.footerMessage||'').split('\n').forEach(function(line){
-      eposWrapLines(line, W).forEach(function(ln){ out += eposText(ln); });
+    var meta = l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice);
+    eposWrapLines(meta, W-2).forEach(function(ln){ out += eposText('  '+ln); });
+    l.toppings.forEach(function(t){
+      eposWrapLines(cartLineToppingDisplay(t), W-4).forEach(function(ln){ out += eposText('    '+ln); });
     });
-    out += '<feed line="2"/><cut type="feed"/>';
-    return out;
+  });
+  out += eposText(new Array(W+1).join('-'));
+  out += eposText(eposPadLine(tr('subtotal'), escposMoney(o.subtotal), W));
+  if(o.discount>0) out += eposText(eposPadLine(tr('discount'), '-'+escposMoney(o.discount), W));
+  if(o.serviceCharge>0) out += eposText(eposPadLine(tr('service_charge'), escposMoney(o.serviceCharge), W));
+  out += '<text em="true"/>';
+  out += eposText(eposPadLine(tr('total'), escposMoney(o.total), W));
+  out += '<text em="false"/>';
+  out += eposText(eposPadLine(tr('receipt_payment'), paymentDisplayFor(o), W));
+  if(o.placedByAccount) out += eposText(eposPadLine(tr('served_by_label'), staffNameFor(o.placedByAccount), W));
+  if(o.paymentMethod==='cash'){
+    out += eposText(eposPadLine(tr('cash_received'), escposMoney(o.amountReceived), W));
+    out += eposText(eposPadLine(tr('receipt_change'), escposMoney(o.change), W));
   }
-  return '<epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">' + buildCopy(false) + '</epos-print>';
+  out += '<text align="center"/>';
+  String(s.footerMessage||'').split('\n').forEach(function(line){
+    eposWrapLines(line, W).forEach(function(ln){ out += eposText(ln); });
+  });
+  out += '<feed line="2"/><cut type="feed"/>';
+  return '<epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">' + out + '</epos-print>';
 }
 /* POSTs the receipt to the printer's ePOS-Print endpoint. Resolves on a
    confirmed successful print, rejects with a human-readable reason
@@ -3329,62 +3370,60 @@ function escposMoney(n){
   n = Math.round(Number(n)||0);
   return 'LAK '+n.toLocaleString('en-US');
 }
+/* Single receipt only — see buildEposPrintXml above for why the old
+   customer-copy-then-kitchen-copy behavior was removed. */
 function buildEscPosReceipt(o){
   var s = state.settings;
   var W = eposCharWidth();
   var sz = escposSanitize;
-  function buildCopy(isKitchen){
-    var out = ESCPOS_ESC+'@'; // initialize printer
-    /* No bold (ESC E) or double-size (GS !) here — this printer/RawBT
-       combination doesn't reliably execute them and was printing the raw
-       command bytes as garbage text instead. Align + plain "====" / "----"
-       separator lines give the same visual hierarchy without relying on
-       any formatting command beyond the very safe, near-universal align. */
-    out += escposAlign(1);
-    out += escposLine(new Array(W+1).join('='));
-    out += escposLine(sz(s.shopName || ''));
-    out += escposLine(new Array(W+1).join('='));
-    if(s.address) eposWrapLines(sz(s.address), W).forEach(function(ln){ out += escposLine(ln); });
-    if(s.phone) out += escposLine(sz(s.phone));
-    var d = new Date(o.timestamp);
-    var metaLine = sz(tr('order_number'))+String(o.number).padStart(4,'0')+' - '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    out += escposLine(metaLine);
-    out += escposLine(sz(isKitchen ? ('*** '+tr('kitchen_copy_label')+' ***') : tr('customer_copy_label')));
-    out += escposAlign(0);
-    out += escposLine(new Array(W+1).join('-'));
-    o.items.forEach(function(l){
-      var priceStr = escposMoney(l.unitPrice*l.qty);
-      var nameStr = sz(l.qty+'x '+cartLineName(l));
-      eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1)).forEach(function(ln,i){
-        out += escposLine(i===0 ? eposPadLine(ln, priceStr, W) : ln);
-      });
-      var meta = sz(l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice));
-      eposWrapLines(meta, W-2).forEach(function(ln){ out += escposLine('  '+ln); });
-      l.toppings.forEach(function(t){
-        eposWrapLines(sz(cartLineToppingDisplay(t)), W-4).forEach(function(ln){ out += escposLine('    '+ln); });
-      });
+  var out = ESCPOS_ESC+'@'; // initialize printer
+  /* No bold (ESC E) or double-size (GS !) here — this printer/RawBT
+     combination doesn't reliably execute them and was printing the raw
+     command bytes as garbage text instead. Align + plain "====" / "----"
+     separator lines give the same visual hierarchy without relying on
+     any formatting command beyond the very safe, near-universal align. */
+  out += escposAlign(1);
+  out += escposLine(new Array(W+1).join('='));
+  out += escposLine(sz(s.shopName || ''));
+  out += escposLine(new Array(W+1).join('='));
+  if(s.address) eposWrapLines(sz(s.address), W).forEach(function(ln){ out += escposLine(ln); });
+  if(s.phone) out += escposLine(sz(s.phone));
+  var d = new Date(o.timestamp);
+  var metaLine = sz(tr('order_number'))+String(o.number).padStart(4,'0')+' - '+d.toLocaleDateString('en-GB')+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  out += escposLine(metaLine);
+  out += escposAlign(0);
+  out += escposLine(new Array(W+1).join('-'));
+  o.items.forEach(function(l){
+    var priceStr = escposMoney(l.unitPrice*l.qty);
+    var nameStr = sz(l.qty+'x '+cartLineName(l));
+    eposWrapLines(nameStr, Math.max(8, W - priceStr.length - 1)).forEach(function(ln,i){
+      out += escposLine(i===0 ? eposPadLine(ln, priceStr, W) : ln);
     });
-    out += escposLine(new Array(W+1).join('-'));
-    out += escposLine(eposPadLine(sz(tr('subtotal')), escposMoney(o.subtotal), W));
-    if(o.discount>0) out += escposLine(eposPadLine(sz(tr('discount')), '-'+escposMoney(o.discount), W));
-    if(o.serviceCharge>0) out += escposLine(eposPadLine(sz(tr('service_charge')), escposMoney(o.serviceCharge), W));
-    out += escposLine(new Array(W+1).join('='));
-    out += escposLine(eposPadLine(sz(tr('total')), escposMoney(o.total), W));
-    out += escposLine(new Array(W+1).join('='));
-    out += escposLine(eposPadLine(sz(tr('receipt_payment')), sz(paymentDisplayFor(o)), W));
-    if(o.placedByAccount) out += escposLine(eposPadLine(sz(tr('served_by_label')), sz(staffNameFor(o.placedByAccount)), W));
-    if(o.paymentMethod==='cash'){
-      out += escposLine(eposPadLine(sz(tr('cash_received')), escposMoney(o.amountReceived), W));
-      out += escposLine(eposPadLine(sz(tr('receipt_change')), escposMoney(o.change), W));
-    }
-    out += escposAlign(1);
-    String(s.footerMessage||'').split('\n').forEach(function(line){
-      eposWrapLines(sz(line), W).forEach(function(ln){ out += escposLine(ln); });
+    var meta = sz(l.size+' '+l.sugar+'% '+tr('sugar_word')+' '+iceLabel(l.ice));
+    eposWrapLines(meta, W-2).forEach(function(ln){ out += escposLine('  '+ln); });
+    l.toppings.forEach(function(t){
+      eposWrapLines(sz(cartLineToppingDisplay(t)), W-4).forEach(function(ln){ out += escposLine('    '+ln); });
     });
-    out += '\n\n\n'+ESCPOS_GS+'V'+String.fromCharCode(1); // feed clear of the cutter, then partial cut
-    return out;
+  });
+  out += escposLine(new Array(W+1).join('-'));
+  out += escposLine(eposPadLine(sz(tr('subtotal')), escposMoney(o.subtotal), W));
+  if(o.discount>0) out += escposLine(eposPadLine(sz(tr('discount')), '-'+escposMoney(o.discount), W));
+  if(o.serviceCharge>0) out += escposLine(eposPadLine(sz(tr('service_charge')), escposMoney(o.serviceCharge), W));
+  out += escposLine(new Array(W+1).join('='));
+  out += escposLine(eposPadLine(sz(tr('total')), escposMoney(o.total), W));
+  out += escposLine(new Array(W+1).join('='));
+  out += escposLine(eposPadLine(sz(tr('receipt_payment')), sz(paymentDisplayFor(o)), W));
+  if(o.placedByAccount) out += escposLine(eposPadLine(sz(tr('served_by_label')), sz(staffNameFor(o.placedByAccount)), W));
+  if(o.paymentMethod==='cash'){
+    out += escposLine(eposPadLine(sz(tr('cash_received')), escposMoney(o.amountReceived), W));
+    out += escposLine(eposPadLine(sz(tr('receipt_change')), escposMoney(o.change), W));
   }
-  return buildCopy(false);
+  out += escposAlign(1);
+  String(s.footerMessage||'').split('\n').forEach(function(line){
+    eposWrapLines(sz(line), W).forEach(function(ln){ out += escposLine(ln); });
+  });
+  out += '\n\n\n'+ESCPOS_GS+'V'+String.fromCharCode(1); // feed clear of the cutter, then partial cut
+  return out;
 }
 /* Correct UTF-8-safe base64 encoding: btoa() only accepts single-byte
    (0x00-0xFF) input, so Lao/Thai/etc. text (which is multi-byte in UTF-8)
@@ -3407,6 +3446,37 @@ function bytesToBase64(bytes){
   for(var i=0;i<bytes.length;i++) binary += String.fromCharCode(bytes[i]);
   return btoa(binary);
 }
+/* Converts one already-rendered canvas into ESC/POS raster print commands
+   (GS v 0), split into row chunks since sending one huge raster command
+   can overrun some printers'/RawBT's buffer. Pulled out of
+   buildEscPosReceiptImage below so it can be called once per copy — see
+   that function's own comment for why that split matters. */
+function canvasToEscPosRasterBytes(canvas){
+  var w = canvas.width, h = canvas.height;
+  var ctx = canvas.getContext('2d');
+  var imgData = ctx.getImageData(0, 0, w, h).data;
+  var bytesPerRow = Math.ceil(w / 8);
+  var bytes = [];
+  var CHUNK_ROWS = 256;
+  for(var startRow=0; startRow<h; startRow+=CHUNK_ROWS){
+    var rows = Math.min(CHUNK_ROWS, h-startRow);
+    var rowBytes = new Array(bytesPerRow*rows).fill(0);
+    for(var y=0; y<rows; y++){
+      for(var x=0; x<w; x++){
+        var idx = ((startRow+y)*w + x) * 4;
+        var r=imgData[idx], g=imgData[idx+1], b=imgData[idx+2], a=imgData[idx+3];
+        var lum = a<128 ? 255 : (0.299*r + 0.587*g + 0.114*b);
+        if(lum < 200){
+          var byteIndex = y*bytesPerRow + (x>>3);
+          rowBytes[byteIndex] |= (1 << (7-(x&7)));
+        }
+      }
+    }
+    var header = [0x1D,0x76,0x30,0x00, bytesPerRow&0xFF,(bytesPerRow>>8)&0xFF, rows&0xFF,(rows>>8)&0xFF];
+    bytes = bytes.concat(header, rowBytes);
+  }
+  return bytes;
+}
 /* Renders the receipt as an actual image and prints it via ESC/POS
    raster commands (GS v 0), instead of sending text — this is how to
    get genuine visual parity with the on-screen receipt (fonts, bold,
@@ -3417,11 +3487,13 @@ function bytesToBase64(bytes){
    codepage at all — it's just "turn on these dots" — so this is
    actually more likely to work reliably than the text formatting
    commands that failed earlier, not less.
-   Captures the SAME markup the on-screen receipt uses (buildReceiptCopiesHtml)
-   via html2canvas, so what prints is a direct rendering of what's on screen,
-   not a re-implementation. 384/576 dots are the standard raster widths for
-   58mm/80mm thermal printers. Split into row chunks since sending one huge
-   raster command can overrun some printers'/RawBT's buffer. */
+   Captures the SAME markup the on-screen receipt uses
+   (buildReceiptContentHtml) via html2canvas, so what prints is a direct
+   rendering of what's on screen, not a re-implementation. 384/576 dots
+   are the standard raster widths for 58mm/80mm thermal printers.
+   Single copy only — this used to also capture and print a second
+   "kitchen copy" image right after, but that doubled the paper used on
+   every sale for a second slip most shops never actually needed. */
 async function buildEscPosReceiptImage(order){
   var paperWidthDots = (state.settings && state.settings.printerPaperWidth==='58mm') ? 384 : 576;
   /* The font size here must be picked in proportion to paperWidthDots to
@@ -3439,15 +3511,6 @@ async function buildEscPosReceiptImage(order){
   var previewSpec = RECEIPT_PAPER_SIZES[(state.settings && state.settings.printerPaperWidth) || '80mm'] || RECEIPT_PAPER_SIZES['80mm'];
   var imageFontSize = Math.round(previewSpec.font * (paperWidthDots / previewSpec.width));
   var container = document.createElement('div');
-  /* id="receipt-content" (not just a class) is required here: all the
-     centering, logo circular-crop, and font-size rules in <style> are
-     scoped specifically to "#receipt-content .r-xxx" selectors. Without
-     this exact id, none of that styling applies at all — which is why
-     the logo and header text weren't centered before. Nothing else in
-     the app looks this id up via getElementById, so a second element
-     sharing it (this container, alongside the real visible receipt
-     modal when printing right after checkout) is safe — CSS id selectors
-     match every element with that id, not just one. */
   container.id = 'receipt-content';
   container.className = 'pos-print-capture';
   container.style.position = 'fixed';
@@ -3458,17 +3521,17 @@ async function buildEscPosReceiptImage(order){
   container.style.boxSizing = 'border-box';
   container.style.padding = '10px';
   container.style.fontSize = imageFontSize+'px'; // bigger than the on-screen preview size — that was tuned for a small modal, not a full-width printout
-  /* This container is appended straight to document.body (see below),
-     outside #pos-root entirely — so it never inherits the app's own
+  /* Appended straight to document.body (see below), outside #pos-root
+     entirely — so it never inherits the app's own
      "font-family:'Noto Sans Lao'" rule (#pos-root.lang-lo), which only
      applies inside that tree. Set it explicitly here so a Lao-language
-     receipt actually uses the same embedded font as the rest of the app,
-     not just whatever generic font the browser falls back to for Lao
-     script. */
+     receipt actually uses the same embedded font as the rest of the
+     app, not just whatever generic font the browser falls back to for
+     Lao script. */
   if(state.language==='lo'){
     container.style.fontFamily = "'Noto Sans Lao','Inter',sans-serif";
   }
-  container.innerHTML = buildReceiptCopiesHtml(order, false);
+  container.innerHTML = buildReceiptContentHtml(order, false);
   document.body.appendChild(container);
   try {
     /* html2canvas has long-standing, widely-reported bugs with custom/
@@ -3495,7 +3558,7 @@ async function buildEscPosReceiptImage(order){
        keeps firing regardless of visibility, so this can't get stuck. */
     await new Promise(function(r){ setTimeout(r, 50); });
     await new Promise(function(r){ setTimeout(r, 150); });
-    var canvas = await html2canvas(container, {
+    var html2canvasOpts = {
       backgroundColor: '#ffffff',
       width: paperWidthDots,
       windowWidth: paperWidthDots,
@@ -3506,31 +3569,11 @@ async function buildEscPosReceiptImage(order){
         var clonedEl = clonedDoc.getElementById('receipt-content');
         if(clonedEl) clonedEl.style.fontFamily = "'Noto Sans Lao','Inter',sans-serif";
       }
-    });
-    var w = canvas.width, h = canvas.height;
-    var ctx = canvas.getContext('2d');
-    var imgData = ctx.getImageData(0, 0, w, h).data;
-    var bytesPerRow = Math.ceil(w / 8);
+    };
+    var canvas = await html2canvas(container, html2canvasOpts);
+    var CUT = [0x0A,0x0A,0x0A, 0x1D,0x56,0x01]; // feed clear of cutter, partial cut
     var allBytes = [0x1B, 0x40]; // ESC @ (initialize printer)
-    var CHUNK_ROWS = 256;
-    for(var startRow=0; startRow<h; startRow+=CHUNK_ROWS){
-      var rows = Math.min(CHUNK_ROWS, h-startRow);
-      var rowBytes = new Array(bytesPerRow*rows).fill(0);
-      for(var y=0; y<rows; y++){
-        for(var x=0; x<w; x++){
-          var idx = ((startRow+y)*w + x) * 4;
-          var r=imgData[idx], g=imgData[idx+1], b=imgData[idx+2], a=imgData[idx+3];
-          var lum = a<128 ? 255 : (0.299*r + 0.587*g + 0.114*b);
-          if(lum < 200){
-            var byteIndex = y*bytesPerRow + (x>>3);
-            rowBytes[byteIndex] |= (1 << (7-(x&7)));
-          }
-        }
-      }
-      var header = [0x1D,0x76,0x30,0x00, bytesPerRow&0xFF,(bytesPerRow>>8)&0xFF, rows&0xFF,(rows>>8)&0xFF];
-      allBytes = allBytes.concat(header, rowBytes);
-    }
-    allBytes = allBytes.concat([0x0A,0x0A,0x0A, 0x1D,0x56,0x01]); // feed clear of cutter, partial cut
+    allBytes = allBytes.concat(canvasToEscPosRasterBytes(canvas)).concat(CUT);
     return new Uint8Array(allBytes);
   } finally {
     document.body.removeChild(container);
@@ -3572,6 +3615,27 @@ function sendToRawBT(order){
    Printer settings, and falls back to the print dialog automatically if
    a direct print attempt fails, so a checkout is never blocked by a
    printer issue. */
+/* Auto-close the receipt after a normal checkout, so staff aren't
+   required to tap "New Order" every single time just to get back to
+   ordering — see completeOrder() and closeReceipt() below. Only ever
+   scheduled for a fresh checkout (never for a reprint from History, a
+   Settings test print, or an Incoming Order approval), and only ever one
+   pending timer at a time: cancelReceiptAutoClose() is called before
+   scheduling a new one and from closeReceipt() itself, so an early
+   manual close can't be followed by a stale auto-close firing later on a
+   screen that's already moved on to something else. */
+var receiptAutoCloseTimer = null;
+var RECEIPT_AUTO_CLOSE_MS = 2000;
+function scheduleReceiptAutoClose(){
+  cancelReceiptAutoClose();
+  receiptAutoCloseTimer = setTimeout(function(){
+    receiptAutoCloseTimer = null;
+    POS.closeReceipt();
+  }, RECEIPT_AUTO_CLOSE_MS);
+}
+function cancelReceiptAutoClose(){
+  if(receiptAutoCloseTimer){ clearTimeout(receiptAutoCloseTimer); receiptAutoCloseTimer = null; }
+}
 function triggerPrint(order){
   var mode = state.settings && state.settings.printerConnectionMode;
   if(mode==='epson_epos'){
@@ -3623,7 +3687,16 @@ var DEFAULT_INGREDIENTS = [];
 var DEFAULT_RECIPES = {};
 var DEFAULT_PREMIX = [];
 
-var SUGAR_LEVELS = [0,25,50,75,100,125];
+/* 0/25/50/75% hidden per shop request — only 100% and 125% are offered
+   to customers/staff now. This only trims the picker: sugarMultiplier()
+   (the recipe-scaling function) reads whatever value ends up stored on
+   the cart line and divides by a hardcoded 100, so it doesn't read this
+   array at all — nothing about stock deduction changes. Any already-
+   placed order with an older 0/25/50/75% line (from before this change)
+   still displays and deducts correctly; it just can't be newly chosen
+   from the picker anymore. To bring a level back, just add it to this
+   array. */
+var SUGAR_LEVELS = [100,125];
 var ICE_LEVELS = [
   {id:'none', label:'No Ice'},
   {id:'less', label:'Less Ice'},
@@ -3638,7 +3711,27 @@ var CATEGORY_PALETTE = ['caramel','taro','matcha','coral'];
    Menu/History/Settings/Admin back-office text stays in English for now. */
 var TRANSLATIONS = {
   en: {
-    tab_order:'🧋 Order', tab_menu:'📋 Menu', tab_history:'🧾 History', tab_deleted:'🔒 Deleted', tab_settings:'⚙️ Settings',
+    tab_order:'🧋 Order', tab_incoming:'🧺 Incoming Orders', tab_menu:'📋 Menu', tab_history:'🧾 History', tab_deleted:'🔒 Deleted', tab_settings:'⚙️ Settings',
+    incoming_sync_error:'Could not load Incoming Orders — check the Firestore security rules for the pos_incoming_orders collection.',
+    incoming_empty_note:'No pending self-service orders right now. New orders submitted from the QR menu will show up here automatically.',
+    incoming_guest_order:'Guest order',
+    incoming_reject_btn:'✕ Reject', incoming_review_approve_btn:'✓ Review & Approve',
+    incoming_tab_hint:'Customer orders submitted from the QR self-service menu. Nothing is recorded as a sale — and no stock is deducted — until you approve it below.',
+    incoming_approve_title:'Approve Order', incoming_payment_method_label:'Payment method',
+    incoming_exact_amount_placeholder:'Exact amount', incoming_confirm_record_btn:'Confirm & Record Sale',
+    incoming_reject_hint:'Need a discount in a foreign currency, or to edit items? Reject this and enter it manually from the Order tab instead.',
+    incoming_customer_requested_label:'Customer requested:',
+    incoming_reject_confirm:'Reject this order? The customer will need to re-submit or order at the counter instead.',
+    order_alert_new_order:'New order!', order_alert_title_flash:'New order!',
+    order_alert_queue_hint:'+{n} more order(s) waiting',
+    order_alert_sound_on_btn:'Alerts on', order_alert_sound_off_btn:'Alerts muted',
+    order_alert_sound_upload_btn:'🎵 Upload sound', order_alert_sound_test_btn:'▶ Test',
+    order_alert_sound_reset_btn:'Use default chime', order_alert_sound_custom_label:'Custom sound active (shared on all devices)',
+    order_alert_sound_invalid_type:'Please choose an audio file (MP3, WAV, etc).',
+    order_alert_sound_too_large:'That file is too big — please choose a short clip under 500KB (a couple of seconds is plenty).',
+    order_alert_sound_pending_label:'Pending upload:', order_alert_sound_preview_btn:'▶ Preview',
+    order_alert_sound_save_btn:'Save sound', order_alert_sound_cancel_btn:'Cancel',
+    order_alert_sound_saving_label:'Saving…', order_alert_sound_sync_error:'Could not sync the alert sound — showing this device\'s last known copy.',
     search_placeholder:'Search menu…',
     currency_label:'Currency',
     current_order:'Current Order',
@@ -3666,6 +3759,7 @@ var TRANSLATIONS = {
     remove:'Remove',
     receipt_payment:'Payment', receipt_change:'Change', paid_in:'Paid in',
     order_number:'Order #', new_order:'New Order', print_receipt:'Print Receipt',
+    receipt_auto_close_hint:'Closing automatically — tap New Order to skip the wait.',
     today:'Today', last_7_days:'Last 7 Days', all_time:'All Time', custom_range:'📅 Custom',
     export_csv:'Export CSV',
     revenue_by_payment:'Revenue by Payment Method', revenue_by_payment_hint:'Daily revenue in the currency it was actually paid in — never converted.',
@@ -3787,6 +3881,7 @@ var TRANSLATIONS = {
     size_label:'Size', recipe_admin_only_hint:'Only an administrator can edit recipes.',
     weekly_target_label:'Weekly Target', monthly_target_label:'Monthly Target',
     deposit_needed_prefix:'Need', fully_stocked_label:'Fully stocked', no_target_set:'No target set',
+    monthly_target_combined_note:'Counts Shop Stock + House Stock combined',
     sets_needed_suffix:'sets needed',
     amount_per_set_label:'Amount Per Set', amount_per_set_hint:'Used to calculate sets needed',
     privileged_session_hint:'You are signed in with full access to this area for your whole session — no PIN needed again until you log out.',
@@ -3799,7 +3894,7 @@ var TRANSLATIONS = {
     photo_visibility_label:'Photo visibility',
     preview_receipt:'Preview Receipt', preview_label:'🧾 Preview — not yet saved', back_to_cart:'← Back to Cart', confirm_order:'Confirm & Complete Order',
     reset_menu_title:'Reset menu to default?', reset_menu_sub:'This permanently replaces your menu and toppings with the default list. Enter the admin PIN to confirm.',
-    reprint_receipt:'🖨 Reprint Receipt', customer_copy_label:'🧾 Customer Copy', kitchen_copy_label:'🍳 Kitchen Copy',
+    reprint_receipt:'🖨 Reprint Receipt',
     refund_order:'↩ Refund', refunded_label:'Refunded', refunded_at_label:'Refunded at', refunded_by_label:'Refunded by',
     refunded_by_admin:'Administrator', refunded_by_manager:'Manager', refund_reason_label:'Reason',
     refund_evidence_hint:'Take a photo as evidence before this refund can be processed.',
@@ -3834,7 +3929,27 @@ var TRANSLATIONS = {
     unavailable_label:'Unavailable', mark_unavailable:'Mark Unavailable', mark_available:'Mark Available'
   },
   lo: {
-    tab_order:'🧋 ສັ່ງເຄື່ອງດື່ມ', tab_menu:'📋 ເມນູ', tab_history:'🧾 ປະຫວັດ', tab_deleted:'🔒 ລຶບແລ້ວ', tab_settings:'⚙️ ຕັ້ງຄ່າ',
+    tab_order:'🧋 ສັ່ງເຄື່ອງດື່ມ', tab_incoming:'🧺 ອໍເດີເຂົ້າມາ', tab_menu:'📋 ເມນູ', tab_history:'🧾 ປະຫວັດ', tab_deleted:'🔒 ລຶບແລ້ວ', tab_settings:'⚙️ ຕັ້ງຄ່າ',
+    incoming_sync_error:'ບໍ່ສາມາດໂຫຼດອໍເດີເຂົ້າມາໄດ້ — ກະລຸນາກວດສອບ Firestore security rules ສຳລັບ pos_incoming_orders',
+    incoming_empty_note:'ຍັງບໍ່ມີອໍເດີຈາກລູກຄ້າຕອນນີ້. ອໍເດີໃໝ່ທີ່ສົ່ງມາຈາກເມນູ QR ຈະສະແດງຢູ່ບ່ອນນີ້ໂດຍອັດຕະໂນມັດ.',
+    incoming_guest_order:'ອໍເດີບໍ່ລະບຸຊື່',
+    incoming_reject_btn:'✕ ປະຕິເສດ', incoming_review_approve_btn:'✓ ກວດສອບ ແລະ ອະນຸມັດ',
+    incoming_tab_hint:'ອໍເດີຈາກລູກຄ້າທີ່ສົ່ງມາຈາກເມນູ QR. ຈະບໍ່ຖືກບັນທຶກເປັນຍອດຂາຍ — ແລະ ຈະບໍ່ຖືກຫັກສະຕັອກ — ຈົນກວ່າທ່ານຈະອະນຸມັດຢູ່ລຸ່ມນີ້.',
+    incoming_approve_title:'ອະນຸມັດອໍເດີ', incoming_payment_method_label:'ວິທີຊຳລະເງິນ',
+    incoming_exact_amount_placeholder:'ຈຳນວນພໍດີ', incoming_confirm_record_btn:'ຢືນຢັນ ແລະ ບັນທຶກຍອດຂາຍ',
+    incoming_reject_hint:'ຕ້ອງການສ່ວນຫຼຸດເປັນສະກຸນເງິນຕ່າງປະເທດ ຫຼື ແກ້ໄຂລາຍການບໍ? ປະຕິເສດອໍເດີນີ້ ແລະ ໃສ່ຂໍ້ມູນເອງຈາກແທັບອໍເດີແທນ.',
+    incoming_customer_requested_label:'ລູກຄ້າຂໍຊຳລະດ້ວຍ:',
+    incoming_reject_confirm:'ປະຕິເສດອໍເດີນີ້ບໍ? ລູກຄ້າຈະຕ້ອງສົ່ງອໍເດີໃໝ່ ຫຼື ສັ່ງທີ່ເຄົາເຕີແທນ.',
+    order_alert_new_order:'ອໍເດີໃໝ່!', order_alert_title_flash:'ອໍເດີໃໝ່!',
+    order_alert_queue_hint:'+{n} ອໍເດີເພີ່ມເຕີມລໍຖ້າຢູ່',
+    order_alert_sound_on_btn:'ເປີດສຽງແຈ້ງເຕືອນ', order_alert_sound_off_btn:'ປິດສຽງແຈ້ງເຕືອນ',
+    order_alert_sound_upload_btn:'🎵 ອັບໂຫລດສຽງ', order_alert_sound_test_btn:'▶ ທົດລອງ',
+    order_alert_sound_reset_btn:'ໃຊ້ສຽງເລີ່ມຕົ້ນ', order_alert_sound_custom_label:'ກຳລັງໃຊ້ສຽງທີ່ອັບໂຫລດເອງ (ໃຊ້ຮ່ວມກັນທຸກອຸປະກອນ)',
+    order_alert_sound_invalid_type:'ກະລຸນາເລືອກໄຟລ໌ສຽງ (MP3, WAV ແລະອື່ນໆ).',
+    order_alert_sound_too_large:'ໄຟລ໌ນີ້ໃຫຍ່ເກີນໄປ — ກະລຸນາເລືອກສຽງສັ້ນໆ ຂະໜາດບໍ່ເກີນ 500KB (ສອງສາມວິນາທີກໍພຽງພໍ).',
+    order_alert_sound_pending_label:'ໄຟລ໌ທີ່ລໍຖ້າບັນທຶກ:', order_alert_sound_preview_btn:'▶ ທົດລອງຟັງ',
+    order_alert_sound_save_btn:'ບັນທຶກສຽງ', order_alert_sound_cancel_btn:'ຍົກເລີກ',
+    order_alert_sound_saving_label:'ກຳລັງບັນທຶກ…', order_alert_sound_sync_error:'ບໍ່ສາມາດຊິງສຽງແຈ້ງເຕືອນໄດ້ — ສະແດງສຽງລ້າສຸດທີ່ຮູ້ຈັກຢູ່ອຸປະກອນນີ້.',
     search_placeholder:'ຄົ້ນຫາເມນູ…',
     currency_label:'ສະກຸນເງິນ',
     current_order:'ອໍເດີປັດຈຸບັນ',
@@ -3862,6 +3977,7 @@ var TRANSLATIONS = {
     remove:'ລຶບ',
     receipt_payment:'ການຊຳລະ', receipt_change:'ເງິນທອນ', paid_in:'ຈ່າຍເປັນ',
     order_number:'ອໍເດີເລກທີ #', new_order:'ອໍເດີໃໝ່', print_receipt:'ພິມໃບບິນ',
+    receipt_auto_close_hint:'ກຳລັງປິດອັດຕະໂນມັດ — ກົດ "ອໍເດີໃໝ່" ເພື່ອຂ້າມການລໍຖ້າ.',
     today:'ມື້ນີ້', last_7_days:'7 ວັນຫຼ້າສຸດ', all_time:'ທັງໝົດ', custom_range:'📅 ກຳນົດເອງ',
     export_csv:'ສົ່ງອອກ CSV',
     revenue_by_payment:'ລາຍຮັບຕາມວິທີຊຳລະ', revenue_by_payment_hint:'ລາຍຮັບປະຈຳວັນຕາມສະກຸນເງິນທີ່ຈ່າຍຈິງ — ບໍ່ປ່ຽນສະກຸນເງິນ.',
@@ -3983,6 +4099,7 @@ var TRANSLATIONS = {
     size_label:'ຂະໜາດ', recipe_admin_only_hint:'ມີແຕ່ຜູ້ດູແລລະບົບເທົ່ານັ້ນທີ່ສາມາດແກ້ໄຂສູດໄດ້.',
     weekly_target_label:'ເປົ້າໝາຍລາຍອາທິດ', monthly_target_label:'ເປົ້າໝາຍລາຍເດືອນ',
     deposit_needed_prefix:'ຕ້ອງການ', fully_stocked_label:'ສະຕັອກພຽງພໍ', no_target_set:'ຍັງບໍ່ໄດ້ຕັ້ງເປົ້າໝາຍ',
+    monthly_target_combined_note:'ນັບລວມສະຕັອກຮ້ານ + ສະຕັອກສາງ',
     sets_needed_suffix:'ຊຸດທີ່ຕ້ອງການ',
     amount_per_set_label:'ຈຳນວນຕໍ່ຊຸດ', amount_per_set_hint:'ໃຊ້ຄິດໄລ່ຈຳນວນຊຸດທີ່ຕ້ອງການ',
     privileged_session_hint:'ທ່ານໄດ້ເຂົ້າສູ່ລະບົບດ້ວຍສິດເຂົ້າເຖິງເຕັມສ່ວນນີ້ຕະຫຼອດການນຳໃຊ້ — ບໍ່ຕ້ອງໃສ່ລະຫັດອີກຈົນກວ່າຈະອອກຈາກລະບົບ.',
@@ -3995,7 +4112,7 @@ var TRANSLATIONS = {
     photo_visibility_label:'ຄວາມຊັດເຈນຂອງຮູບ',
     preview_receipt:'ເບິ່ງຕົວຢ່າງໃບບິນ', preview_label:'🧾 ຕົວຢ່າງ — ຍັງບໍ່ໄດ້ບັນທຶກ', back_to_cart:'← ກັບຄືນກະຕ່າ', confirm_order:'ຢືນຢັນ ແລະ ສຳເລັດອໍເດີ',
     reset_menu_title:'ຣີເຊັດເມນູກັບຄືນຄ່າເລີ່ມຕົ້ນ?', reset_menu_sub:'ນີ້ຈະປ່ຽນແທນເມນູ ແລະ ທັອບປິ້ງຂອງທ່ານດ້ວຍລາຍການເລີ່ມຕົ້ນຖາວອນ. ໃສ່ລະຫັດຜູ້ດູແລລະບົບເພື່ອຢືນຢັນ.',
-    reprint_receipt:'🖨 ພິມໃບບິນຄືນ', customer_copy_label:'🧾 ສຳເນົາລູກຄ້າ', kitchen_copy_label:'🍳 ສຳເນົາຄົວ',
+    reprint_receipt:'🖨 ພິມໃບບິນຄືນ',
     refund_order:'↩ ຄືນເງິນ', refunded_label:'ຄືນເງິນແລ້ວ', refunded_at_label:'ຄືນເງິນເມື່ອ', refunded_by_label:'ຄືນເງິນໂດຍ',
     refunded_by_admin:'ຜູ້ດູແລລະບົບ', refunded_by_manager:'ຜູ້ຈັດການ', refund_reason_label:'ເຫດຜົນ',
     refund_evidence_hint:'ຖ່າຍຮູບເປັນຫຼັກຖານກ່ອນທີ່ຈະດຳເນີນການຄືນເງິນນີ້.',
@@ -4030,7 +4147,27 @@ var TRANSLATIONS = {
     unavailable_label:'ໝົດ', mark_unavailable:'ໝາຍວ່າໝົດ', mark_available:'ໝາຍວ່າມີຄືນ'
   },
   th: {
-    tab_order:'🧋 สั่งเครื่องดื่ม', tab_menu:'📋 เมนู', tab_history:'🧾 ประวัติ', tab_deleted:'🔒 ที่ลบแล้ว', tab_settings:'⚙️ ตั้งค่า',
+    tab_order:'🧋 สั่งเครื่องดื่ม', tab_incoming:'🧺 ออเดอร์ที่เข้ามา', tab_menu:'📋 เมนู', tab_history:'🧾 ประวัติ', tab_deleted:'🔒 ที่ลบแล้ว', tab_settings:'⚙️ ตั้งค่า',
+    incoming_sync_error:'ไม่สามารถโหลดออเดอร์ที่เข้ามาได้ — กรุณาตรวจสอบ Firestore security rules สำหรับ pos_incoming_orders',
+    incoming_empty_note:'ยังไม่มีออเดอร์จากลูกค้าตอนนี้ ออเดอร์ใหม่ที่ส่งมาจากเมนู QR จะแสดงที่นี่โดยอัตโนมัติ',
+    incoming_guest_order:'ออเดอร์ไม่ระบุชื่อ',
+    incoming_reject_btn:'✕ ปฏิเสธ', incoming_review_approve_btn:'✓ ตรวจสอบและอนุมัติ',
+    incoming_tab_hint:'ออเดอร์จากลูกค้าที่ส่งมาจากเมนู QR จะไม่ถูกบันทึกเป็นยอดขาย — และจะไม่ถูกหักสต็อก — จนกว่าคุณจะอนุมัติด้านล่างนี้',
+    incoming_approve_title:'อนุมัติออเดอร์', incoming_payment_method_label:'วิธีชำระเงิน',
+    incoming_exact_amount_placeholder:'จำนวนพอดี', incoming_confirm_record_btn:'ยืนยันและบันทึกยอดขาย',
+    incoming_reject_hint:'ต้องการส่วนลดเป็นสกุลเงินต่างประเทศ หรือแก้ไขรายการ? ปฏิเสธออเดอร์นี้แล้วกรอกข้อมูลเองจากแท็บออเดอร์แทน',
+    incoming_customer_requested_label:'ลูกค้าขอชำระด้วย:',
+    incoming_reject_confirm:'ปฏิเสธออเดอร์นี้หรือไม่? ลูกค้าจะต้องส่งออเดอร์ใหม่ หรือสั่งที่เคาน์เตอร์แทน',
+    order_alert_new_order:'ออเดอร์ใหม่!', order_alert_title_flash:'ออเดอร์ใหม่!',
+    order_alert_queue_hint:'+{n} ออเดอร์เพิ่มเติมรอคิวอยู่',
+    order_alert_sound_on_btn:'เปิดเสียงแจ้งเตือน', order_alert_sound_off_btn:'ปิดเสียงแจ้งเตือน',
+    order_alert_sound_upload_btn:'🎵 อัปโหลดเสียง', order_alert_sound_test_btn:'▶ ทดสอบ',
+    order_alert_sound_reset_btn:'ใช้เสียงเริ่มต้น', order_alert_sound_custom_label:'กำลังใช้เสียงที่อัปโหลดเอง (ใช้ร่วมกันทุกอุปกรณ์)',
+    order_alert_sound_invalid_type:'กรุณาเลือกไฟล์เสียง (MP3, WAV และอื่นๆ)',
+    order_alert_sound_too_large:'ไฟล์นี้ใหญ่เกินไป — กรุณาเลือกเสียงสั้นๆ ขนาดไม่เกิน 500KB (สองสามวินาทีก็เพียงพอ)',
+    order_alert_sound_pending_label:'ไฟล์ที่รอบันทึก:', order_alert_sound_preview_btn:'▶ ทดลองฟัง',
+    order_alert_sound_save_btn:'บันทึกเสียง', order_alert_sound_cancel_btn:'ยกเลิก',
+    order_alert_sound_saving_label:'กำลังบันทึก…', order_alert_sound_sync_error:'ไม่สามารถซิงค์เสียงแจ้งเตือนได้ — แสดงเสียงล่าสุดที่ทราบบนอุปกรณ์นี้',
     search_placeholder:'ค้นหาเมนู…',
     currency_label:'สกุลเงิน',
     current_order:'ออเดอร์ปัจจุบัน',
@@ -4058,6 +4195,7 @@ var TRANSLATIONS = {
     remove:'ลบ',
     receipt_payment:'การชำระเงิน', receipt_change:'เงินทอน', paid_in:'ชำระเป็น',
     order_number:'ออเดอร์ #', new_order:'ออเดอร์ใหม่', print_receipt:'พิมพ์ใบเสร็จ',
+    receipt_auto_close_hint:'กำลังปิดอัตโนมัติ — กด "ออเดอร์ใหม่" เพื่อข้ามการรอ',
     today:'วันนี้', last_7_days:'7 วันล่าสุด', all_time:'ทั้งหมด', custom_range:'📅 กำหนดเอง',
     export_csv:'ส่งออก CSV',
     revenue_by_payment:'รายได้ตามวิธีชำระเงิน', revenue_by_payment_hint:'รายได้รายวันในสกุลเงินที่ชำระจริง — ไม่มีการแปลงสกุลเงิน',
@@ -4179,6 +4317,7 @@ var TRANSLATIONS = {
     size_label:'ขนาด', recipe_admin_only_hint:'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถแก้ไขสูตรได้',
     weekly_target_label:'เป้าหมายรายสัปดาห์', monthly_target_label:'เป้าหมายรายเดือน',
     deposit_needed_prefix:'ต้องการ', fully_stocked_label:'สต็อกเพียงพอ', no_target_set:'ยังไม่ได้ตั้งเป้าหมาย',
+    monthly_target_combined_note:'นับรวมสต็อกร้าน + สต็อกคลัง',
     sets_needed_suffix:'ชุดที่ต้องการ',
     amount_per_set_label:'จำนวนต่อชุด', amount_per_set_hint:'ใช้คำนวณจำนวนชุดที่ต้องการ',
     privileged_session_hint:'คุณเข้าสู่ระบบด้วยสิทธิ์เข้าถึงส่วนนี้เต็มรูปแบบตลอดเซสชัน — ไม่ต้องใส่รหัส PIN อีกจนกว่าจะออกจากระบบ',
@@ -4191,7 +4330,7 @@ var TRANSLATIONS = {
     photo_visibility_label:'ความชัดเจนของภาพ',
     preview_receipt:'ดูตัวอย่างใบเสร็จ', preview_label:'🧾 ตัวอย่าง — ยังไม่ได้บันทึก', back_to_cart:'← กลับไปที่ตะกร้า', confirm_order:'ยืนยันและทำรายการให้เสร็จสิ้น',
     reset_menu_title:'รีเซ็ตเมนูเป็นค่าเริ่มต้น?', reset_menu_sub:'การดำเนินการนี้จะแทนที่เมนูและท็อปปิ้งของคุณด้วยรายการเริ่มต้นอย่างถาวร ป้อนรหัส PIN ผู้ดูแลระบบเพื่อยืนยัน',
-    reprint_receipt:'🖨 พิมพ์ใบเสร็จซ้ำ', customer_copy_label:'🧾 สำเนาลูกค้า', kitchen_copy_label:'🍳 สำเนาครัว',
+    reprint_receipt:'🖨 พิมพ์ใบเสร็จซ้ำ',
     refund_order:'↩ คืนเงิน', refunded_label:'คืนเงินแล้ว', refunded_at_label:'คืนเงินเมื่อ', refunded_by_label:'คืนเงินโดย',
     refunded_by_admin:'ผู้ดูแลระบบ', refunded_by_manager:'ผู้จัดการ', refund_reason_label:'เหตุผล',
     refund_evidence_hint:'ถ่ายภาพเป็นหลักฐานก่อนดำเนินการคืนเงินนี้',
@@ -4276,6 +4415,38 @@ var LOCATIONS = {
   }
 };
 var LOCATION_STORAGE_KEY = 'pos_active_location';
+/* New-order alert sound is a per-device preference (like the location
+   assignment above), not a shop-wide setting — a busy counter tablet and
+   a quiet back-office laptop logged into the same shop may want this on
+   or off independently, so this lives in localStorage rather than
+   pos_settings and is never Firestore-synced. Defaults ON. */
+var ORDER_ALERT_SOUND_KEY = 'pos_order_alert_sound';
+function isOrderAlertSoundOn(){
+  try { return window.localStorage.getItem(ORDER_ALERT_SOUND_KEY) !== '0'; } catch(e){ return true; }
+}
+function setOrderAlertSoundOn(on){
+  try { window.localStorage.setItem(ORDER_ALERT_SOUND_KEY, on ? '1' : '0'); } catch(e){}
+}
+/* Optional custom alert sound — UNLIKE the mute toggle above, this IS
+   synced shop-wide via Firestore (pos_alert_sound/main, one small
+   document holding just {dataUrl}), so uploading a sound on one device
+   plays on every device at that location within a second or two, the
+   same way a menu or settings change does. It lives in its own
+   collection rather than embedded in pos_settings for the same reason
+   photos do (see setupDataListeners) — a ~500KB audio clip could
+   otherwise eat most of pos_settings' own 1 MiB Firestore document
+   budget. state.orderAlertCustomSound is kept up to date by that
+   collection's onSnapshot listener; getOrderAlertCustomSound() just
+   reads the in-memory copy, while setOrderAlertCustomSound() writes
+   through to Firestore and returns a Promise (the listener then updates
+   state.orderAlertCustomSound itself once the write round-trips back). */
+var ORDER_ALERT_CUSTOM_SOUND_MAX_BYTES = 500000; // ~500KB — plenty for a short clip, keeps the Firestore doc well under its 1 MiB limit
+function getOrderAlertCustomSound(){
+  return state.orderAlertCustomSound || null;
+}
+function setOrderAlertCustomSound(dataUrl){
+  return db.collection('pos_alert_sound').doc('main').set({dataUrl: dataUrl || null});
+}
 /* Location display names ("Donkoi", "Location 2") are editable at
    runtime (Settings -> Rename Locations, master-admin-only), which means
    they can't just be the hardcoded defaults above forever. They're kept
@@ -4372,7 +4543,7 @@ var state = {
   settingsLoaded:false, menuLoaded:false, toppingsLoaded:false, ordersLoaded:false, ingredientsLoaded:false, recipesLoaded:false,
   expensesLoaded:false, expenses:{}, expenseSyncError:false,
   stockSyncError:false,
-  language:'en',
+  language:'lo', // default UI language on first load; a language chip tap only changes this in memory (see setLanguage) — it isn't persisted, so every fresh load falls back to this default
   syncStatus:'connecting', // connecting | synced | error
   syncErrorLabel:'',
   syncErrorMessage:'',
@@ -4406,6 +4577,11 @@ var state = {
   splitTransfer:'',
   receiptOrder:null,
   testPrintMode:false,
+  receiptIsFreshCheckout:false, // true only right after a normal Order-tab checkout — see scheduleReceiptAutoClose()
+  orderAlertSoundDraft:null, // {name, dataUrl} of a freshly-picked-but-not-yet-saved alert sound — see buildOrderAlertSoundControls()
+  orderAlertCustomSound:null, // synced shop-wide from pos_alert_sound/main — see getOrderAlertCustomSound()
+  orderAlertSoundSaving:false, // true while a Save/reset is actually round-tripping to Firestore
+  alertSoundSyncError:false,
   receiptPreview:null,
   refundEvidence:null, // {orderId, photo, reason} — set while capturing evidence and through the approval step
   trainingMode:false,
@@ -4464,7 +4640,13 @@ var state = {
   costUnlocked:false,
   costPinInput:'',
   costPinError:false,
-  costPinChecking:false
+  costPinChecking:false,
+  incomingOrders:[],
+  incomingOrdersLoaded:false,
+  incomingOrdersSyncError:false,
+  incomingApprovePrompt:null, // {orderId, paymentMethod, amountReceived, discount}
+  expandedIncomingId:null,
+  orderAlerts:[] // transient new-order pop-up toasts: [{id, title, itemCount, ts}]
 };
 
 /* ================= FIREBASE (multi-device sync + auth) ================= */
@@ -4576,6 +4758,27 @@ function handlePhotosSyncError(label){
     render();
   };
 }
+/* Same idea for pos_incoming_orders (QR self-service submissions) — a
+   missing Firestore rule for this newer collection must never block the
+   core ordering app from loading; the Incoming Orders tab just shows a
+   notice until it resolves. */
+function handleIncomingOrdersSyncError(label){
+  return function(err){
+    console.error('Incoming orders sync error ('+label+')', err);
+    state.incomingOrdersSyncError = true;
+    render();
+  };
+}
+/* Same idea for pos_alert_sound — a missing rule or transient error here
+   must never block the core ordering app; the alert just plays the
+   default chime until this resolves. */
+function handleAlertSoundSyncError(label){
+  return function(err){
+    console.error('Alert sound sync error ('+label+')', err);
+    state.alertSoundSyncError = true;
+    render();
+  };
+}
 
 var LISTENER_LABELS = ['settings','menu','toppings','orders'];
 function setListenerOk(label){
@@ -4609,6 +4812,47 @@ function teardownDataListeners(){
    'category_bg_<name>', 'page_background', 'header_background'. */
 function sanitizeCategoryKey(cat){
   return String(cat||'').replace(/\//g,'_').trim();
+}
+/* Renders `img` cover-fit onto a canvas of ~targetW x targetH, encoded as
+   JPEG, then shrinks quality (and if that's not enough, dimensions) until
+   the result stays under a safe byte budget. This exists because Firestore
+   rejects any document over 1,048,576 bytes total -- and a single busy,
+   high-detail photo (a real phone camera shot, not a stock photo) can
+   still land over 1MB even after a fixed resize + fixed JPEG quality, which
+   silently failed to save (the .catch() in savePhotoDoc alerted the error,
+   but the photo itself just never made it into pos_photos -- invisible to
+   self-service.html, which only ever reads what actually synced). Returns
+   {dataUrl, tooLarge} -- tooLarge stays true only if even the smallest
+   acceptable version didn't fit, so the caller can warn proactively instead
+   of the upload silently vanishing. */
+function compressImageToDataUrl(img, targetW, targetH, opts){
+  opts = opts || {};
+  var maxBytes = opts.maxBytes || 700000; // ~700KB -- well under Firestore's 1 MiB doc cap
+  var minQuality = opts.minQuality != null ? opts.minQuality : 0.5;
+  var quality = opts.startQuality != null ? opts.startQuality : 0.85;
+  var minScale = opts.minScale != null ? opts.minScale : 0.5;
+  function renderAt(w, h, q){
+    var canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(w));
+    canvas.height = Math.max(1, Math.round(h));
+    var ctx = canvas.getContext('2d');
+    var scale = Math.max(canvas.width/img.width, canvas.height/img.height);
+    var dw = img.width*scale, dh = img.height*scale;
+    var dx = (canvas.width-dw)/2, dy = (canvas.height-dh)/2;
+    ctx.drawImage(img, dx, dy, dw, dh);
+    return canvas.toDataURL('image/jpeg', q);
+  }
+  var scale = 1;
+  var dataUrl = renderAt(targetW*scale, targetH*scale, quality);
+  while(dataUrl.length > maxBytes && quality > minQuality){
+    quality = Math.max(minQuality, quality - 0.1);
+    dataUrl = renderAt(targetW*scale, targetH*scale, quality);
+  }
+  while(dataUrl.length > maxBytes && scale > minScale){
+    scale = Math.max(minScale, scale - 0.15);
+    dataUrl = renderAt(targetW*scale, targetH*scale, quality);
+  }
+  return { dataUrl: dataUrl, tooLarge: dataUrl.length > maxBytes };
 }
 function savePhotoDoc(id, dataUrl){
   return db.collection('pos_photos').doc(id).set({data: dataUrl}).catch(function(e){
@@ -4683,6 +4927,130 @@ function settingsForSave(){
   delete s.categoryBackgroundPhotos;
   return s;
 }
+/* ================= PUBLIC SETTINGS (read by the unauthenticated QR page) =================
+   self-service.html has no login and reads Firestore under public, rules-
+   enforced access — so it must NEVER read pos_settings directly, since
+   that document also carries the LAPNet payment QR payload, the printer's
+   IP address, and staff display names. This mirrors just the handful of
+   fields the public menu actually needs into its own small document,
+   re-synced every time settings load/change on any device. Firestore
+   rules (see SELF_SERVICE_SETUP.md) only grant public read on THIS
+   collection, never on pos_settings itself. */
+function publicSettingsSubset(s){
+  return {
+    shopName: s.shopName || '',
+    tagline: s.tagline || '',
+    currency: s.currency || '₭',
+    categories: s.categories || [],
+    categoryTranslations: s.categoryTranslations || {}
+  };
+}
+function syncPublicSettings(){
+  if(!state.settings) return;
+  db.collection('pos_public_settings').doc('main').set(publicSettingsSubset(state.settings)).catch(function(e){
+    console.error('Could not sync public settings for the self-service page', e);
+  });
+}
+/* ===== New-order pop-up alerts (Incoming Orders) =====
+   Fired from the pos_incoming_orders listener below whenever a doc appears
+   that wasn't there a moment ago. Deliberately NOT fired for orders that
+   were already pending when the listener first attaches (e.g. right after
+   login, or reconnecting after the tab was asleep) — otherwise every app
+   open would immediately pop a toast per already-known order, which reads
+   as noise, not a notification. knownIncomingOrderIds is rebuilt from the
+   live snapshot every time, so an order that gets approved/rejected is
+   automatically forgotten (its id can safely "reappear" as new later,
+   though that shouldn't happen in practice). */
+var incomingOrdersFirstSnapshot = true;
+var knownIncomingOrderIds = {};
+function orderAlertTitle(o){
+  var bits = [];
+  if(o.customerName) bits.push(o.customerName);
+  if(o.customerNote) bits.push(o.customerNote);
+  return bits.length ? bits.join(' · ') : tr('incoming_guest_order');
+}
+function pushOrderAlert(o){
+  var alert = { id:'alert_'+o.id+'_'+Date.now(), orderId:o.id, title:orderAlertTitle(o), itemCount:(o.items||[]).length, ts:Date.now() };
+  // No cap here — these queue up (oldest first) behind a single visible
+  // card instead of stacking vertically down the screen, so a burst of
+  // orders stays reviewable one at a time rather than getting silently
+  // dropped. See buildOrderAlertStack() for how only the front one and a
+  // "peek" of the rest actually render.
+  state.orderAlerts.push(alert);
+  playOrderAlertSound();
+  flashDocumentTitleForNewOrder();
+  // Deliberately no auto-dismiss timer — this toast is meant to stay put
+  // until staff actually deal with it (tap it to open the order, or tap
+  // the ✕ to dismiss), so a new order can never silently disappear from
+  // the screen unnoticed.
+  render();
+}
+function dismissOrderAlert(alertId){
+  var before = state.orderAlerts.length;
+  state.orderAlerts = state.orderAlerts.filter(function(a){ return a.id!==alertId; });
+  if(state.orderAlerts.length !== before) render();
+}
+/* Short two-tone chime built with the Web Audio API instead of a bundled
+   audio file, so this stays a single self-contained HTML file. Wrapped in
+   try/catch: some browsers block audio before the page has had any user
+   interaction (e.g. right after a fresh page load), and this must never
+   break the toast itself just because the sound couldn't play. */
+var orderAlertAudioCtx = null;
+/* overrideDataUrl lets the sound-settings screen preview a freshly-picked
+   (not-yet-saved) file straight from its in-memory draft, using the exact
+   same playback path a real incoming order would use — without touching
+   isOrderAlertSoundOn() or localStorage at all. */
+function playOrderAlertSound(overrideDataUrl){
+  if(!overrideDataUrl && !isOrderAlertSoundOn()) return;
+  var customSound = overrideDataUrl || getOrderAlertCustomSound();
+  if(customSound){
+    try{
+      var audio = new Audio(customSound);
+      audio.play().catch(function(){ /* blocked by the browser's autoplay policy — nothing more to do */ });
+    }catch(e){ /* corrupt/unsupported stored file — silently skip rather than break the toast */ }
+    return;
+  }
+  try{
+    if(!orderAlertAudioCtx) orderAlertAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    var ctx = orderAlertAudioCtx;
+    if(ctx.state==='suspended') ctx.resume();
+    var now = ctx.currentTime;
+    [[880,now,0.14],[1175,now+0.15,0.18]].forEach(function(tone){
+      var osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = tone[0];
+      gain.gain.setValueAtTime(0.0001, tone[1]);
+      gain.gain.exponentialRampToValueAtTime(0.22, tone[1]+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, tone[1]+tone[2]);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(tone[1]); osc.stop(tone[1]+tone[2]+0.02);
+    });
+  }catch(e){ /* Web Audio unavailable/blocked — toast still shows without sound */ }
+}
+/* If the tab isn't visible (staff on another window/app), flash the
+   browser tab title so a new order is noticeable even without looking
+   directly at this screen. Reverts automatically the moment the tab
+   becomes visible again. */
+var orderAlertTitleFlashTimer = null;
+var orderAlertOriginalTitle = null;
+function flashDocumentTitleForNewOrder(){
+  if(typeof document.visibilityState !== 'undefined' && document.visibilityState !== 'hidden') return;
+  if(orderAlertOriginalTitle===null) orderAlertOriginalTitle = document.title;
+  if(orderAlertTitleFlashTimer) return;
+  var flashOn = false;
+  orderAlertTitleFlashTimer = setInterval(function(){
+    document.title = flashOn ? orderAlertOriginalTitle : '🔔 '+tr('order_alert_title_flash');
+    flashOn = !flashOn;
+  }, 1000);
+}
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState==='visible' && orderAlertTitleFlashTimer){
+    clearInterval(orderAlertTitleFlashTimer);
+    orderAlertTitleFlashTimer = null;
+    if(orderAlertOriginalTitle!==null) document.title = orderAlertOriginalTitle;
+  }
+});
+
 function setupDataListeners(){
   activeDataUnsubs.push(db.collection('pos_settings').doc('main').onSnapshot(function(doc){
     if(doc.exists){
@@ -4695,6 +5063,7 @@ function setupDataListeners(){
     state.settingsLoaded = true;
     setListenerOk('settings');
     checkLoaded();
+    syncPublicSettings();
     render();
   }, handleSyncError('settings')));
 
@@ -4732,6 +5101,17 @@ function setupDataListeners(){
     render();
   }, handlePhotosSyncError('photos')));
 
+  /* Custom new-order alert sound (shop-wide, NOT per-device — see
+     getOrderAlertCustomSound above for why this lives in its own
+     collection). Missing/erroring here must never block the core app
+     from loading, same as photos — worst case, the alert just falls back
+     to the default chime until this resolves. */
+  activeDataUnsubs.push(db.collection('pos_alert_sound').doc('main').onSnapshot(function(doc){
+    state.orderAlertCustomSound = (doc.exists && doc.data().dataUrl) || null;
+    state.alertSoundSyncError = false;
+    render();
+  }, handleAlertSoundSyncError('alert-sound')));
+
   activeDataUnsubs.push(db.collection('pos_toppings').doc('main').onSnapshot(function(doc){
     if(doc.exists && doc.data().items){
       state.toppings = doc.data().items;
@@ -4752,6 +5132,28 @@ function setupDataListeners(){
     checkLoaded();
     render();
   }, handleSyncError('orders')));
+
+  /* Customer self-service submissions (QR portal) — pending orders that
+     have NOT yet touched shop data (no order number, no stock deducted).
+     Oldest first so staff naturally clear the queue in submission order.
+     Written by the public self-service.html page (unauthenticated,
+     create-only per the Firestore rules), never by this app. */
+  activeDataUnsubs.push(db.collection('pos_incoming_orders').orderBy('submittedAt','asc').onSnapshot(function(snap){
+    var freshList = snap.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    if(incomingOrdersFirstSnapshot){
+      incomingOrdersFirstSnapshot = false;
+    } else {
+      freshList.forEach(function(o){
+        if(!knownIncomingOrderIds[o.id]) pushOrderAlert(o);
+      });
+    }
+    knownIncomingOrderIds = {};
+    freshList.forEach(function(o){ knownIncomingOrderIds[o.id] = true; });
+    state.incomingOrders = freshList;
+    state.incomingOrdersLoaded = true;
+    state.incomingOrdersSyncError = false;
+    render();
+  }, handleIncomingOrdersSyncError('incoming-orders')));
 
   activeDataUnsubs.push(db.collection('pos_ingredients').doc('main').onSnapshot(function(doc){
     if(doc.exists && doc.data().items){
@@ -5338,6 +5740,7 @@ function doRender(){
     return;
   }
   fitCartList();
+  positionOrderAlertStack();
   if(savedId){
     var el = document.getElementById(savedId);
     if(el && el.tagName!=='SELECT'){
@@ -5427,8 +5830,10 @@ function buildAppHTML(){
   html += buildHeader();
   if(state.trainingMode) html += buildTrainingBanner();
   if(state.remoteViewLocation) html += buildRemoteViewBanner();
+  if(state.orderAlerts && state.orderAlerts.length) html += buildOrderAlertStack();
   html += '<div class="pos-main">';
   if(state.tab==='order') html += buildOrderTab();
+  else if(state.tab==='incoming') html += buildIncomingOrdersTab();
   else if(state.tab==='history') html += buildHistoryTab();
   else if(state.tab==='stock') html += buildStockTab();
   else if(state.tab==='housestock') html += buildHouseStockTab();
@@ -5443,6 +5848,7 @@ function buildAppHTML(){
   if(state.managerPrompt) html += buildManagerPinModal();
   else if(state.refundEvidence) html += buildRefundEvidenceModal();
   if(state.trainingPromptOpen) html += buildTrainingPinGate();
+  if(state.incomingApprovePrompt) html += buildIncomingApproveModal();
   return html;
 }
 function buildTrainingBanner(){
@@ -5451,6 +5857,55 @@ function buildTrainingBanner(){
     '<span>🎓 '+tr('training_mode_active')+'</span>' +
     '<button class="btn btn-small" onclick="POS.quitTrainingMode()">'+tr('quit_training')+'</button>' +
   '</div>';
+}
+/* The toast is a fixed overlay (so it can appear/disappear without
+   shifting the rest of the page, and stays visible while a tab scrolls),
+   but the header itself already has controls in that same top-right
+   corner (language chips, cart, lock). Now that the toast is twice its
+   original size it would otherwise sit right on top of those — so after
+   every render, nudge it down to clear the header (and the training/
+   remote-view banner, when either is showing) instead of covering them. */
+function positionOrderAlertStack(){
+  var stack = document.querySelector('.order-alert-stack');
+  if(!stack) return;
+  var clearBelow = 14;
+  var header = document.querySelector('.pos-header');
+  if(header) clearBelow = Math.max(clearBelow, header.getBoundingClientRect().bottom + 10);
+  var banner = document.querySelector('.training-banner');
+  if(banner) clearBelow = Math.max(clearBelow, banner.getBoundingClientRect().bottom + 10);
+  stack.style.top = clearBelow + 'px';
+}
+/* Multiple pending alerts show as one card (the oldest — first come, first
+   reviewed) with a couple of faint "peek" cards fanned out behind it and a
+   count badge, like a stack of order tickets — not a full vertical list of
+   every toast, which used to push down the screen as orders piled up.
+   Handling the front card (tap to review, or ✕ to dismiss) reveals the
+   next one on the very next render — nothing is ever silently dropped,
+   they just queue up one at a time. */
+function buildOrderAlertStack(){
+  var alerts = state.orderAlerts;
+  if(!alerts.length) return '';
+  var front = alerts[0];
+  var behindCount = alerts.length - 1;
+  var peekLayers = '';
+  var peekCount = Math.min(behindCount, 2); // purely decorative — capped at 2 regardless of real queue length
+  for(var i=peekCount; i>=1; i--){
+    peekLayers += '<div class="order-alert-peek" style="--peek-i:'+i+'"></div>';
+  }
+  var countBadge = behindCount>0 ? ('<div class="order-alert-count-badge">+'+behindCount+'</div>') : '';
+  var queueHint = behindCount>0 ? ('<div class="order-alert-queue-hint">'+tr('order_alert_queue_hint').replace('{n}', behindCount)+'</div>') : '';
+  var frontCard = '' +
+    '<div class="order-alert-toast" onclick="POS.viewOrderAlert(\''+front.id+'\')">' +
+      '<div class="order-alert-icon">🔔</div>' +
+      '<div class="order-alert-body">' +
+        '<div class="order-alert-title">'+tr('order_alert_new_order')+'</div>' +
+        '<div class="order-alert-sub">'+escapeHtml(front.title)+' · '+front.itemCount+' '+tr('items_suffix')+'</div>' +
+        queueHint +
+      '</div>' +
+      countBadge +
+      '<button class="order-alert-close" onclick="event.stopPropagation();POS.dismissOrderAlert(\''+front.id+'\')">✕</button>' +
+    '</div>';
+  return '<div class="order-alert-stack"><div class="order-alert-stack-inner">'+peekLayers+frontCard+'</div></div>';
 }
 function buildRemoteViewBanner(){
   var loc = LOCATIONS[state.remoteViewLocation];
@@ -5493,9 +5948,11 @@ function buildTrainingPinGate(){
 
 function buildHeader(){
   var s = state.settings;
-  var tabDefs = [['order','tab_order'],['history','tab_history'],['stock','tab_stock'],['housestock','tab_house_stock'],['revenue','tab_revenue'],['cost','tab_cost'],['deleted','tab_deleted'],['settings','tab_settings']];
+  var tabDefs = [['order','tab_order'],['incoming','tab_incoming'],['history','tab_history'],['stock','tab_stock'],['housestock','tab_house_stock'],['revenue','tab_revenue'],['cost','tab_cost'],['deleted','tab_deleted'],['settings','tab_settings']];
+  var incomingPendingCount = (state.incomingOrders||[]).length;
   var navHtml = tabDefs.map(function(td){
-    return '<button class="'+(state.tab===td[0]?'active':'')+'" onclick="POS.setTab(\''+td[0]+'\')">'+tr(td[1])+'</button>';
+    var badge = (td[0]==='incoming' && incomingPendingCount>0) ? (' <span class="tab-badge">'+incomingPendingCount+'</span>') : '';
+    return '<button class="'+(state.tab===td[0]?'active':'')+'" onclick="POS.setTab(\''+td[0]+'\')">'+tr(td[1])+badge+'</button>';
   }).join('');
   var syncHtml = state.syncStatus==='synced' ? '<span class="sync-dot sync-ok" title="Synced with all devices">🟢 Synced</span>' :
     state.syncStatus==='error' ? '<span class="sync-dot sync-err" style="cursor:pointer;" title="'+escapeHtml('Problem with: '+state.syncErrorLabel+' — '+state.syncErrorMessage)+'" onclick="POS.showSyncErrorDetail()">🔴 Offline ('+escapeHtml(state.syncErrorLabel)+')</span>' :
@@ -5883,6 +6340,255 @@ function buildDraftOrder(){
     placedByRole: state.loggedInRole || null
   };
 }
+/* Shared by both a normal in-person checkout (completeOrder) and an
+   Incoming Order approval (POS.confirmIncomingApprove) — the exact same
+   order-numbering + pos_orders write + stock deduction pipeline either
+   way, so a customer's approved self-service order is indistinguishable
+   from a staff-entered one anywhere else in the app (History, receipts,
+   revenue, stock). draft must have the same shape buildDraftOrder()
+   returns (items/subtotal/discount/serviceCharge/total/paymentMethod/...). */
+function recordCompletedOrder(draft){
+  var counterRef = db.collection('pos_meta').doc('counter');
+  var todayKey = todayDateKey();
+  return db.runTransaction(function(tx){
+    return tx.get(counterRef).then(function(doc){
+      var data = doc.exists ? doc.data() : {};
+      var isNewDay = data.date !== todayKey;
+      var current = isNewDay ? 1 : ((Number(data.value)||1));
+      tx.set(counterRef, {value: current+1, date: todayKey});
+      return current;
+    });
+  }).then(function(orderNumber){
+    var order = Object.assign({}, draft, {
+      id: uid('order'),
+      number: orderNumber,
+      timestamp: new Date().toISOString(),
+      items: draft.items
+    });
+    return db.collection('pos_orders').doc(order.id).set(order).then(function(){ return order; });
+  }).then(function(order){
+    deductStockForOrder(order.items);
+    return order;
+  });
+}
+
+/* ================= INCOMING ORDERS (QR self-service approval) =================
+   A pending doc submitted by the public self-service.html page never
+   touches pos_orders/pos_ingredients/pos_meta on its own — see the
+   Firestore rules. Approving one here runs it through the exact same
+   recordCompletedOrder() pipeline a staff-entered sale uses, then removes
+   the pending doc. Prices/toppings are honored exactly as the customer
+   saw them at submission time (never re-priced against a menu that may
+   have changed since) — the same way an in-person cart line's price is
+   locked in the moment it's added, not re-resolved at checkout. */
+function computeIncomingOrderSubtotal(items){
+  return (items||[]).reduce(function(sum,l){ return sum + (Number(l.unitPrice)||0)*(Number(l.qty)||0); }, 0);
+}
+function buildDraftOrderFromIncoming(order, prompt){
+  var subtotalLAK = computeIncomingOrderSubtotal(order.items);
+  var discountLAK = Math.min(Number(prompt.discount)||0, subtotalLAK);
+  var afterDiscountLAK = Math.max(subtotalLAK - discountLAK, 0);
+  var serviceLAK = computeServiceCharge(afterDiscountLAK);
+  var totalLAK = afterDiscountLAK + serviceLAK;
+  var receivedInput = prompt.paymentMethod==='cash'
+    ? (prompt.amountReceived==='' || prompt.amountReceived==null ? totalLAK : Number(prompt.amountReceived||0))
+    : totalLAK;
+  // Split is always plain LAK here (this approval flow has no foreign-currency
+  // support — see the "reject and enter manually" hint), so the LAK-suffixed
+  // fields are identical to the plain ones, same as they'd be at rate=1.
+  var splitCashInput = prompt.paymentMethod==='split' ? (prompt.splitCash==='' || prompt.splitCash==null ? 0 : Number(prompt.splitCash)) : null;
+  var splitTransferInput = prompt.paymentMethod==='split' ? (prompt.splitTransfer==='' || prompt.splitTransfer==null ? 0 : Number(prompt.splitTransfer)) : null;
+  return {
+    items: JSON.parse(JSON.stringify(order.items)),
+    subtotal: subtotalLAK,
+    discount: discountLAK,
+    serviceCharge: serviceLAK,
+    total: totalLAK,
+    paymentMethod: prompt.paymentMethod,
+    amountReceived: receivedInput,
+    change: receivedInput - totalLAK,
+    currency: 'LAK',
+    displayTotal: totalLAK,
+    displayReceived: prompt.paymentMethod==='cash' ? receivedInput : null,
+    displayChange: prompt.paymentMethod==='cash' ? (receivedInput - totalLAK) : null,
+    splitCash: splitCashInput, splitTransfer: splitTransferInput,
+    splitCashLAK: splitCashInput, splitTransferLAK: splitTransferInput,
+    placedByAccount: state.loggedInAccount || null,
+    placedByRole: state.loggedInRole || null,
+    source: 'self_service',
+    customerName: order.customerName || '',
+    customerNote: order.customerNote || '',
+    sourceIncomingOrderId: order.id
+  };
+}
+function relativeTimeFromIso(iso){
+  if(!iso) return '';
+  var then = new Date(iso).getTime();
+  if(isNaN(then)) return '';
+  var diffSec = Math.max(0, Math.round((Date.now()-then)/1000));
+  if(diffSec<60) return diffSec+'s ago';
+  var diffMin = Math.round(diffSec/60);
+  if(diffMin<60) return diffMin+'m ago';
+  var diffHr = Math.round(diffMin/60);
+  if(diffHr<24) return diffHr+'h ago';
+  var diffDay = Math.round(diffHr/24);
+  return diffDay+'d ago';
+}
+function buildIncomingOrdersTab(){
+  var orders = state.incomingOrders || [];
+  var syncNotice = state.incomingOrdersSyncError
+    ? '<div class="section-card" style="background:#FFFBF9;border-color:var(--danger-light);"><p class="hint" style="color:var(--danger);">'+tr('incoming_sync_error')+'</p></div>'
+    : '';
+  var ordersBodyHtml = orders.length
+    ? buildIncomingOrdersCards(orders)
+    : '<div class="section-card"><p class="empty-note">'+tr('incoming_empty_note')+'</p></div>';
+  return syncNotice +
+    '<div class="section-card">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">' +
+        '<div><h2>'+tr('tab_incoming')+'</h2><p class="hint">'+tr('incoming_tab_hint')+'</p></div>' +
+        '<button class="btn btn-outline btn-small" style="white-space:nowrap;flex:none;" onclick="POS.toggleOrderAlertSound()">'+(isOrderAlertSoundOn()?'🔔 '+tr('order_alert_sound_on_btn'):'🔕 '+tr('order_alert_sound_off_btn'))+'</button>' +
+      '</div>' +
+      buildOrderAlertSoundControls() +
+    '</div>' +
+    ordersBodyHtml;
+}
+/* Pulled out of buildIncomingOrdersTab so the mute toggle, upload button,
+   and (when relevant) the save/preview/cancel controls for a pending
+   upload are ALWAYS visible at the top of this tab — they used to live
+   inside the same branch as the order cards themselves, which meant the
+   entire sound-settings row disappeared the moment the queue emptied out
+   (the normal, common state — orders only sit in the queue briefly).
+   That's what made uploading a new sound look like it "didn't save": the
+   button you'd used to upload it could vanish from under you as soon as
+   an order was approved/rejected elsewhere, with no way to get back to
+   it — including to upload a REPLACEMENT — until a new order happened to
+   come in. */
+function buildOrderAlertSoundControls(){
+  var hasCustomSound = !!getOrderAlertCustomSound();
+  var draft = state.orderAlertSoundDraft;
+  var saving = state.orderAlertSoundSaving;
+  var uploadRow = '' +
+    '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;">' +
+      '<label class="btn btn-outline btn-small" style="white-space:nowrap;">'+tr('order_alert_sound_upload_btn')+'<input type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.opus,.wma" style="display:none" onchange="POS.handleOrderAlertSoundUpload(this)"/></label>' +
+      '<button class="btn btn-ghost btn-small" style="white-space:nowrap;" onclick="POS.testOrderAlertSound()">'+tr('order_alert_sound_test_btn')+'</button>' +
+      (hasCustomSound ? ('' +
+        '<span class="hint" style="margin:0;">'+tr('order_alert_sound_custom_label')+'</span>' +
+        '<button class="btn btn-ghost btn-small" '+(saving?'disabled':'')+' style="white-space:nowrap;" onclick="POS.resetOrderAlertSound()">'+tr('order_alert_sound_reset_btn')+'</button>'
+      ) : '') +
+    '</div>' +
+    (state.alertSoundSyncError ? '<p class="hint" style="color:var(--danger);margin-top:4px;">'+tr('order_alert_sound_sync_error')+'</p>' : '');
+  /* A freshly-picked file sits here as a draft — audible via Preview,
+     but NOT yet written over the shared working sound — until Save is
+     tapped. This is the confirm step: uploading alone no longer replaces
+     anything, so there's no way to overwrite a sound that already works
+     (for every device at this shop, since Save syncs shop-wide via
+     Firestore — see getOrderAlertCustomSound) with a bad pick by
+     accident. Cancel discards the pick entirely and leaves whatever was
+     already saved untouched. */
+  var draftRow = draft ? ('' +
+    '<div class="order-alert-sound-draft-row" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;padding:8px 10px;background:var(--cream-dark,#F3E9DD);border-radius:10px;">' +
+      '<span style="font-size:12px;font-weight:700;">'+tr('order_alert_sound_pending_label')+' '+escapeHtml(draft.name)+'</span>' +
+      '<button class="btn btn-ghost btn-small" '+(saving?'disabled':'')+' style="white-space:nowrap;" onclick="POS.previewOrderAlertSoundDraft()">'+tr('order_alert_sound_preview_btn')+'</button>' +
+      '<button class="btn btn-primary btn-small" '+(saving?'disabled':'')+' style="width:auto;white-space:nowrap;" onclick="POS.saveOrderAlertSoundDraft()">'+(saving?tr('order_alert_sound_saving_label'):tr('order_alert_sound_save_btn'))+'</button>' +
+      '<button class="btn btn-ghost btn-small" '+(saving?'disabled':'')+' style="white-space:nowrap;" onclick="POS.cancelOrderAlertSoundDraft()">'+tr('order_alert_sound_cancel_btn')+'</button>' +
+    '</div>'
+  ) : '';
+  return uploadRow + draftRow;
+}
+function buildIncomingOrdersCards(orders){
+  return orders.map(function(o){
+    var expanded = state.expandedIncomingId === o.id;
+    var subtotal = computeIncomingOrderSubtotal(o.items);
+    var itemLines = (o.items||[]).map(function(l){
+      var toppingsText = (l.toppings&&l.toppings.length) ? (' · '+l.toppings.map(function(t){return (Number(t.qty)>1?t.qty+'x ':'')+t.name;}).join(', ')) : '';
+      var meta = l.size+' · '+l.sugar+'% '+tr('sugar_word')+' · '+iceLabel(l.ice)+toppingsText;
+      return '<div class="di"><span>'+l.qty+'x '+escapeHtml(l.name)+' <span style="opacity:.75;">('+escapeHtml(meta)+')</span></span><span>'+formatMoney(l.unitPrice*l.qty)+'</span></div>';
+    }).join('');
+    var titleBits = [];
+    if(o.customerName) titleBits.push(escapeHtml(o.customerName));
+    if(o.customerNote) titleBits.push(escapeHtml(o.customerNote));
+    var title = titleBits.length ? titleBits.join(' · ') : tr('incoming_guest_order');
+    var paymentNote = o.paymentChoice ? ('<div class="otime">'+tr('incoming_customer_requested_label')+' '+paymentMethodLabel(o.paymentChoice)+'</div>') : '';
+    return '' +
+    '<div class="order-row">' +
+      '<div class="order-row-top" onclick="POS.toggleIncomingExpand(\''+o.id+'\')">' +
+        '<div><div class="onum">'+title+'</div><div class="otime">'+relativeTimeFromIso(o.submittedAt)+' · '+(o.items?o.items.length:0)+' '+tr('items_suffix')+'</div>'+paymentNote+'</div>' +
+        '<div class="ototal">'+formatMoney(subtotal)+'</div>' +
+      '</div>' +
+      (expanded ? (
+        '<div class="order-detail">' + itemLines +
+          '<div class="dactions">' +
+            '<button class="btn btn-ghost btn-small" onclick="POS.rejectIncoming(\''+o.id+'\')">'+tr('incoming_reject_btn')+'</button>' +
+            '<button class="btn btn-primary btn-small" style="width:auto;" onclick="POS.openIncomingApprove(\''+o.id+'\')">'+tr('incoming_review_approve_btn')+'</button>' +
+          '</div>' +
+        '</div>'
+      ) : '') +
+    '</div>';
+  }).join('');
+}
+function buildIncomingApproveModal(){
+  var p = state.incomingApprovePrompt;
+  var o = (state.incomingOrders||[]).filter(function(x){return x.id===p.orderId;})[0];
+  if(!o){ state.incomingApprovePrompt = null; return ''; }
+  var draft = buildDraftOrderFromIncoming(o, p);
+  /* Deliberately just these three, matching the exact set customers can
+     request on self-service.html (see openIncomingApprove's fallback list
+     and firestore.rules' paymentChoice check) — this shop doesn't take
+     E-Gets/FoodPanda orders through the QR menu (nothing here integrates
+     with those apps), and transfer already covers "pay via QR scan" as far
+     as this review step is concerned, so there's no separate QR option. */
+  var payDefs = [['cash',tr('cash')],['transfer',tr('transfer')],['split',tr('split_payment_label')]];
+  var payBtns = payDefs.map(function(pm){
+    return '<button class="'+(p.paymentMethod===pm[0]?'active':'')+'" onclick="POS.setIncomingApprovePayment(\''+pm[0]+'\')">'+pm[1]+'</button>';
+  }).join('');
+  var itemsHtml = (o.items||[]).map(function(l){
+    var toppingsText = (l.toppings&&l.toppings.length) ? (' · '+l.toppings.map(function(t){return (Number(t.qty)>1?t.qty+'x ':'')+t.name;}).join(', ')) : '';
+    var meta = l.size+' · '+l.sugar+'% '+tr('sugar_word')+' · '+iceLabel(l.ice)+toppingsText;
+    return '<div class="r-item"><span class="r-name">'+l.qty+'x '+escapeHtml(l.name)+'<div class="r-sub-line">'+escapeHtml(meta)+'</div></span><span class="r-item-price">'+formatMoney(l.unitPrice*l.qty)+'</span></div>';
+  }).join('');
+  var splitSumOk = draft.paymentMethod!=='split' || Math.abs(draft.total - ((draft.splitCash||0)+(draft.splitTransfer||0))) <= 0.005;
+  var canConfirm = !state.completingOrder && splitSumOk;
+  return '' +
+  '<div class="pos-overlay" onclick="if(event.target===this) POS.cancelIncomingApprove()">' +
+    '<div class="pos-modal" style="max-width:380px;">' +
+      '<button class="modal-close-x" '+(state.completingOrder?'disabled':'')+' onclick="POS.cancelIncomingApprove()">✕</button>' +
+      '<h2>'+tr('incoming_approve_title')+'</h2>' +
+      (o.customerName || o.customerNote ? '<p class="sub-cat">'+escapeHtml([o.customerName,o.customerNote].filter(Boolean).join(' · '))+'</p>' : '') +
+      (o.paymentChoice ? '<p class="sub-cat">'+tr('incoming_customer_requested_label')+' '+paymentMethodLabel(o.paymentChoice)+'</p>' : '') +
+      itemsHtml +
+      '<div class="r-divider"></div>' +
+      '<div class="summary-row"><span>'+tr('subtotal')+'</span><span>'+formatMoney(draft.subtotal)+'</span></div>' +
+      '<div class="summary-row"><span>'+tr('discount')+' (₭)</span><input type="text" inputmode="decimal" value="'+escapeHtml(String(p.discount||''))+'" placeholder="0" oninput="POS.setIncomingApproveDiscount(this.value)"/></div>' +
+      (draft.serviceCharge>0 ? '<div class="summary-row"><span>'+tr('service_charge')+'</span><span>'+formatMoney(draft.serviceCharge)+'</span></div>' : '') +
+      '<div class="summary-row total"><span>'+tr('total')+'</span><span>'+formatMoney(draft.total)+'</span></div>' +
+      '<div class="opt-label">'+tr('incoming_payment_method_label')+'</div>' +
+      '<div class="pay-methods">'+payBtns+'</div>' +
+      (p.paymentMethod==='cash' ? (
+        '<div class="cash-row"><span>'+tr('cash_received')+' (₭)</span><input type="text" inputmode="decimal" placeholder="'+tr('incoming_exact_amount_placeholder')+'" value="'+escapeHtml(p.amountReceived)+'" oninput="POS.setIncomingApproveAmount(this.value)"/></div>' +
+        (draft.displayChange!=null ? ('<div class="summary-row change-line '+(draft.displayChange<-0.005?'warn':'ok')+'"><span>'+(draft.displayChange<-0.005?tr('short_by'):tr('change_due'))+'</span><span>'+formatMoney(Math.abs(draft.displayChange))+'</span></div>') : '')
+      ) : '') +
+      (p.paymentMethod==='split' ? (
+        '<div class="cash-row"><span>'+tr('split_cash_label')+' (₭)</span><input type="text" inputmode="decimal" placeholder="0" value="'+escapeHtml(p.splitCash)+'" oninput="POS.setIncomingApproveSplitCash(this.value)"/></div>' +
+        '<div class="cash-row"><span>'+tr('split_transfer_label')+' (₭)</span><input type="text" inputmode="decimal" placeholder="0" value="'+escapeHtml(p.splitTransfer)+'" oninput="POS.setIncomingApproveSplitTransfer(this.value)"/></div>' +
+        '<div class="summary-row change-line '+(splitSumOk?'ok':'warn')+'"><span>'+(splitSumOk?tr('split_match_label'):((draft.total-((draft.splitCash||0)+(draft.splitTransfer||0)))>0?tr('split_remaining_label'):tr('split_over_label')))+'</span><span>'+(splitSumOk?'✓':formatMoney(Math.abs(draft.total-((draft.splitCash||0)+(draft.splitTransfer||0)))))+'</span></div>'
+      ) : '') +
+      '<button class="btn btn-primary" '+(canConfirm?'':'disabled')+' onclick="POS.confirmIncomingApprove()">'+(state.completingOrder?tr('processing'):(tr('incoming_confirm_record_btn')+' · '+formatMoney(draft.total)))+'</button>' +
+      '<p class="hint" style="margin-top:10px;">'+tr('incoming_reject_hint')+'</p>' +
+    '</div>' +
+  '</div>';
+}
+/* Where the shop hosts the public QR page — see buildSelfServiceUrl() and
+   the "Customer Self-Service" card in Settings. */
+function buildSelfServiceUrl(){
+  var base = (state.settings && state.settings.selfServiceBaseUrl) || '';
+  if(!base){
+    try{ base = window.location.href.replace(/[^\/]*$/, 'self-service.html'); }
+    catch(e){ base = 'self-service.html'; }
+  }
+  var loc = getActiveLocation();
+  var sep = base.indexOf('?')>-1 ? '&' : '?';
+  return base + (loc && loc.key && loc.key!=='main' ? (sep+'loc='+encodeURIComponent(loc.key)) : '');
+}
 /* The amount actually paid, in the currency actually paid — never converted to LAK for display. */
 function orderPaidAmount(o){
   var cur = o.currency || 'LAK';
@@ -6260,34 +6966,17 @@ function buildReceiptContentHtml(o, isPreview){
     '<div class="r-footer">'+nl2br(s.footerMessage)+'</div>' +
     lapnetQrHtml;
 }
-/* Wraps the receipt content in two copies for printing — a customer copy
-   (always the one shown on screen) and a kitchen copy, so every checkout
-   prints both in a single print job. The kitchen copy is completely
-   hidden on screen (.print-only) and only appears in the print output,
-   separated by a dashed cut line and a forced page break so they come out
-   as two distinct slips even on a continuous receipt roll. */
-function buildReceiptCopiesHtml(o, isPreview){
-  var content = buildReceiptContentHtml(o, isPreview);
-  return '' +
-    '<div class="receipt-copy">' +
-      '<div class="receipt-copy-label print-only">'+tr('customer_copy_label')+'</div>' +
-      content +
-    '</div>' +
-    '<div class="receipt-copy receipt-copy-kitchen print-only">' +
-      '<div class="receipt-copy-label">'+tr('kitchen_copy_label')+'</div>' +
-      content +
-    '</div>';
-}
 function buildReceiptModal(){
   var o = state.receiptOrder;
   return '' +
   '<div class="pos-overlay" onclick="if(event.target===this) POS.closeReceipt()">' +
     '<div class="pos-modal receipt-modal">' +
-      '<div id="receipt-content">' + buildReceiptCopiesHtml(o, false) + '</div>' +
+      '<div id="receipt-content">' + buildReceiptContentHtml(o, false) + '</div>' +
       '<div class="receipt-actions">' +
         '<button class="btn btn-ghost" onclick="POS.closeReceipt()">'+(state.testPrintMode ? tr('close_recipe') : tr('new_order'))+'</button>' +
         '<button class="btn btn-primary" onclick="POS.printCurrentReceipt()">'+tr('print_receipt')+'</button>' +
       '</div>' +
+      (state.receiptIsFreshCheckout ? '<p class="hint" style="text-align:center;margin-top:8px;">'+tr('receipt_auto_close_hint')+'</p>' : '') +
     '</div>' +
   '</div>';
 }
@@ -7018,10 +7707,10 @@ function buildHouseStockRawSubTab(){
     return '' +
     '<div class="mgmt-row" style="flex-wrap:wrap;row-gap:10px;">' +
       '<span class="em">'+ingredientEmoji(ing.unit)+'</span>' +
-      '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+tr('house_stock_qty_label')+': '+formatIngredientAmount(ing.houseStock)+' '+escapeHtml(ing.unit)+'</div></div>' +
+      '<div class="info"><div class="t1">'+escapeHtml(ing.name)+'</div><div class="t2">'+tr('current_stock_label')+': '+formatIngredientAmount(ing.stock)+' '+escapeHtml(ing.unit)+' · '+tr('house_stock_qty_label')+': '+formatIngredientAmount(ing.houseStock)+' '+escapeHtml(ing.unit)+'</div></div>' +
       '<div class="acts"><button class="btn btn-outline btn-small" onclick="POS.editHouseStock(\''+ing.id+'\')">'+tr('edit')+'</button></div>' +
       '<div class="stock-target-grid">' +
-        buildStockTargetBox(ing, 'monthlyTarget', 'monthly_target_label', 'houseStock') +
+        buildStockTargetBox(ing, 'monthlyTarget', 'monthly_target_label', 'houseStock', 'stock') +
         buildAmountPerSetBox(ing) +
       '</div>' +
     '</div>';
@@ -7423,22 +8112,49 @@ function stockStatusFor(stock, target){
   if(pct <= 0.5) return 'yellow';
   return 'green';
 }
-function buildStockTargetBox(ing, field, labelKey, stockField){
+/* extraStockField (optional) makes the target comparison count a SECOND
+   stock field alongside stockField, rather than stockField alone — this
+   is what House Stock's monthly target uses (extraStockField='stock') so
+   "amount needed monthly" reflects what's actually on hand shop-wide
+   (Shop Stock + House Stock combined), not just what's sitting in the
+   warehouse. Shop Stock's own weekly target box never passes this, so
+   its calculation (weeklyTarget - stock) is completely unchanged. */
+function buildStockTargetBox(ing, field, labelKey, stockField, extraStockField){
   stockField = stockField || 'stock';
-  var stockValue = ing[stockField];
+  var stockValue = (Number(ing[stockField])||0) + (extraStockField ? (Number(ing[extraStockField])||0) : 0);
   var target = ing[field];
   var status = stockStatusFor(stockValue, target);
-  var needed = Math.max(0, (Number(target)||0) - (Number(stockValue)||0));
+  var needed = Math.max(0, (Number(target)||0) - stockValue);
   var statusHtml;
   if(status===null){
     statusHtml = '<div class="stock-target-status status-none">'+tr('no_target_set')+'</div>';
   } else if(needed<=0){
     statusHtml = '<div class="stock-target-status">✓ '+tr('fully_stocked_label')+'</div>';
   } else {
+    /* Shown for ANY status with a real shortfall — red, yellow, AND
+       green — not just red/yellow. Green still means "not urgent," but
+       green only means the stock hasn't dropped far enough to be a red/
+       yellow emergency; it doesn't mean the target is actually met (that
+       case is the needed<=0 "Fully stocked" branch above, entered
+       separately). A green item can still be short of its target, and
+       staff still need to know how many sets to deposit to close that
+       gap, same as they would for red/yellow — this used to only show
+       up once the item had already slid into yellow or red. */
     var setsBadge = '';
-    if((status==='red' || status==='yellow') && Number(ing.amountPerSet)>0){
-      var setsNeeded = Math.ceil(needed / Number(ing.amountPerSet));
-      setsBadge = ' <span class="sets-needed-badge">'+setsNeeded+' '+tr('sets_needed_suffix')+'</span>';
+    if(Number(ing.amountPerSet)>0){
+      /* Round to the nearest whole set instead of always rounding up
+         (Math.ceil) — a shortfall that's only a small fraction of one
+         set (e.g. 9.1 sets) shouldn't be nudged up to a whole extra set
+         just because it's not an exact multiple. Only round UP once the
+         remainder is at least half a set (9.5 or above); anything below
+         that rounds down, same as normal rounding. If that rounds all
+         the way down to 0 (the shortfall is under half of one set), the
+         badge is skipped entirely rather than showing "0 sets" — the
+         "Need X <unit>" text right next to it already says so. */
+      var setsNeeded = Math.round(needed / Number(ing.amountPerSet));
+      if(setsNeeded > 0){
+        setsBadge = ' <span class="sets-needed-badge">'+setsNeeded+' '+tr('sets_needed_suffix')+'</span>';
+      }
     }
     statusHtml = '<div class="stock-target-status">'+tr('deposit_needed_prefix')+' '+formatIngredientAmount(needed)+' '+escapeHtml(ing.unit)+setsBadge+'</div>';
   }
@@ -7449,6 +8165,7 @@ function buildStockTargetBox(ing, field, labelKey, stockField){
       'oninput="POS.updateIngredientTarget(\''+ing.id+'\',\''+field+'\',this.value)" ' +
       'onblur="POS.persistIngredientTarget(\''+ing.id+'\')"/>' +
     statusHtml +
+    (extraStockField ? '<div class="stock-target-combined-note">'+tr('monthly_target_combined_note')+'</div>' : '') +
   '</div>';
 }
 function buildAmountPerSetBox(ing){
@@ -7472,11 +8189,14 @@ function ingredientSeverity(ing){
   return wStatus!=null ? STOCK_SEVERITY_RANK[wStatus] : 3;
 }
 /* Same idea, but for House Stock: sorts by MONTHLY target status against
-   houseStock instead of weekly target against stock. Kept as a separate
-   function (rather than parameterizing ingredientSeverity) so each tab's
-   sort rule stays easy to read on its own. */
+   Shop Stock + House Stock COMBINED (matching buildStockTargetBox's own
+   monthly-target calculation below — see its comment for why), rather
+   than weekly target against stock alone. Kept as a separate function
+   (rather than parameterizing ingredientSeverity) so each tab's sort
+   rule stays easy to read on its own. */
 function ingredientSeverityHouseStock(ing){
-  var mStatus = stockStatusFor(ing.houseStock, ing.monthlyTarget);
+  var combined = (Number(ing.houseStock)||0) + (Number(ing.stock)||0);
+  var mStatus = stockStatusFor(combined, ing.monthlyTarget);
   return mStatus!=null ? STOCK_SEVERITY_RANK[mStatus] : 3;
 }
 function buildRawMaterialsSubTab(){
@@ -7879,6 +8599,8 @@ function buildSettingsTab(){
   }
   var privileged = state.loggedInRole==='manager' || state.loggedInRole==='admin';
   var f = state.settingsForm || state.settings;
+  var selfServiceUrl = buildSelfServiceUrl();
+  var selfServiceQr = renderQrDataUrl(selfServiceUrl);
   var byCat = {};
   state.menu.forEach(function(m){
     (byCat[m.category] = byCat[m.category]||[]).push(m);
@@ -7970,6 +8692,18 @@ function buildSettingsTab(){
           (lapnetQrIsValid(f.lapnetQrPayload)?tr('lapnet_qr_valid'):tr('lapnet_qr_invalid'))+
         '</p>' : '') +
     '</div>' +
+    '<button class="btn btn-primary" style="width:auto;margin-top:14px;" onclick="POS.saveSettings()">'+tr('save_settings')+'</button>' +
+  '</div>' +
+  '<div class="section-card">' +
+    '<h2>🧺 Customer Self-Service (QR Ordering)</h2>' +
+    '<p class="hint">Customers scan this to browse the menu and submit an order from their phone. Nothing is charged, and no stock is deducted, until you approve it from the Incoming Orders tab.</p>' +
+    '<div class="field" style="margin-bottom:12px;">' +
+      '<label>Self-service page URL</label>' +
+      '<input type="text" value="'+escapeHtml(f.selfServiceBaseUrl||'')+'" placeholder="e.g. https://yourshop.web.app/self-service.html" oninput="POS.updateSettingsForm(\'selfServiceBaseUrl\',this.value)"/>' +
+      '<p class="hint" style="margin-top:4px;">Where you host self-service.html. Leave blank to auto-guess from this page\'s own address.</p>' +
+    '</div>' +
+    (selfServiceQr ? '<div style="text-align:center;"><img src="'+selfServiceQr+'" alt="Self-service QR code" style="width:180px;height:180px;"/></div>' : '') +
+    '<p class="hint" style="text-align:center;word-break:break-all;margin-top:8px;">'+escapeHtml(selfServiceUrl)+'</p>' +
     '<button class="btn btn-primary" style="width:auto;margin-top:14px;" onclick="POS.saveSettings()">'+tr('save_settings')+'</button>' +
   '</div>' +
   '<div class="section-card">' +
@@ -9005,16 +9739,42 @@ var POS = {
       // printer settings, receipt QR, etc at the target are untouched.
       targetSettings.categories = JSON.parse(JSON.stringify(sourceSettings.categories || []));
       targetSettings.categoryTranslations = JSON.parse(JSON.stringify(sourceSettings.categoryTranslations || {}));
-      targetSettings.categoryPhotos = JSON.parse(JSON.stringify(sourceSettings.categoryPhotos || {}));
-      targetSettings.categoryBackgroundPhotos = JSON.parse(JSON.stringify(sourceSettings.categoryBackgroundPhotos || {}));
-      return Promise.all([
-        realDb.collection(targetPrefix+'pos_ingredients').doc('main').set({items: ingredientsItems}),
-        realDb.collection(targetPrefix+'pos_premix').doc('main').set({items: premixItems}),
-        realDb.collection(targetPrefix+'pos_menu').doc('main').set({items: menuItems}),
-        realDb.collection(targetPrefix+'pos_recipes').doc('main').set({items: recipeItems}),
-        realDb.collection(targetPrefix+'pos_toppings').doc('main').set({items: toppingItems}),
-        realDb.collection(targetPrefix+'pos_settings').doc('main').set(targetSettings)
-      ]);
+      /* Category thumbnail/background photos live in pos_photos, not
+         embedded in pos_settings (see settingsForSave()) — copying them
+         by cloning sourceSettings.categoryPhotos straight into
+         targetSettings would (a) do nothing useful, since a healthy
+         pos_settings document never actually carries that field anymore,
+         and (b) is exactly the mistake that bloats pos_settings past
+         Firestore's 1 MiB write limit and breaks EVERY future settings
+         save at that location, including totally unrelated ones like a
+         staff name. The actual photo docs get copied further down,
+         straight into the target location's own pos_photos collection.
+         These two lines also strip out anything already wrongly embedded
+         here (from before this fix, or from a still-stale target
+         document), so this write self-heals a bloated document instead
+         of perpetuating it. */
+      delete targetSettings.categoryPhotos;
+      delete targetSettings.categoryBackgroundPhotos;
+      delete targetSettings.pageBackgroundPhoto;
+      delete targetSettings.headerBackgroundPhoto;
+      return realDb.collection(sourcePrefix+'pos_photos').get().then(function(photoSnap){
+        var photoWrites = [];
+        photoSnap.forEach(function(d){
+          // Only category_thumb_*/category_bg_* are relevant here — this
+          // feature copies stock/menu setup, not individual item photos.
+          if(/^category_(thumb|bg)_/.test(d.id)){
+            photoWrites.push(realDb.collection(targetPrefix+'pos_photos').doc(d.id).set(d.data()));
+          }
+        });
+        return Promise.all([
+          realDb.collection(targetPrefix+'pos_ingredients').doc('main').set({items: ingredientsItems}),
+          realDb.collection(targetPrefix+'pos_premix').doc('main').set({items: premixItems}),
+          realDb.collection(targetPrefix+'pos_menu').doc('main').set({items: menuItems}),
+          realDb.collection(targetPrefix+'pos_recipes').doc('main').set({items: recipeItems}),
+          realDb.collection(targetPrefix+'pos_toppings').doc('main').set({items: toppingItems}),
+          realDb.collection(targetPrefix+'pos_settings').doc('main').set(targetSettings)
+        ].concat(photoWrites));
+      });
     }).then(function(){
       state.copyStockSetupBusy = false;
       render();
@@ -9140,14 +9900,23 @@ var POS = {
         if(!existingSettings.categoryTranslations) existingSettings.categoryTranslations = {};
         existingSettings.categoryTranslations[categoryName] = catTranslation;
       }
-      if(catPhoto){
-        if(!existingSettings.categoryPhotos) existingSettings.categoryPhotos = {};
-        existingSettings.categoryPhotos[categoryName] = catPhoto;
-      }
-      if(catBgPhoto){
-        if(!existingSettings.categoryBackgroundPhotos) existingSettings.categoryBackgroundPhotos = {};
-        existingSettings.categoryBackgroundPhotos[categoryName] = catBgPhoto;
-      }
+      /* catPhoto/catBgPhoto go straight into the target's pos_photos
+         collection below, NOT embedded into existingSettings — embedding
+         a photo data URL into pos_settings is exactly what bloats that
+         document past Firestore's 1 MiB write limit and breaks every
+         future settings save at that location (see saveSettings() and
+         copyStockSetupToLocation() for the same fix). The two deletes
+         also strip out anything already wrongly embedded here, from
+         before this fix, so this write self-heals a bloated target
+         document instead of perpetuating it. */
+      delete existingSettings.categoryPhotos;
+      delete existingSettings.categoryBackgroundPhotos;
+      delete existingSettings.pageBackgroundPhoto;
+      delete existingSettings.headerBackgroundPhoto;
+      var photoWrites = [];
+      var catKey = sanitizeCategoryKey(categoryName);
+      if(catPhoto) photoWrites.push(realDb.collection(targetPrefix+'pos_photos').doc('category_thumb_'+catKey).set({data: catPhoto}));
+      if(catBgPhoto) photoWrites.push(realDb.collection(targetPrefix+'pos_photos').doc('category_bg_'+catKey).set({data: catBgPhoto}));
 
       return Promise.all([
         realDb.collection(targetPrefix+'pos_ingredients').doc('main').set({items: mergedRaw}),
@@ -9156,7 +9925,7 @@ var POS = {
         realDb.collection(targetPrefix+'pos_menu').doc('main').set({items: mergedMenu}),
         realDb.collection(targetPrefix+'pos_recipes').doc('main').set({items: existingRecipes}),
         realDb.collection(targetPrefix+'pos_settings').doc('main').set(existingSettings)
-      ]);
+      ].concat(photoWrites));
     }).then(function(){
       state.duplicateItemBusyId = null;
       render();
@@ -9380,31 +10149,11 @@ var POS = {
     if(state.completingOrder) return;
     var draft = buildDraftOrder();
     if(!draft) return;
-    var cartSnapshot = draft.items;
     state.completingOrder = true;
     render();
-
-    var counterRef = db.collection('pos_meta').doc('counter');
-    var todayKey = todayDateKey();
-    db.runTransaction(function(tx){
-      return tx.get(counterRef).then(function(doc){
-        var data = doc.exists ? doc.data() : {};
-        var isNewDay = data.date !== todayKey;
-        var current = isNewDay ? 1 : ((Number(data.value)||1));
-        tx.set(counterRef, {value: current+1, date: todayKey});
-        return current;
-      });
-    }).then(function(orderNumber){
-      var order = Object.assign({}, draft, {
-        id: uid('order'),
-        number: orderNumber,
-        timestamp: new Date().toISOString(),
-        items: cartSnapshot
-      });
-      return db.collection('pos_orders').doc(order.id).set(order).then(function(){ return order; });
-    }).then(function(order){
-      deductStockForOrder(order.items);
+    recordCompletedOrder(draft).then(function(order){
       state.receiptOrder = order;
+      state.receiptIsFreshCheckout = true;
       state.receiptPreview = null;
       state.cart = [];
       state.discount = 0;
@@ -9415,14 +10164,222 @@ var POS = {
       state.completingOrder = false;
       state.mobileCartOpen = false;
       doRender();
-      if(order.paymentMethod==='transfer' || order.paymentMethod==='split') triggerPrint(order);
+      /* Cash pays at the counter — there's no "scan to pay" QR on the
+         receipt for a customer to use, so an automatic cash print is
+         just wasted paper. Transfer/split/E-Gets/FoodPanda all still
+         auto-print, since those receipts carry the payment QR the
+         customer actually needs. This only affects the automatic print
+         right after checkout — staff can still tap "Print Receipt" on
+         the receipt screen, or Reprint from History, for a cash order
+         if a customer wants a paper copy. */
+      if(order.paymentMethod!=='cash') triggerPrint(order);
+      scheduleReceiptAutoClose();
     }).catch(function(e){
       state.completingOrder = false;
       render();
       window.alert('Could not complete the order — check your internet connection and try again.\n('+e.message+')');
     });
   },
-  closeReceipt: function(){ state.receiptOrder=null; state.testPrintMode=false; render(); },
+  /* ---- Incoming Orders (QR self-service approval) ---- */
+  dismissOrderAlert: function(alertId){
+    dismissOrderAlert(alertId);
+  },
+  viewOrderAlert: function(alertId){
+    var a = (state.orderAlerts||[]).filter(function(x){return x.id===alertId;})[0];
+    dismissOrderAlert(alertId);
+    POS.setTab('incoming');
+    if(a) state.expandedIncomingId = a.orderId;
+    render();
+  },
+  toggleOrderAlertSound: function(){
+    setOrderAlertSoundOn(!isOrderAlertSoundOn());
+    render();
+  },
+  handleOrderAlertSoundUpload: function(inputEl){
+    var file = inputEl && inputEl.files && inputEl.files[0];
+    inputEl.value = ''; // clear so picking the same file again still fires onchange
+    if(!file) return;
+    /* file.type alone isn't reliable enough to gate on: plenty of real
+       browser/OS combinations (this is a known issue with .m4a in
+       particular, and with any file whose OS-level MIME mapping is
+       missing or unusual) hand back an empty string or a non-"audio/"
+       type for a perfectly valid audio file, which would otherwise
+       reject it here even after the browser's own file picker let
+       someone select it. Falling back to the file extension for those
+       known formats keeps this from being stricter than the file picker
+       itself — genuinely wrong file types (a .txt or .png) still get
+       caught by neither check. */
+    var looksLikeAudioByType = /^audio\//.test(file.type);
+    var looksLikeAudioByExt = /\.(mp3|wav|m4a|aac|ogg|oga|flac|opus|wma|weba)$/i.test(file.name||'');
+    if(!looksLikeAudioByType && !looksLikeAudioByExt){
+      window.alert(tr('order_alert_sound_invalid_type'));
+      return;
+    }
+    if(file.size > ORDER_ALERT_CUSTOM_SOUND_MAX_BYTES){
+      window.alert(tr('order_alert_sound_too_large'));
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(e){
+      /* Stage only — do NOT touch localStorage yet. Picking a file used to
+         overwrite the working sound immediately, which is what made this
+         look broken: staff would pick a file, hear nothing obviously
+         different happen, and have no way to tell whether it had actually
+         taken effect. Now the pick just becomes a draft (with a Preview /
+         Save / Cancel row shown right under the upload button — see
+         buildOrderAlertSoundControls()) and nothing is overwritten until
+         Save is tapped. */
+      state.orderAlertSoundDraft = { name: file.name, dataUrl: e.target.result };
+      render();
+    };
+    reader.onerror = function(){ window.alert(tr('order_alert_sound_invalid_type')); };
+    reader.readAsDataURL(file);
+  },
+  previewOrderAlertSoundDraft: function(){
+    var draft = state.orderAlertSoundDraft;
+    if(!draft) return;
+    playOrderAlertSound(draft.dataUrl);
+  },
+  saveOrderAlertSoundDraft: function(){
+    var draft = state.orderAlertSoundDraft;
+    if(!draft || state.orderAlertSoundSaving) return;
+    state.orderAlertSoundSaving = true;
+    render();
+    setOrderAlertCustomSound(draft.dataUrl).then(function(){
+      // The pos_alert_sound listener will update state.orderAlertCustomSound
+      // itself once this write round-trips back — just clear the draft and
+      // the "saving" flag here so the draft row disappears.
+      state.orderAlertSoundDraft = null;
+      state.orderAlertSoundSaving = false;
+      render();
+    }).catch(function(e){
+      state.orderAlertSoundSaving = false;
+      render();
+      window.alert('Could not save the alert sound — check your internet connection and try again.\n('+e.message+')');
+    });
+  },
+  cancelOrderAlertSoundDraft: function(){
+    state.orderAlertSoundDraft = null;
+    render();
+  },
+  resetOrderAlertSound: function(){
+    if(state.orderAlertSoundSaving) return;
+    state.orderAlertSoundSaving = true;
+    render();
+    setOrderAlertCustomSound(null).then(function(){
+      state.orderAlertSoundSaving = false;
+      render();
+    }).catch(function(e){
+      state.orderAlertSoundSaving = false;
+      render();
+      window.alert('Could not reset the alert sound — check your internet connection and try again.\n('+e.message+')');
+    });
+  },
+  testOrderAlertSound: function(){
+    playOrderAlertSound();
+  },
+  toggleIncomingExpand: function(id){
+    state.expandedIncomingId = state.expandedIncomingId===id ? null : id;
+    render();
+  },
+  openIncomingApprove: function(id){
+    var o = (state.incomingOrders||[]).filter(function(x){return x.id===id;})[0];
+    /* Pre-select whatever payment method the customer said they'd use, so
+       staff usually just has to confirm rather than re-pick it — they can
+       still change it freely, this is only a starting point. Falls back to
+       'cash' for older incoming orders recorded before customers could
+       state a preference, or if the stored value is somehow unrecognized. */
+    var initialMethod = (o && ['cash','transfer','split'].indexOf(o.paymentChoice)>-1) ? o.paymentChoice : 'cash';
+    state.incomingApprovePrompt = {orderId:id, paymentMethod:initialMethod, amountReceived:'', discount:0, splitCash:'', splitTransfer:''};
+    render();
+  },
+  cancelIncomingApprove: function(){
+    if(state.completingOrder) return;
+    state.incomingApprovePrompt = null;
+    render();
+  },
+  setIncomingApprovePayment: function(pm){
+    state.incomingApprovePrompt.paymentMethod = pm;
+    state.incomingApprovePrompt.amountReceived = '';
+    state.incomingApprovePrompt.splitCash = '';
+    state.incomingApprovePrompt.splitTransfer = '';
+    render();
+  },
+  setIncomingApproveAmount: function(v){
+    state.incomingApprovePrompt.amountReceived = sanitizeDecimal(v);
+    render();
+  },
+  setIncomingApproveSplitCash: function(v){
+    state.incomingApprovePrompt.splitCash = sanitizeDecimal(v);
+    render();
+  },
+  setIncomingApproveSplitTransfer: function(v){
+    state.incomingApprovePrompt.splitTransfer = sanitizeDecimal(v);
+    render();
+  },
+  setIncomingApproveDiscount: function(v){
+    var d = sanitizeDecimal(v);
+    state.incomingApprovePrompt.discount = d==='' ? 0 : Number(d);
+    render();
+  },
+  confirmIncomingApprove: function(){
+    if(state.completingOrder) return;
+    var p = state.incomingApprovePrompt;
+    var o = (state.incomingOrders||[]).filter(function(x){return x.id===p.orderId;})[0];
+    if(!o){ state.incomingApprovePrompt = null; render(); return; }
+    var draft = buildDraftOrderFromIncoming(o, p);
+    /* Same guard the disabled Confirm button already enforces in the UI —
+       repeated here so this can never record a sale with a split payment
+       that doesn't actually add up to the total, even if this were ever
+       called some other way. */
+    if(draft.paymentMethod==='split' && Math.abs(draft.total - ((draft.splitCash||0)+(draft.splitTransfer||0))) > 0.005) return;
+    state.completingOrder = true;
+    render();
+    recordCompletedOrder(draft).then(function(order){
+      return db.collection('pos_incoming_orders').doc(o.id).delete().then(function(){ return order; });
+    }).then(function(order){
+      state.receiptOrder = order;
+      state.incomingApprovePrompt = null;
+      state.expandedIncomingId = null;
+      state.completingOrder = false;
+      doRender();
+      /* Same reasoning as completeOrder() above: cash doesn't need the
+         payment QR on the receipt, so skip the automatic print for it.
+         Manual Print Receipt / Reprint still work for any payment
+         method, cash included. */
+      if(order.paymentMethod!=='cash') triggerPrint(order);
+    }).catch(function(e){
+      state.completingOrder = false;
+      render();
+      window.alert('Could not approve this order — check your internet connection and try again.\n('+e.message+')');
+    });
+  },
+  rejectIncoming: function(id){
+    if(!window.confirm(tr('incoming_reject_confirm'))) return;
+    db.collection('pos_incoming_orders').doc(id).delete().catch(function(e){
+      window.alert('Could not reject this order: '+e.message);
+    });
+  },
+  closeReceipt: function(){
+    cancelReceiptAutoClose();
+    var wasFreshCheckout = state.receiptIsFreshCheckout;
+    state.receiptOrder = null;
+    state.testPrintMode = false;
+    state.receiptIsFreshCheckout = false;
+    if(wasFreshCheckout){
+      /* Only for a just-completed sale (never a reprint from History, a
+         Settings test print, or an Incoming Order approval) — whether
+         this fires automatically or staff tapped "New Order" early,
+         landing back on the drink categories grid is what "ready for
+         the next customer" actually looks like, rather than staying on
+         whatever category/search the previous order happened to leave
+         behind. */
+      state.orderView = 'categories';
+      state.activeCategory = 'All';
+      state.search = '';
+    }
+    render();
+  },
   printCurrentReceipt: function(){ if(state.receiptOrder) triggerPrint(state.receiptOrder); },
   /* Builds a synthetic sample order (no real order needed) so staff can
      check a receipt actually fits the selected paper width before
@@ -9904,20 +10861,14 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var size = 800;
-        var canvas = document.createElement('canvas');
-        canvas.width = size; canvas.height = size;
-        var ctx = canvas.getContext('2d');
-        var scale = Math.max(size/img.width, size/img.height);
-        var w = img.width*scale, h = img.height*scale;
-        var x = (size-w)/2, y = (size-h)/2;
-        ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        var result = compressImageToDataUrl(img, 800, 800, {startQuality:0.85});
+        var dataUrl = result.dataUrl;
         var target = id ? state.menu.filter(function(m){return m.id===id;})[0] : state.newItemDraft;
         if(target){
           target.photo = dataUrl;
           if(id) savePhotoDoc('item_'+id, dataUrl); // new items: saved once saveItem() assigns an id
           render();
+          if(result.tooLarge) window.alert('This photo is unusually detailed and stayed large even after compression. It was saved, but if it does not show up on the self-service page, try a simpler or lower-resolution photo.');
         }
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
@@ -9942,19 +10893,13 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var w0 = 640, h0 = 427;
-        var canvas = document.createElement('canvas');
-        canvas.width = w0; canvas.height = h0;
-        var ctx = canvas.getContext('2d');
-        var scale = Math.max(w0/img.width, h0/img.height);
-        var w = img.width*scale, h = img.height*scale;
-        var x = (w0-w)/2, y = (h0-h)/2;
-        ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        var result = compressImageToDataUrl(img, 640, 427, {startQuality:0.85});
+        var dataUrl = result.dataUrl;
         if(!state.settings.categoryPhotos) state.settings.categoryPhotos = {};
         state.settings.categoryPhotos[cat] = dataUrl;
         savePhotoDoc('category_thumb_'+sanitizeCategoryKey(cat), dataUrl);
         render();
+        if(result.tooLarge) window.alert('This photo is unusually detailed and stayed large even after compression. It was saved, but if it does not show up on the self-service page, try a simpler or lower-resolution photo.');
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
       img.src = e.target.result;
@@ -10048,19 +10993,13 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var w0=1800, h0=1157;
-        var canvas = document.createElement('canvas');
-        canvas.width=w0; canvas.height=h0;
-        var ctx = canvas.getContext('2d');
-        var scale = Math.max(w0/img.width, h0/img.height);
-        var w=img.width*scale, h=img.height*scale;
-        var x=(w0-w)/2, y=(h0-h)/2;
-        ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        var result = compressImageToDataUrl(img, 1800, 1157, {startQuality:0.8});
+        var dataUrl = result.dataUrl;
         state.settings.pageBackgroundPhoto = dataUrl;
         if(state.settingsForm) state.settingsForm.pageBackgroundPhoto = dataUrl;
         savePhotoDoc('page_background', dataUrl);
         render();
+        if(result.tooLarge) window.alert('This photo is unusually detailed and stayed large even after compression. It was saved, but if it does not sync properly, try a simpler or lower-resolution photo.');
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
       img.src = e.target.result;
@@ -10085,19 +11024,13 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var w0=2000, h0=400;
-        var canvas = document.createElement('canvas');
-        canvas.width=w0; canvas.height=h0;
-        var ctx = canvas.getContext('2d');
-        var scale = Math.max(w0/img.width, h0/img.height);
-        var w=img.width*scale, h=img.height*scale;
-        var x=(w0-w)/2, y=(h0-h)/2;
-        ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        var result = compressImageToDataUrl(img, 2000, 400, {startQuality:0.8});
+        var dataUrl = result.dataUrl;
         state.settings.headerBackgroundPhoto = dataUrl;
         if(state.settingsForm) state.settingsForm.headerBackgroundPhoto = dataUrl;
         savePhotoDoc('header_background', dataUrl);
         render();
+        if(result.tooLarge) window.alert('This photo is unusually detailed and stayed large even after compression. It was saved, but if it does not sync properly, try a simpler or lower-resolution photo.');
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
       img.src = e.target.result;
@@ -10135,15 +11068,8 @@ var POS = {
     reader.onload = function(e){
       var img = new Image();
       img.onload = function(){
-        var w0=1800, h0=1157;
-        var canvas = document.createElement('canvas');
-        canvas.width=w0; canvas.height=h0;
-        var ctx = canvas.getContext('2d');
-        var scale = Math.max(w0/img.width, h0/img.height);
-        var w=img.width*scale, h=img.height*scale;
-        var x=(w0-w)/2, y=(h0-h)/2;
-        ctx.drawImage(img, x, y, w, h);
-        var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        var result = compressImageToDataUrl(img, 1800, 1157, {startQuality:0.8});
+        var dataUrl = result.dataUrl;
         if(!state.settings.categoryBackgroundPhotos) state.settings.categoryBackgroundPhotos = {};
         state.settings.categoryBackgroundPhotos[cat] = dataUrl;
         if(state.settingsForm){
@@ -10152,6 +11078,7 @@ var POS = {
         }
         savePhotoDoc('category_bg_'+sanitizeCategoryKey(cat), dataUrl);
         render();
+        if(result.tooLarge) window.alert('This photo is unusually detailed and stayed large even after compression. It was saved, but if it does not sync properly, try a simpler or lower-resolution photo.');
       };
       img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
       img.src = e.target.result;
@@ -10377,7 +11304,20 @@ var POS = {
   saveSettings: function(){
     var merged = Object.assign({}, state.settings, state.settingsForm);
     state.settings = merged;
-    db.collection('pos_settings').doc('main').set(merged).then(function(){
+    /* Must go through settingsForSave() like every other settings write —
+       state.settings (and settingsForm, cloned from it) carries the live
+       category/page/header photo data URLs that applyPhotoMap() attaches
+       for on-screen display, and writing those straight into pos_settings
+       is exactly what silently bloated that document past Firestore's
+       1 MiB limit and made every future save here — even something as
+       small as a staff name — fail outright. This was the one settings
+       save path that had been missed when photos were split into their
+       own pos_photos collection; every other save on this screen already
+       used settingsForSave(). Because this always does a full document
+       overwrite (not a merge), the next successful save here also
+       self-heals an already-bloated document — no separate cleanup step
+       needed. */
+    db.collection('pos_settings').doc('main').set(settingsForSave()).then(function(){
       window.alert('Settings saved.');
     }).catch(function(e){ window.alert('Could not save settings: '+e.message); });
     render();
