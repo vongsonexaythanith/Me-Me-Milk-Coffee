@@ -3136,6 +3136,7 @@ var DEFAULT_SETTINGS = {
   categoryPhotos: {},
   pageBackgroundPhoto: null,
   headerBackgroundPhoto: null,
+  customerDisplayLogo: null,
   categoryBackgroundPhotos: {},
   categories: ["Milk Tea","Specialty","Fruit Tea","Coffee"],
   lapnetQrPayload: "",
@@ -3148,7 +3149,8 @@ var DEFAULT_SETTINGS = {
   printerDeviceId: "local_printer",
   printerRawbtImageMode: false,
   categoryTranslations: {}, // { "CategoryName": {lo:"...", th:"..."} }
-  selfServiceBaseUrl: "" // Customer self-service portal base URL (e.g. https://yourshop.web.app/self-service.html). Leave blank to auto-guess from this page's own address.
+  selfServiceBaseUrl: "", // Customer self-service portal base URL (e.g. https://yourshop.web.app/self-service.html). Leave blank to auto-guess from this page's own address.
+  customerDisplayMessage: "" // Text shown beneath the logo on the second screen's idle "Welcome" view — see customer-display.html.
 };
 /* Fallback labels shown for any account key not yet given a custom name in
    Settings — e.g. before the shop owner has typed in each team member's
@@ -3890,6 +3892,21 @@ var TRANSLATIONS = {
     lapnet_qr_label:'LAPNet payment QR (dynamic)', lapnet_qr_hint:'Paste the raw text your bank app shows when generating a QR (starts with "000201…"). On every completed order, this shop will generate a fresh QR with the exact total already filled in — no more typing the amount by hand. Leave blank to skip this.',
     lapnet_qr_placeholder:'00020101021115...', lapnet_qr_valid:'✓ Looks valid', lapnet_qr_invalid:'⚠ Could not read this as a payment QR — double-check you pasted the full text',
     scan_to_pay_label:'Scan to pay',
+    customer_display_section_title:'🖥️ Customer Payment Display',
+    customer_display_section_hint:'Opens a second window for a monitor facing the customer. The moment you confirm a Transfer, Split, E-Gets, or FoodPanda order, it switches to a big "Scan to pay" QR — Cash orders don\'t trigger it, since there\'s nothing to scan. Drag the window to your second screen and make it full-screen once; after that it stays in sync on its own.',
+    customer_display_open_button:'🖥️ Open Customer Display',
+    customer_display_qr_showing:'Payment QR is showing on the customer screen',
+    customer_display_dismiss:'Clear',
+    customer_display_no_qr_hint:'⚠ No LAPNet payment QR is configured above yet, so this screen won\'t have anything to show for Transfer/Split/E-Gets/FoodPanda orders until you add one.',
+    customer_display_enable_toggle_label:'Wait for "Order is Paid" on this device',
+    customer_display_enable_toggle_hint:'When on, confirming a Transfer/Split/E-Gets/FoodPanda order on THIS device shows the QR on the customer screen first and waits for you to tap "Order is Paid" before deducting stock or printing — nothing is recorded until you confirm. Off (the default) keeps today\'s behavior: the sale records and prints immediately. This is per-device, so only registers with a second monitor attached need to turn it on. Cash is never affected either way.',
+    customer_display_logo_label:'Idle-screen logo',
+    customer_display_logo_hint:'Shown big and centered on the customer screen whenever it\'s not showing a payment QR. A transparent PNG works best — it\'s kept at its original shape, never cropped.',
+    customer_display_message_label:'Idle-screen message',
+    customer_display_message_placeholder:'e.g. Welcome to Me Me Milk Tea!',
+    pending_payment_title:'Waiting for Payment',
+    pending_payment_hint:'The payment QR is showing on the customer screen. Tap below once the customer has completed the transfer.',
+    order_is_paid_button:'Order is Paid',
     welcome_label:'Welcome,',
     photo_visibility_label:'Photo visibility',
     preview_receipt:'Preview Receipt', preview_label:'🧾 Preview — not yet saved', back_to_cart:'← Back to Cart', confirm_order:'Confirm & Complete Order',
@@ -4108,6 +4125,21 @@ var TRANSLATIONS = {
     lapnet_qr_label:'LAPNet QR ຈ່າຍເງິນ (ແບບໄດນາມິກ)', lapnet_qr_hint:'ວາງຂໍ້ຄວາມທີ່ແອັບທະນາຄານຂອງທ່ານສະແດງເມື່ອສ້າງ QR (ເລີ່ມຕົ້ນດ້ວຍ "000201…"). ທຸກອໍເດີທີ່ສຳເລັດ ຮ້ານຈະສ້າງ QR ໃໝ່ພ້ອມຈຳນວນເງິນທີ່ຖືກຕ້ອງ — ບໍ່ຕ້ອງພິມຈຳນວນເອງອີກຕໍ່ໄປ. ປະໄວ້ຫວ່າງຖ້າບໍ່ຕ້ອງການໃຊ້.',
     lapnet_qr_placeholder:'00020101021115...', lapnet_qr_valid:'✓ ຖືກຕ້ອງ', lapnet_qr_invalid:'⚠ ອ່ານເປັນ QR ຈ່າຍເງິນບໍ່ໄດ້ — ກະລຸນາກວດຄືນວ່າວາງຂໍ້ຄວາມຄົບຖ້ວນ',
     scan_to_pay_label:'ສະແກນເພື່ອຈ່າຍ',
+    customer_display_section_title:'🖥️ ຈໍສະແດງການຈ່າຍເງິນລູກຄ້າ',
+    customer_display_section_hint:'ເປີດໜ້າຈໍທີສອງສຳລັບຈໍທີ່ຫັນໜ້າໃສ່ລູກຄ້າ. ທັນທີທີ່ທ່ານຢືນຢັນອໍເດີແບບໂອນເງິນ, ແບ່ງຈ່າຍ, E-Gets, ຫຼື FoodPanda, ມັນຈະປ່ຽນເປັນ QR "ສະແກນເພື່ອຈ່າຍ" ຂະໜາດໃຫຍ່ — ອໍເດີເງິນສົດຈະບໍ່ເປີດມັນ ເພາະບໍ່ມີຫຍັງໃຫ້ສະແກນ. ລາກໜ້າຈໍນີ້ໄປໃສ່ຈໍທີ່ສອງ ແລະເຮັດໃຫ້ເຕັມຈໍໜຶ່ງເທື່ອ ຫຼັງຈາກນັ້ນມັນຈະຊິງຄ໌ອັດຕະໂນມັດ.',
+    customer_display_open_button:'🖥️ ເປີດຈໍສະແດງລູກຄ້າ',
+    customer_display_qr_showing:'QR ຈ່າຍເງິນກຳລັງສະແດງຢູ່ຈໍລູກຄ້າ',
+    customer_display_dismiss:'ລຶບອອກ',
+    customer_display_no_qr_hint:'⚠ ຍັງບໍ່ໄດ້ຕັ້ງຄ່າ LAPNet QR ຈ່າຍເງິນຢູ່ຂ້າງເທິງ ດັ່ງນັ້ນຈໍນີ້ຈະບໍ່ມີຫຍັງໃຫ້ສະແດງສຳລັບອໍເດີໂອນເງິນ/ແບ່ງຈ່າຍ/E-Gets/FoodPanda ຈົນກວ່າທ່ານຈະເພີ່ມມັນ.',
+    customer_display_enable_toggle_label:'ລໍຖ້າ "ຈ່າຍເງິນແລ້ວ" ຢູ່ອຸປະກອນນີ້',
+    customer_display_enable_toggle_hint:'ເມື່ອເປີດ, ການຢືນຢັນອໍເດີແບບໂອນເງິນ/ແບ່ງຈ່າຍ/E-Gets/FoodPanda ຢູ່ອຸປະກອນນີ້ຈະສະແດງ QR ຢູ່ຈໍລູກຄ້າກ່ອນ ແລະລໍຖ້າໃຫ້ທ່ານກົດ "ຈ່າຍເງິນແລ້ວ" ກ່ອນຈະຫັກສະຕັອກ ຫຼື ພິມໃບບິນ — ບໍ່ມີຫຍັງຖືກບັນທຶກຈົນກວ່າທ່ານຈະຢືນຢັນ. ປິດ (ຄ່າເລີ່ມຕົ້ນ) ຈະຄົງພຶດຕິກຳເກົ່າໄວ້: ບັນທຶກ ແລະ ພິມທັນທີ. ນີ້ແມ່ນຕັ້ງຄ່າສະເພາະອຸປະກອນ ດັ່ງນັ້ນມີແຕ່ເຄື່ອງທີ່ຕິດຈໍທີສອງເທົ່ານັ້ນທີ່ຕ້ອງເປີດມັນ. ເງິນສົດຈະບໍ່ຖືກກະທົບບໍ່ວ່າຈະຕັ້ງແບບໃດ.',
+    customer_display_logo_label:'ໂລໂກ້ໜ້າຈໍວ່າງ',
+    customer_display_logo_hint:'ສະແດງໃຫຍ່ ແລະ ຢູ່ກາງຈໍລູກຄ້າເມື່ອບໍ່ໄດ້ສະແດງ QR ຈ່າຍເງິນ. PNG ພື້ນຫຼັງໂປ່ງໃສດີທີ່ສຸດ — ຈະຄົງຮູບຮ່າງເດີມໄວ້ ບໍ່ຖືກຕັດ.',
+    customer_display_message_label:'ຂໍ້ຄວາມໜ້າຈໍວ່າງ',
+    customer_display_message_placeholder:'ຕົວຢ່າງ: ຍິນດີຕ້ອນຮັບສູ່ Me Me Milk Tea!',
+    pending_payment_title:'ກຳລັງລໍຖ້າການຈ່າຍເງິນ',
+    pending_payment_hint:'QR ຈ່າຍເງິນກຳລັງສະແດງຢູ່ຈໍລູກຄ້າ. ກົດຂ້າງລຸ່ມນີ້ເມື່ອລູກຄ້າໂອນເງິນສຳເລັດແລ້ວ.',
+    order_is_paid_button:'ຈ່າຍເງິນແລ້ວ',
     welcome_label:'ຍິນດີຕ້ອນຮັບ,',
     photo_visibility_label:'ຄວາມຊັດເຈນຂອງຮູບ',
     preview_receipt:'ເບິ່ງຕົວຢ່າງໃບບິນ', preview_label:'🧾 ຕົວຢ່າງ — ຍັງບໍ່ໄດ້ບັນທຶກ', back_to_cart:'← ກັບຄືນກະຕ່າ', confirm_order:'ຢືນຢັນ ແລະ ສຳເລັດອໍເດີ',
@@ -4326,6 +4358,21 @@ var TRANSLATIONS = {
     lapnet_qr_label:'LAPNet QR ชำระเงิน (แบบไดนามิก)', lapnet_qr_hint:'วางข้อความดิบที่แอปธนาคารของคุณแสดงตอนสร้าง QR (ขึ้นต้นด้วย "000201…") ทุกออเดอร์ที่เสร็จสมบูรณ์ ร้านจะสร้าง QR ใหม่พร้อมยอดที่ถูกต้อง — ไม่ต้องพิมพ์จำนวนเงินเองอีก เว้นว่างไว้หากไม่ต้องการใช้',
     lapnet_qr_placeholder:'00020101021115...', lapnet_qr_valid:'✓ ถูกต้อง', lapnet_qr_invalid:'⚠ อ่านเป็น QR ชำระเงินไม่ได้ — กรุณาตรวจสอบว่าวางข้อความครบถ้วน',
     scan_to_pay_label:'สแกนเพื่อจ่าย',
+    customer_display_section_title:'🖥️ หน้าจอชำระเงินสำหรับลูกค้า',
+    customer_display_section_hint:'เปิดหน้าต่างที่สองสำหรับจอที่หันหน้าเข้าหาลูกค้า ทันทีที่คุณยืนยันออเดอร์แบบโอนเงิน แบ่งจ่าย E-Gets หรือ FoodPanda หน้าจอจะเปลี่ยนเป็นคิวอาร์โค้ด "สแกนเพื่อจ่าย" ขนาดใหญ่ — ออเดอร์เงินสดจะไม่เปิดหน้าจอนี้ เพราะไม่มีอะไรให้สแกน ลากหน้าต่างไปไว้ที่จอที่สองแล้วทำให้เต็มจอครั้งเดียว หลังจากนั้นจะซิงค์อัตโนมัติ',
+    customer_display_open_button:'🖥️ เปิดหน้าจอลูกค้า',
+    customer_display_qr_showing:'คิวอาร์โค้ดชำระเงินกำลังแสดงอยู่ที่หน้าจอลูกค้า',
+    customer_display_dismiss:'ล้าง',
+    customer_display_no_qr_hint:'⚠ ยังไม่ได้ตั้งค่าคิวอาร์โค้ด LAPNet ด้านบน ดังนั้นหน้าจอนี้จะยังไม่มีอะไรแสดงสำหรับออเดอร์โอนเงิน/แบ่งจ่าย/E-Gets/FoodPanda จนกว่าคุณจะเพิ่ม',
+    customer_display_enable_toggle_label:'รอ "ชำระเงินแล้ว" บนอุปกรณ์นี้',
+    customer_display_enable_toggle_hint:'เมื่อเปิดใช้งาน การยืนยันออเดอร์แบบโอนเงิน/แบ่งจ่าย/E-Gets/FoodPanda บนอุปกรณ์นี้จะแสดงคิวอาร์โค้ดที่หน้าจอลูกค้าก่อน แล้วรอให้คุณกด "ชำระเงินแล้ว" ก่อนตัดสต็อกหรือพิมพ์ใบเสร็จ — จะไม่มีการบันทึกใดๆ จนกว่าคุณจะยืนยัน ปิด (ค่าเริ่มต้น) จะคงพฤติกรรมเดิมไว้: บันทึกและพิมพ์ทันที การตั้งค่านี้เฉพาะอุปกรณ์ ดังนั้นมีแค่เครื่องที่ต่อจอที่สองเท่านั้นที่ต้องเปิด เงินสดจะไม่ได้รับผลกระทบไม่ว่าจะตั้งค่าแบบใด',
+    customer_display_logo_label:'โลโก้หน้าจอว่าง',
+    customer_display_logo_hint:'แสดงขนาดใหญ่ตรงกลางหน้าจอลูกค้าเมื่อยังไม่แสดงคิวอาร์โค้ดชำระเงิน ไฟล์ PNG พื้นหลังโปร่งใสจะให้ผลลัพธ์ดีที่สุด — จะคงรูปทรงเดิมไว้ ไม่ถูกครอบตัด',
+    customer_display_message_label:'ข้อความหน้าจอว่าง',
+    customer_display_message_placeholder:'เช่น ยินดีต้อนรับสู่ Me Me Milk Tea!',
+    pending_payment_title:'กำลังรอการชำระเงิน',
+    pending_payment_hint:'คิวอาร์โค้ดชำระเงินกำลังแสดงอยู่ที่หน้าจอลูกค้า กดด้านล่างเมื่อลูกค้าโอนเงินเสร็จแล้ว',
+    order_is_paid_button:'ชำระเงินแล้ว',
     welcome_label:'ยินดีต้อนรับ,',
     photo_visibility_label:'ความชัดเจนของภาพ',
     preview_receipt:'ดูตัวอย่างใบเสร็จ', preview_label:'🧾 ตัวอย่าง — ยังไม่ได้บันทึก', back_to_cart:'← กลับไปที่ตะกร้า', confirm_order:'ยืนยันและทำรายการให้เสร็จสิ้น',
@@ -4646,7 +4693,9 @@ var state = {
   incomingOrdersSyncError:false,
   incomingApprovePrompt:null, // {orderId, paymentMethod, amountReceived, discount}
   expandedIncomingId:null,
-  orderAlerts:[] // transient new-order pop-up toasts: [{id, title, itemCount, ts}]
+  orderAlerts:[], // transient new-order pop-up toasts: [{id, title, itemCount, ts}]
+  customerDisplayActive:null, // {orderId, total} while the second-screen payment QR is up; see showCustomerDisplayQr()
+  pendingPaymentOrder:null // {draft, incomingOrderId} while waiting for staff to tap "Order is Paid"; see shouldGateForPaymentConfirmation()
 };
 
 /* ================= FIREBASE (multi-device sync + auth) ================= */
@@ -4854,6 +4903,37 @@ function compressImageToDataUrl(img, targetW, targetH, opts){
   }
   return { dataUrl: dataUrl, tooLarge: dataUrl.length > maxBytes };
 }
+/* A shop logo needs different handling than a background photo: it
+   must keep its transparent background (a JPEG background photo is
+   fine to flatten, a logo forced onto a black/white square looks
+   broken), and it must NEVER be cropped to fill a fixed box the way
+   compressImageToDataUrl's "cover" fit does — a logo's whole point is
+   its exact shape. So this renders at up to maxDim on the long edge,
+   preserving aspect ratio and alpha (PNG, not JPEG), and only shrinks
+   dimensions (there's no JPEG-style quality knob for a lossless
+   format) if that's still over the Firestore-safe byte budget — which
+   in practice is rare, since logos are simple graphics that compress
+   far better than a photo at the same pixel size. */
+function compressLogoToDataUrl(img, maxDim, maxBytes){
+  maxBytes = maxBytes || 700000; // ~700KB -- well under Firestore's 1 MiB doc cap
+  function renderAt(dim){
+    var scale = Math.min(1, dim / Math.max(img.width, img.height));
+    var w = Math.max(1, Math.round(img.width*scale));
+    var h = Math.max(1, Math.round(img.height*scale));
+    var canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    return canvas.toDataURL('image/png');
+  }
+  var dim = maxDim;
+  var dataUrl = renderAt(dim);
+  while(dataUrl.length > maxBytes && dim > 200){
+    dim = Math.round(dim * 0.85);
+    dataUrl = renderAt(dim);
+  }
+  return { dataUrl: dataUrl, tooLarge: dataUrl.length > maxBytes };
+}
 function savePhotoDoc(id, dataUrl){
   return db.collection('pos_photos').doc(id).set({data: dataUrl}).catch(function(e){
     window.alert('Could not save photo: '+e.message);
@@ -4905,6 +4985,7 @@ function applyPhotoMap(){
     });
     if(map.page_background!=null) state.settings.pageBackgroundPhoto = map.page_background;
     if(map.header_background!=null) state.settings.headerBackgroundPhoto = map.header_background;
+    if(map.customer_display_logo!=null) state.settings.customerDisplayLogo = map.customer_display_logo;
   }
 }
 /* Sanitized copies used whenever the WHOLE menu/settings object is saved
@@ -4925,6 +5006,7 @@ function settingsForSave(){
   delete s.headerBackgroundPhoto;
   delete s.categoryPhotos;
   delete s.categoryBackgroundPhotos;
+  delete s.customerDisplayLogo;
   return s;
 }
 /* ================= PUBLIC SETTINGS (read by the unauthenticated QR page) =================
@@ -5064,6 +5146,7 @@ function setupDataListeners(){
     setListenerOk('settings');
     checkLoaded();
     syncPublicSettings();
+    syncCustomerDisplayBranding();
     render();
   }, handleSyncError('settings')));
 
@@ -5830,6 +5913,7 @@ function buildAppHTML(){
   html += buildHeader();
   if(state.trainingMode) html += buildTrainingBanner();
   if(state.remoteViewLocation) html += buildRemoteViewBanner();
+  if(state.customerDisplayActive) html += buildCustomerDisplayBanner();
   if(state.orderAlerts && state.orderAlerts.length) html += buildOrderAlertStack();
   html += '<div class="pos-main">';
   if(state.tab==='order') html += buildOrderTab();
@@ -5845,6 +5929,7 @@ function buildAppHTML(){
   if(state.modal) html += buildItemModal();
   if(state.receiptPreview) html += buildReceiptPreviewModal();
   if(state.receiptOrder) html += buildReceiptModal();
+  if(state.pendingPaymentOrder) html += buildPendingPaymentModal();
   if(state.managerPrompt) html += buildManagerPinModal();
   else if(state.refundEvidence) html += buildRefundEvidenceModal();
   if(state.trainingPromptOpen) html += buildTrainingPinGate();
@@ -5914,6 +5999,20 @@ function buildRemoteViewBanner(){
   '<div class="training-banner" style="background:var(--taro);">' +
     '<span>🔭 '+tr('remote_viewing_prefix')+' '+escapeHtml(loc.name)+' '+tr('remote_viewing_suffix')+'</span>' +
     '<button class="btn btn-small" onclick="POS.stopRemoteView()">'+tr('stop_remote_viewing')+'</button>' +
+  '</div>';
+}
+/* Persistent across every tab (not just the Order tab) for as long as
+   the customer-facing second screen is showing a payment QR — since
+   staff might switch tabs while a customer is still scanning, and this
+   is the only way to bring the customer screen back to idle (see
+   customer-display.html / showCustomerDisplayQr — deliberately no
+   timer, only this manual dismiss). */
+function buildCustomerDisplayBanner(){
+  if(!state.customerDisplayActive) return '';
+  return '' +
+  '<div class="training-banner" style="background:var(--coral);">' +
+    '<span>🖥️ '+tr('customer_display_qr_showing')+'</span>' +
+    '<button class="btn btn-small" onclick="POS.dismissCustomerDisplay()">✕ '+tr('customer_display_dismiss')+'</button>' +
   '</div>';
 }
 function buildTrainingPinGate(){
@@ -6369,6 +6468,67 @@ function recordCompletedOrder(draft){
   }).then(function(order){
     deductStockForOrder(order.items);
     return order;
+  });
+}
+/* Shared tail end of both completeOrder() and confirmIncomingApprove()
+   — actually runs recordCompletedOrder() (stock deduction + the
+   pos_orders write) and settles all the post-completion UI state.
+   incomingOrderId is null for a normal register checkout, or the
+   pos_incoming_orders doc id being approved (deleted once recorded,
+   same as before this was split out). alreadyConfirmedPaid is true
+   only when this is reached via POS.confirmOrderPaid() — i.e. staff
+   already watched the customer pay and tapped "Order is Paid" — in
+   which case the customer-facing screen goes back to idle immediately
+   instead of continuing to show the QR (there's nothing left to pay).
+   For the ordinary, non-gated path (shouldGateForPaymentConfirmation
+   was false — Cash, or the workflow isn't enabled on this device) this
+   behaves exactly as completeOrder()/confirmIncomingApprove() always
+   did: the QR still shows after recording for staff to dismiss
+   manually once they see the payment land. */
+function finalizeCompletedOrder(draft, incomingOrderId, alreadyConfirmedPaid){
+  state.completingOrder = true;
+  render();
+  var chain = recordCompletedOrder(draft);
+  if(incomingOrderId){
+    chain = chain.then(function(order){
+      return db.collection('pos_incoming_orders').doc(incomingOrderId).delete().then(function(){ return order; });
+    });
+  }
+  chain.then(function(order){
+    state.receiptOrder = order;
+    state.receiptIsFreshCheckout = !incomingOrderId;
+    state.receiptPreview = null;
+    state.pendingPaymentOrder = null;
+    state.incomingApprovePrompt = null;
+    state.expandedIncomingId = null;
+    state.cart = [];
+    state.discount = 0;
+    state.amountReceived = '';
+    state.splitCash = '';
+    state.splitTransfer = '';
+    state.paymentMethod = 'cash';
+    state.completingOrder = false;
+    state.mobileCartOpen = false;
+    doRender();
+    /* Cash pays at the counter — there's no "scan to pay" QR on the
+       receipt for a customer to use, so an automatic cash print is
+       just wasted paper. Transfer/split/E-Gets/FoodPanda all still
+       auto-print, since those receipts carry the payment QR the
+       customer actually needs. This only affects the automatic print
+       right after checkout — staff can still tap "Print Receipt" on
+       the receipt screen, or Reprint from History, for a cash order
+       if a customer wants a paper copy. */
+    if(order.paymentMethod!=='cash') triggerPrint(order);
+    if(alreadyConfirmedPaid){
+      clearCustomerDisplayQr();
+    } else {
+      showCustomerDisplayQr(order);
+    }
+    if(!incomingOrderId) scheduleReceiptAutoClose();
+  }).catch(function(e){
+    state.completingOrder = false;
+    render();
+    window.alert('Could not complete the order — check your internet connection and try again.\n('+e.message+')');
   });
 }
 
@@ -6875,12 +7035,12 @@ function buildDynamicLaoQrPayload(basePayload, amountLAK){
    version that fits the payload; 'M' error-correction is the usual
    choice for payment QRs — enough resilience for a phone-screen or
    printed-receipt scan without bloating the code further than needed. */
-function renderQrDataUrl(text){
+function renderQrDataUrl(text, cellSize, margin){
   try{
     var qr = qrcode(0, 'M');
     qr.addData(text);
     qr.make();
-    return qr.createDataURL(6, 8);
+    return qr.createDataURL(cellSize||6, margin==null?8:margin);
   } catch(e){
     console.error('QR render failed', e);
     return null;
@@ -6897,11 +7057,116 @@ function renderQrDataUrl(text){
 function lapnetQrIsValid(rawPayload){
   return !!buildDynamicLaoQrPayload(rawPayload, 1000);
 }
-function buildLapnetQrForOrder(o){
+function buildLapnetQrForOrder(o, cellSize){
   var s = state.settings || {};
   var payload = buildDynamicLaoQrPayload(s.lapnetQrPayload, o.total);
   if(!payload) return null;
-  return renderQrDataUrl(payload);
+  return renderQrDataUrl(payload, cellSize);
+}
+/* ================= CUSTOMER-FACING PAYMENT DISPLAY (second screen) =================
+   A big-screen QR display for a second monitor facing the customer, on
+   the SAME computer as the register — see customer-display.html. That
+   page has no Firebase/login of its own; it's a dumb viewer that reads
+   this same-origin localStorage key and repaints the instant it
+   changes (the browser's own 'storage' event fires in every OTHER
+   same-origin window/tab the moment a value changes — instant and
+   free on one computer, no Firestore round-trip needed). This is
+   deliberately localStorage, not Firestore: it only needs to reach a
+   second window on the SAME device, and skipping Firestore means no
+   new collection, no rules update, and no network round-trip either.
+   Only ever shown for a payment method that actually has something to
+   scan (Transfer/Split/E-Gets/FoodPanda, and only if a LAPNet QR is
+   actually configured) — Cash has nothing to scan, same reasoning as
+   the auto-print change. Clears only when staff explicitly dismisses
+   it via the persistent banner (POS.dismissCustomerDisplay() below) —
+   never on a timer — since a customer scanning from their banking app
+   can take longer than any fixed delay would allow for. */
+var CUSTOMER_DISPLAY_KEY = 'memetea_customer_display_v1';
+function writeCustomerDisplayState(patch){
+  var current = {};
+  try{
+    var raw = window.localStorage.getItem(CUSTOMER_DISPLAY_KEY);
+    if(raw) current = JSON.parse(raw);
+  } catch(e){}
+  var next = Object.assign({}, current, patch);
+  try{
+    window.localStorage.setItem(CUSTOMER_DISPLAY_KEY, JSON.stringify(next));
+  } catch(e){
+    console.error('Could not write customer display state', e);
+  }
+}
+/* Keeps the idle/branding half of the payload (shop name, tagline,
+   logo, idle message, language) fresh any time settings load, a
+   settings save happens, or the language changes, so a customer-
+   display window that's already open updates too, and one opened
+   fresh (before any order) still shows the right branding instead of
+   a blank/default screen. */
+function syncCustomerDisplayBranding(){
+  if(!state.settings) return;
+  writeCustomerDisplayState({
+    shopName: state.settings.shopName || '',
+    tagline: state.settings.tagline || '',
+    currency: state.settings.currency || '₭',
+    logoDataUrl: state.settings.customerDisplayLogo || null,
+    idleMessage: state.settings.customerDisplayMessage || '',
+    language: state.language || 'en'
+  });
+}
+function showCustomerDisplayQr(order){
+  if(order.paymentMethod==='cash') return;
+  var qrDataUrl = buildLapnetQrForOrder(order, 16);
+  if(!qrDataUrl) return; // no LAPNet QR configured — nothing to show
+  state.customerDisplayActive = {orderId: order.id, total: order.total};
+  writeCustomerDisplayState({
+    active: true,
+    qrDataUrl: qrDataUrl,
+    amount: order.total,
+    orderId: order.id,
+    shopName: (state.settings && state.settings.shopName) || '',
+    tagline: (state.settings && state.settings.tagline) || '',
+    currency: (state.settings && state.settings.currency) || '₭',
+    language: state.language || 'en',
+    ts: Date.now()
+  });
+  render();
+}
+function clearCustomerDisplayQr(){
+  state.customerDisplayActive = null;
+  writeCustomerDisplayState({active:false, qrDataUrl:null, amount:null, orderId:null, ts: Date.now()});
+  render();
+}
+/* Whether THIS device should wait for staff to tap "Order is Paid"
+   before deducting stock/recording the sale — deliberately a per-
+   device localStorage toggle (like the mute setting or this device's
+   active location), not a shop-wide Firestore setting: only a
+   register that actually has a second monitor attached should use
+   this workflow, and a shop may only have one such register even
+   with several devices in use. Defaults OFF so nothing changes for a
+   device that's never touched this setting. */
+var CUSTOMER_DISPLAY_ENABLED_KEY = 'memetea_customer_display_enabled';
+function isCustomerDisplayEnabled(){
+  try{
+    return window.localStorage.getItem(CUSTOMER_DISPLAY_ENABLED_KEY) === '1';
+  } catch(e){ return false; }
+}
+function setCustomerDisplayEnabled(on){
+  try{
+    window.localStorage.setItem(CUSTOMER_DISPLAY_ENABLED_KEY, on ? '1' : '0');
+  } catch(e){}
+}
+/* The single gate the checkout flow (completeOrder) and the Incoming
+   Order approval flow (confirmIncomingApprove) both check before
+   recording a sale. Only true when ALL of: this device has the
+   workflow enabled, the payment method actually has something to
+   scan (Cash never does — same reasoning as the auto-print change),
+   and a LAPNet QR is actually configured (if it isn't, there's
+   nothing for the customer screen to show, so falling straight
+   through to the instant/legacy flow is more useful than blocking
+   checkout on a screen that can never do anything). */
+function shouldGateForPaymentConfirmation(paymentMethod){
+  if(paymentMethod==='cash') return false;
+  if(!isCustomerDisplayEnabled()) return false;
+  return lapnetQrIsValid((state.settings||{}).lapnetQrPayload);
 }
 function paymentDisplayFor(o){
   return o.paymentMethod==='split' ? splitPaymentBreakdown(o) : paymentMethodLabel(o.paymentMethod);
@@ -6977,6 +7242,34 @@ function buildReceiptModal(){
         '<button class="btn btn-primary" onclick="POS.printCurrentReceipt()">'+tr('print_receipt')+'</button>' +
       '</div>' +
       (state.receiptIsFreshCheckout ? '<p class="hint" style="text-align:center;margin-top:8px;">'+tr('receipt_auto_close_hint')+'</p>' : '') +
+    '</div>' +
+  '</div>';
+}
+/* Shown instead of the normal receipt the instant a Transfer/Split/
+   E-Gets/FoodPanda order is confirmed, when this device has the
+   "Order is Paid" workflow enabled (Settings → Customer Payment
+   Display) — the sale hasn't actually been recorded yet at this
+   point (see shouldGateForPaymentConfirmation/completeOrder), so
+   nothing has been deducted and there's genuinely nothing to undo if
+   staff tap Cancel. Deliberately no click-outside-to-dismiss on the
+   overlay, unlike the other modals — this is the one place a stray
+   tap shouldn't be able to lose an order staff are mid-checkout on. */
+function buildPendingPaymentModal(){
+  var p = state.pendingPaymentOrder;
+  if(!p) return '';
+  var draft = p.draft;
+  var busy = state.completingOrder;
+  var itemCount = draft.items.reduce(function(s,l){ return s + (Number(l.qty)||0); }, 0);
+  return '' +
+  '<div class="pos-overlay">' +
+    '<div class="pos-modal" style="max-width:360px;text-align:center;">' +
+      '<div style="font-size:40px;margin-bottom:4px;">📲</div>' +
+      '<h2 style="margin-bottom:4px;">'+tr('pending_payment_title')+'</h2>' +
+      '<p class="hint">'+tr('pending_payment_hint')+'</p>' +
+      '<div style="font-size:30px;font-weight:800;margin:14px 0 2px;">'+formatMoney(draft.total)+'</div>' +
+      '<p class="hint" style="margin-top:0;">'+paymentDisplayFor(draft)+' · '+itemCount+' '+tr('items_suffix')+'</p>' +
+      '<button class="btn btn-primary" style="width:100%;margin-top:16px;" '+(busy?'disabled':'')+' onclick="POS.confirmOrderPaid()">'+(busy?tr('processing'):('✅ '+tr('order_is_paid_button')))+'</button>' +
+      '<button class="btn btn-ghost" style="width:100%;margin-top:8px;" '+(busy?'disabled':'')+' onclick="POS.cancelPendingPayment()">'+tr('cancel')+'</button>' +
     '</div>' +
   '</div>';
 }
@@ -8630,6 +8923,9 @@ function buildSettingsTab(){
   var headerPreview = f.headerBackgroundPhoto
     ? '<img class="photo-preview-img" src="'+f.headerBackgroundPhoto+'" alt=""/>'
     : '<div class="photo-preview-placeholder">🖼️</div>';
+  var customerDisplayLogoPreview = f.customerDisplayLogo
+    ? '<img class="photo-preview-img" src="'+f.customerDisplayLogo+'" alt="" style="background:#1B1023;object-fit:contain;"/>'
+    : '<div class="photo-preview-placeholder">🖼️</div>';
 
   return '' +
   '<div class="section-card" style="background:var(--taro-light);border-color:var(--taro);">' +
@@ -8704,6 +9000,33 @@ function buildSettingsTab(){
     '</div>' +
     (selfServiceQr ? '<div style="text-align:center;"><img src="'+selfServiceQr+'" alt="Self-service QR code" style="width:180px;height:180px;"/></div>' : '') +
     '<p class="hint" style="text-align:center;word-break:break-all;margin-top:8px;">'+escapeHtml(selfServiceUrl)+'</p>' +
+    '<button class="btn btn-primary" style="width:auto;margin-top:14px;" onclick="POS.saveSettings()">'+tr('save_settings')+'</button>' +
+  '</div>' +
+  '<div class="section-card">' +
+    '<h2>'+tr('customer_display_section_title')+'</h2>' +
+    '<p class="hint">'+tr('customer_display_section_hint')+'</p>' +
+    (f.lapnetQrPayload ? '' : '<p class="hint" style="color:var(--coral);">'+tr('customer_display_no_qr_hint')+'</p>') +
+    '<button class="btn btn-primary" style="width:auto;margin-top:6px;" onclick="POS.openCustomerDisplayWindow()">'+tr('customer_display_open_button')+'</button>' +
+    '<label style="display:flex;align-items:center;gap:8px;margin-top:16px;font-weight:600;">' +
+      '<input type="checkbox" '+(isCustomerDisplayEnabled()?'checked':'')+' onchange="POS.toggleCustomerDisplayEnabled()"/>' +
+      tr('customer_display_enable_toggle_label') +
+    '</label>' +
+    '<p class="hint" style="margin-top:4px;">'+tr('customer_display_enable_toggle_hint')+'</p>' +
+    '<div class="field" style="margin-top:16px;">' +
+      '<label>'+tr('customer_display_logo_label')+'</label>' +
+      '<div class="photo-upload-row">' +
+        customerDisplayLogoPreview +
+        '<div class="photo-upload-actions">' +
+          '<label class="btn btn-outline btn-small">'+tr('choose_photo')+'<input type="file" accept="image/*" style="display:none" onchange="POS.handleCustomerDisplayLogoInput(this)"/></label>' +
+          (f.customerDisplayLogo ? '<button class="btn btn-ghost btn-small" onclick="POS.removeCustomerDisplayLogo()">'+tr('remove')+'</button>' : '') +
+        '</div>' +
+      '</div>' +
+      '<p class="hint" style="margin-top:4px;">'+tr('customer_display_logo_hint')+'</p>' +
+    '</div>' +
+    '<div class="field" style="margin-top:12px;">' +
+      '<label>'+tr('customer_display_message_label')+'</label>' +
+      '<input type="text" value="'+escapeHtml(f.customerDisplayMessage||'')+'" placeholder="'+tr('customer_display_message_placeholder')+'" oninput="POS.updateSettingsForm(\'customerDisplayMessage\',this.value)"/>' +
+    '</div>' +
     '<button class="btn btn-primary" style="width:auto;margin-top:14px;" onclick="POS.saveSettings()">'+tr('save_settings')+'</button>' +
   '</div>' +
   '<div class="section-card">' +
@@ -9757,6 +10080,7 @@ var POS = {
       delete targetSettings.categoryBackgroundPhotos;
       delete targetSettings.pageBackgroundPhoto;
       delete targetSettings.headerBackgroundPhoto;
+      delete targetSettings.customerDisplayLogo;
       return realDb.collection(sourcePrefix+'pos_photos').get().then(function(photoSnap){
         var photoWrites = [];
         photoSnap.forEach(function(d){
@@ -9913,6 +10237,7 @@ var POS = {
       delete existingSettings.categoryBackgroundPhotos;
       delete existingSettings.pageBackgroundPhoto;
       delete existingSettings.headerBackgroundPhoto;
+      delete existingSettings.customerDisplayLogo;
       var photoWrites = [];
       var catKey = sanitizeCategoryKey(categoryName);
       if(catPhoto) photoWrites.push(realDb.collection(targetPrefix+'pos_photos').doc('category_thumb_'+catKey).set({data: catPhoto}));
@@ -9942,6 +10267,7 @@ var POS = {
   },
   setLanguage: function(lang){
     state.language = lang;
+    syncCustomerDisplayBranding();
     render();
   },
   setTab: function(t){
@@ -10149,36 +10475,29 @@ var POS = {
     if(state.completingOrder) return;
     var draft = buildDraftOrder();
     if(!draft) return;
-    state.completingOrder = true;
-    render();
-    recordCompletedOrder(draft).then(function(order){
-      state.receiptOrder = order;
-      state.receiptIsFreshCheckout = true;
+    /* This device has the "wait for Order is Paid" workflow enabled
+       and this is a payment method with an actual QR to show — hold
+       off on recording the sale (and deducting stock) until staff
+       confirm the customer actually paid. See buildPendingPaymentModal
+       / POS.confirmOrderPaid / POS.cancelPendingPayment below. */
+    if(shouldGateForPaymentConfirmation(draft.paymentMethod)){
+      state.pendingPaymentOrder = {draft: draft, incomingOrderId: null};
       state.receiptPreview = null;
-      state.cart = [];
-      state.discount = 0;
-      state.amountReceived = '';
-      state.splitCash = '';
-      state.splitTransfer = '';
-      state.paymentMethod = 'cash';
-      state.completingOrder = false;
-      state.mobileCartOpen = false;
-      doRender();
-      /* Cash pays at the counter — there's no "scan to pay" QR on the
-         receipt for a customer to use, so an automatic cash print is
-         just wasted paper. Transfer/split/E-Gets/FoodPanda all still
-         auto-print, since those receipts carry the payment QR the
-         customer actually needs. This only affects the automatic print
-         right after checkout — staff can still tap "Print Receipt" on
-         the receipt screen, or Reprint from History, for a cash order
-         if a customer wants a paper copy. */
-      if(order.paymentMethod!=='cash') triggerPrint(order);
-      scheduleReceiptAutoClose();
-    }).catch(function(e){
-      state.completingOrder = false;
+      showCustomerDisplayQr(draft);
       render();
-      window.alert('Could not complete the order — check your internet connection and try again.\n('+e.message+')');
-    });
+      return;
+    }
+    finalizeCompletedOrder(draft, null, false);
+  },
+  confirmOrderPaid: function(){
+    var p = state.pendingPaymentOrder;
+    if(!p || state.completingOrder) return;
+    finalizeCompletedOrder(p.draft, p.incomingOrderId, true);
+  },
+  cancelPendingPayment: function(){
+    state.pendingPaymentOrder = null;
+    clearCustomerDisplayQr();
+    render();
   },
   /* ---- Incoming Orders (QR self-service approval) ---- */
   dismissOrderAlert: function(alertId){
@@ -10333,26 +10652,19 @@ var POS = {
        that doesn't actually add up to the total, even if this were ever
        called some other way. */
     if(draft.paymentMethod==='split' && Math.abs(draft.total - ((draft.splitCash||0)+(draft.splitTransfer||0))) > 0.005) return;
-    state.completingOrder = true;
-    render();
-    recordCompletedOrder(draft).then(function(order){
-      return db.collection('pos_incoming_orders').doc(o.id).delete().then(function(){ return order; });
-    }).then(function(order){
-      state.receiptOrder = order;
+    /* Same "wait for Order is Paid" gate as completeOrder() above —
+       staff approving a customer's QR order carries the exact same
+       risk of deducting stock before a Transfer/Split/E-Gets/FoodPanda
+       payment is actually confirmed, so it's gated the same way. */
+    if(shouldGateForPaymentConfirmation(draft.paymentMethod)){
+      state.pendingPaymentOrder = {draft: draft, incomingOrderId: o.id};
       state.incomingApprovePrompt = null;
       state.expandedIncomingId = null;
-      state.completingOrder = false;
-      doRender();
-      /* Same reasoning as completeOrder() above: cash doesn't need the
-         payment QR on the receipt, so skip the automatic print for it.
-         Manual Print Receipt / Reprint still work for any payment
-         method, cash included. */
-      if(order.paymentMethod!=='cash') triggerPrint(order);
-    }).catch(function(e){
-      state.completingOrder = false;
+      showCustomerDisplayQr(draft);
       render();
-      window.alert('Could not approve this order — check your internet connection and try again.\n('+e.message+')');
-    });
+      return;
+    }
+    finalizeCompletedOrder(draft, o.id, false);
   },
   rejectIncoming: function(id){
     if(!window.confirm(tr('incoming_reject_confirm'))) return;
@@ -10381,6 +10693,14 @@ var POS = {
     render();
   },
   printCurrentReceipt: function(){ if(state.receiptOrder) triggerPrint(state.receiptOrder); },
+  dismissCustomerDisplay: function(){ clearCustomerDisplayQr(); },
+  openCustomerDisplayWindow: function(){
+    window.open('customer-display.html', 'memeteaCustomerDisplay');
+  },
+  toggleCustomerDisplayEnabled: function(){
+    setCustomerDisplayEnabled(!isCustomerDisplayEnabled());
+    render();
+  },
   /* Builds a synthetic sample order (no real order needed) so staff can
      check a receipt actually fits the selected paper width before
      relying on it for real checkouts. Reuses the normal receipt modal +
@@ -11044,6 +11364,40 @@ var POS = {
     deletePhotoDoc('header_background');
     render();
   },
+  /* ---- Customer Payment Display: idle-screen logo (Settings tab) ----
+     PNG (not JPEG) and "contain" not "cover" — see compressLogoToDataUrl
+     — since a logo must keep its transparent background and its exact
+     shape, unlike the page/header background photos above. */
+  handleCustomerDisplayLogoInput: function(inputEl){
+    var file = inputEl && inputEl.files && inputEl.files[0];
+    if(!file) return;
+    if(!/^image\//.test(file.type)){ window.alert('Please choose an image file.'); return; }
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var img = new Image();
+      img.onload = function(){
+        var result = compressLogoToDataUrl(img, 1000);
+        var dataUrl = result.dataUrl;
+        state.settings.customerDisplayLogo = dataUrl;
+        if(state.settingsForm) state.settingsForm.customerDisplayLogo = dataUrl;
+        savePhotoDoc('customer_display_logo', dataUrl);
+        syncCustomerDisplayBranding();
+        render();
+        if(result.tooLarge) window.alert('This logo is unusually detailed and stayed large even after compression. It was saved, but if it does not sync properly, try a simpler image.');
+      };
+      img.onerror = function(){ window.alert('Could not read that image — try a different file.'); };
+      img.src = e.target.result;
+    };
+    reader.onerror = function(){ window.alert('Could not read that file.'); };
+    reader.readAsDataURL(file);
+  },
+  removeCustomerDisplayLogo: function(){
+    state.settings.customerDisplayLogo = null;
+    if(state.settingsForm) state.settingsForm.customerDisplayLogo = null;
+    deletePhotoDoc('customer_display_logo');
+    syncCustomerDisplayBranding();
+    render();
+  },
   updatePageBackgroundOpacity: function(value){
     state.settings.pageBackgroundOpacity = Number(value);
     if(state.settingsForm) state.settingsForm.pageBackgroundOpacity = Number(value);
@@ -11320,6 +11674,7 @@ var POS = {
     db.collection('pos_settings').doc('main').set(settingsForSave()).then(function(){
       window.alert('Settings saved.');
     }).catch(function(e){ window.alert('Could not save settings: '+e.message); });
+    syncCustomerDisplayBranding();
     render();
   },
   resetMenu: function(){

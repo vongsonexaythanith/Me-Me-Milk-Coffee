@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Customer Payment Display</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background: #1B1023;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+  }
+  #screen {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 4vh 4vw;
+  }
+  /* ---- Idle state (default: no payment in progress) ---- */
+  #idle-screen {
+    color: #F4EDF7;
+  }
+  #idle-logo {
+    display: block;
+    max-width: 70vw;
+    max-height: 42vh;
+    width: auto;
+    height: auto;
+    margin: 0 auto 3vh;
+  }
+  #idle-shop-name {
+    font-size: 6.5vw;
+    font-weight: 800;
+    margin: 0 0 1vh 0;
+    line-height: 1.1;
+  }
+  #idle-tagline {
+    font-size: 2.2vw;
+    opacity: 0.75;
+    margin: 0 0 3vh 0;
+  }
+  #idle-message {
+    font-size: 2.8vw;
+    font-weight: 600;
+    opacity: 0.9;
+  }
+  /* ---- QR state (a Transfer/Split/E-Gets/FoodPanda order was just confirmed) ---- */
+  #qr-screen {
+    color: #1B1023;
+    background: #FDF9FF;
+    border-radius: 28px;
+    padding: 5vh 5vw;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  #qr-shop-name {
+    font-size: 2.4vw;
+    font-weight: 700;
+    margin: 0 0 2vh 0;
+    opacity: 0.85;
+  }
+  #qr-image {
+    width: min(60vh, 55vw);
+    height: min(60vh, 55vw);
+    image-rendering: pixelated;
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+  }
+  #qr-amount-label {
+    font-size: 3vw;
+    font-weight: 700;
+    margin-top: 3vh;
+  }
+  #qr-amount-value {
+    font-size: 5.5vw;
+    font-weight: 800;
+    margin-top: 0.5vh;
+  }
+  [hidden] { display: none !important; }
+  #fullscreen-btn {
+    position: fixed; bottom: 18px; right: 18px;
+    background: rgba(255,255,255,0.12);
+    color: #F4EDF7;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  #fullscreen-btn:hover { background: rgba(255,255,255,0.22); }
+</style>
+</head>
+<body>
+  <div id="screen">
+    <div id="idle-screen">
+      <img id="idle-logo" src="" alt="" hidden/>
+      <div id="idle-shop-name">🧋</div>
+      <div id="idle-tagline"></div>
+      <div id="idle-message">Welcome!</div>
+    </div>
+    <div id="qr-screen" hidden>
+      <div id="qr-shop-name"></div>
+      <img id="qr-image" src="" alt="Scan to pay"/>
+      <div id="qr-amount-label">Scan to pay</div>
+      <div id="qr-amount-value"></div>
+    </div>
+  </div>
+  <button id="fullscreen-btn" onclick="goFullscreen()">⛶ Full Screen</button>
+
+<script>
+/* This page is deliberately standalone — no Firebase, no login, no
+   business logic. It only reads the shared localStorage key that
+   index.html writes to on the SAME computer (see showCustomerDisplayQr
+   / syncCustomerDisplayBranding in index.html) and repaints whenever
+   that key changes. That's why this only works as a second browser
+   window on the same device as the register — a separate device
+   wouldn't share localStorage with it. Open this file once (from
+   Settings → Customer Payment Display in the staff app, or just this
+   file directly), drag the window to the second monitor, and click
+   "Full Screen" — from then on it updates itself with zero further
+   interaction needed. */
+var KEY = 'memetea_customer_display_v1';
+
+var WELCOME_TEXT = {
+  en: 'Welcome!',
+  lo: 'ຍິນດີຕ້ອນຮັບ!',
+  th: 'ยินดีต้อนรับ!'
+};
+var SCAN_TO_PAY_TEXT = {
+  en: 'Scan to pay',
+  lo: 'ສະແກນເພື່ອຈ່າຍ',
+  th: 'สแกนเพื่อจ่าย'
+};
+
+function formatMoney(amount, currency){
+  var n = Math.round(Number(amount)||0);
+  return (currency||'₭') + n.toLocaleString('en-US');
+}
+
+function readState(){
+  try{
+    var raw = window.localStorage.getItem(KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e){
+    console.error('Could not read customer display state', e);
+    return null;
+  }
+}
+
+function render(){
+  var s = readState() || {};
+  var lang = WELCOME_TEXT[s.language] ? s.language : 'en';
+
+  /* A logo (set in Settings → Customer Payment Display) replaces the
+     shop-name-as-big-text fallback — showing both would be redundant,
+     since the logo already carries the shop's identity. No logo yet?
+     Fall back to the shop name in big text, same as before this
+     feature existed, so a shop that hasn't uploaded one yet still
+     gets a sensible idle screen instead of a blank space. */
+  var logoEl = document.getElementById('idle-logo');
+  var nameEl = document.getElementById('idle-shop-name');
+  if(s.logoDataUrl){
+    logoEl.src = s.logoDataUrl;
+    logoEl.hidden = false;
+    nameEl.hidden = true;
+  } else {
+    logoEl.hidden = true;
+    nameEl.hidden = false;
+    nameEl.textContent = s.shopName || '🧋';
+  }
+  document.getElementById('idle-tagline').textContent = s.tagline || '';
+  /* The custom message (Settings → Customer Payment Display) is what
+     shows beneath the logo. Falls back to the translated "Welcome!"
+     default for a shop that hasn't set one yet. */
+  document.getElementById('idle-message').textContent = (s.idleMessage && s.idleMessage.trim()) ? s.idleMessage : WELCOME_TEXT[lang];
+
+  if(s.active && s.qrDataUrl){
+    document.getElementById('idle-screen').hidden = true;
+    document.getElementById('qr-screen').hidden = false;
+    document.getElementById('qr-shop-name').textContent = s.shopName || '';
+    document.getElementById('qr-image').src = s.qrDataUrl;
+    document.getElementById('qr-amount-label').textContent = SCAN_TO_PAY_TEXT[lang];
+    document.getElementById('qr-amount-value').textContent = formatMoney(s.amount, s.currency);
+    document.title = SCAN_TO_PAY_TEXT[lang] + ' — ' + formatMoney(s.amount, s.currency);
+  } else {
+    document.getElementById('qr-screen').hidden = true;
+    document.getElementById('idle-screen').hidden = false;
+    document.title = 'Customer Payment Display' + (s.shopName ? ' — ' + s.shopName : '');
+  }
+}
+
+/* Fires in this window whenever index.html (a DIFFERENT window on the
+   same origin) changes the key — this is the instant, zero-dependency
+   sync this whole feature relies on. It never fires in the window that
+   made the change itself, which is exactly what we want here since
+   this page never writes the key. */
+window.addEventListener('storage', function(e){
+  if(e.key === KEY) render();
+});
+
+/* Cheap defensive fallback in case a particular browser/OS combo ever
+   misses a storage event (rare, but costs nothing to guard against) —
+   this only repaints the DOM, it never touches localStorage itself. */
+setInterval(render, 3000);
+
+function goFullscreen(){
+  var el = document.documentElement;
+  var req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+  if(req) req.call(el);
+}
+document.addEventListener('fullscreenchange', function(){
+  document.getElementById('fullscreen-btn').hidden = !!document.fullscreenElement;
+});
+
+render();
+</script>
+</body>
+</html>
