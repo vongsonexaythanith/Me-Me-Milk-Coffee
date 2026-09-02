@@ -5194,6 +5194,19 @@ function setupDataListeners(){
     state.photoMap = map;
     state.photoSyncError = false;
     applyPhotoMap();
+    /* Load order between this listener and the pos_settings one above
+       isn't guaranteed (same reasoning as applyPhotoMap's own comment).
+       If pos_settings happened to fire FIRST — the common case on a
+       fresh page load/reconnect — its own syncCustomerDisplayBranding()
+       call ran before this photo map existed yet, so it pushed a
+       logo-less snapshot to the customer display's localStorage even
+       though a logo is actually configured. Re-syncing here, once the
+       photo map is actually in, is what corrects that — without it,
+       the customer display stayed stuck showing no logo until staff
+       happened to hit Save in Settings (which calls
+       syncCustomerDisplayBranding() again with photos already loaded
+       by then), instead of it just working after every page load. */
+    syncCustomerDisplayBranding();
     render();
   }, handlePhotosSyncError('photos')));
 
