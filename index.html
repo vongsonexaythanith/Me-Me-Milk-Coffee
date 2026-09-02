@@ -3902,13 +3902,13 @@ var TRANSLATIONS = {
     lapnet_qr_placeholder:'00020101021115...', lapnet_qr_valid:'✓ Looks valid', lapnet_qr_invalid:'⚠ Could not read this as a payment QR — double-check you pasted the full text',
     scan_to_pay_label:'Scan to pay',
     customer_display_section_title:'🖥️ Customer Payment Display',
-    customer_display_section_hint:'Opens a second window for a monitor facing the customer. The moment you confirm a Transfer or Split order, it switches to a big "Scan to pay" QR — Cash, E-Gets, and FoodPanda orders don\'t trigger it, since there\'s nothing to scan for those. Drag the window to your second screen and make it full-screen once; after that it stays in sync on its own.',
+    customer_display_section_hint:'Opens a second window for a monitor facing the customer. When the toggle below is on, confirming a Transfer or Split order switches it to a big "Scan to pay" QR — Cash, E-Gets, and FoodPanda orders never trigger it, since there\'s nothing to scan for those. Drag the window to your second screen and make it full-screen once; after that it stays in sync on its own.',
     customer_display_open_button:'🖥️ Open Customer Display',
     customer_display_qr_showing:'Payment QR is showing on the customer screen',
     customer_display_dismiss:'Clear',
     customer_display_no_qr_hint:'⚠ No LAPNet payment QR is configured above yet, so this screen won\'t have anything to show for Transfer/Split orders until you add one.',
-    customer_display_enable_toggle_label:'Wait for "Order is Paid" on this device',
-    customer_display_enable_toggle_hint:'When on, confirming a Transfer/Split order on THIS device shows the QR on the customer screen first and waits for you to tap "Order is Paid" before deducting stock or printing — nothing is recorded until you confirm. Off (the default) keeps today\'s behavior: the sale records and prints immediately. This is per-device, so only registers with a second monitor attached need to turn it on. Cash, E-Gets, and FoodPanda are never affected either way.',
+    customer_display_enable_toggle_label:'Show payment QR & wait for "Order is Paid" on this device',
+    customer_display_enable_toggle_hint:'When on, confirming a Transfer/Split order on THIS device shows the QR on the customer screen and waits for you to tap "Order is Paid" before deducting stock or printing — nothing is recorded until you confirm. Off (the default) keeps the customer screen on its idle logo/message — no QR ever shows there — and the sale records and prints immediately, same as Cash. This is per-device, so only registers with a second monitor attached need to turn it on. Cash, E-Gets, and FoodPanda are never affected either way.',
     customer_display_logo_label:'Idle-screen logo',
     customer_display_logo_hint:'Shown big and centered on the customer screen whenever it\'s not showing a payment QR. A transparent PNG works best — it\'s kept at its original shape, never cropped.',
     customer_display_message_label:'Idle-screen message',
@@ -4137,13 +4137,13 @@ var TRANSLATIONS = {
     lapnet_qr_placeholder:'00020101021115...', lapnet_qr_valid:'✓ ຖືກຕ້ອງ', lapnet_qr_invalid:'⚠ ອ່ານເປັນ QR ຈ່າຍເງິນບໍ່ໄດ້ — ກະລຸນາກວດຄືນວ່າວາງຂໍ້ຄວາມຄົບຖ້ວນ',
     scan_to_pay_label:'ສະແກນເພື່ອຈ່າຍ',
     customer_display_section_title:'🖥️ ຈໍສະແດງການຈ່າຍເງິນລູກຄ້າ',
-    customer_display_section_hint:'ເປີດໜ້າຈໍທີສອງສຳລັບຈໍທີ່ຫັນໜ້າໃສ່ລູກຄ້າ. ທັນທີທີ່ທ່ານຢືນຢັນອໍເດີແບບໂອນເງິນ ຫຼື ແບ່ງຈ່າຍ, ມັນຈະປ່ຽນເປັນ QR "ສະແກນເພື່ອຈ່າຍ" ຂະໜາດໃຫຍ່ — ອໍເດີເງິນສົດ, E-Gets, ຫຼື FoodPanda ຈະບໍ່ເປີດມັນ ເພາະບໍ່ມີຫຍັງໃຫ້ສະແກນ. ລາກໜ້າຈໍນີ້ໄປໃສ່ຈໍທີ່ສອງ ແລະເຮັດໃຫ້ເຕັມຈໍໜຶ່ງເທື່ອ ຫຼັງຈາກນັ້ນມັນຈະຊິງຄ໌ອັດຕະໂນມັດ.',
+    customer_display_section_hint:'ເປີດໜ້າຈໍທີສອງສຳລັບຈໍທີ່ຫັນໜ້າໃສ່ລູກຄ້າ. ເມື່ອສະຫຼັບຢູ່ລຸ່ມນີ້ເປີດຢູ່, ການຢືນຢັນອໍເດີແບບໂອນເງິນ ຫຼື ແບ່ງຈ່າຍຈະປ່ຽນເປັນ QR "ສະແກນເພື່ອຈ່າຍ" ຂະໜາດໃຫຍ່ — ອໍເດີເງິນສົດ, E-Gets, ຫຼື FoodPanda ຈະບໍ່ເປີດມັນ ເພາະບໍ່ມີຫຍັງໃຫ້ສະແກນ. ລາກໜ້າຈໍນີ້ໄປໃສ່ຈໍທີ່ສອງ ແລະເຮັດໃຫ້ເຕັມຈໍໜຶ່ງເທື່ອ ຫຼັງຈາກນັ້ນມັນຈະຊິງຄ໌ອັດຕະໂນມັດ.',
     customer_display_open_button:'🖥️ ເປີດຈໍສະແດງລູກຄ້າ',
     customer_display_qr_showing:'QR ຈ່າຍເງິນກຳລັງສະແດງຢູ່ຈໍລູກຄ້າ',
     customer_display_dismiss:'ລຶບອອກ',
     customer_display_no_qr_hint:'⚠ ຍັງບໍ່ໄດ້ຕັ້ງຄ່າ LAPNet QR ຈ່າຍເງິນຢູ່ຂ້າງເທິງ ດັ່ງນັ້ນຈໍນີ້ຈະບໍ່ມີຫຍັງໃຫ້ສະແດງສຳລັບອໍເດີໂອນເງິນ/ແບ່ງຈ່າຍ ຈົນກວ່າທ່ານຈະເພີ່ມມັນ.',
-    customer_display_enable_toggle_label:'ລໍຖ້າ "ຈ່າຍເງິນແລ້ວ" ຢູ່ອຸປະກອນນີ້',
-    customer_display_enable_toggle_hint:'ເມື່ອເປີດ, ການຢືນຢັນອໍເດີແບບໂອນເງິນ/ແບ່ງຈ່າຍ ຢູ່ອຸປະກອນນີ້ຈະສະແດງ QR ຢູ່ຈໍລູກຄ້າກ່ອນ ແລະລໍຖ້າໃຫ້ທ່ານກົດ "ຈ່າຍເງິນແລ້ວ" ກ່ອນຈະຫັກສະຕັອກ ຫຼື ພິມໃບບິນ — ບໍ່ມີຫຍັງຖືກບັນທຶກຈົນກວ່າທ່ານຈະຢືນຢັນ. ປິດ (ຄ່າເລີ່ມຕົ້ນ) ຈະຄົງພຶດຕິກຳເກົ່າໄວ້: ບັນທຶກ ແລະ ພິມທັນທີ. ນີ້ແມ່ນຕັ້ງຄ່າສະເພາະອຸປະກອນ ດັ່ງນັ້ນມີແຕ່ເຄື່ອງທີ່ຕິດຈໍທີສອງເທົ່ານັ້ນທີ່ຕ້ອງເປີດມັນ. ເງິນສົດ, E-Gets, ແລະ FoodPanda ຈະບໍ່ຖືກກະທົບບໍ່ວ່າຈະຕັ້ງແບບໃດ.',
+    customer_display_enable_toggle_label:'ສະແດງ QR ຈ່າຍເງິນ ແລະ ລໍຖ້າ "ຈ່າຍເງິນແລ້ວ" ຢູ່ອຸປະກອນນີ້',
+    customer_display_enable_toggle_hint:'ເມື່ອເປີດ, ການຢືນຢັນອໍເດີແບບໂອນເງິນ/ແບ່ງຈ່າຍ ຢູ່ອຸປະກອນນີ້ຈະສະແດງ QR ຢູ່ຈໍລູກຄ້າ ແລະລໍຖ້າໃຫ້ທ່ານກົດ "ຈ່າຍເງິນແລ້ວ" ກ່ອນຈະຫັກສະຕັອກ ຫຼື ພິມໃບບິນ — ບໍ່ມີຫຍັງຖືກບັນທຶກຈົນກວ່າທ່ານຈະຢືນຢັນ. ປິດ (ຄ່າເລີ່ມຕົ້ນ) ຈະໃຫ້ຈໍລູກຄ້າຄົງຢູ່ໜ້າຈໍວ່າງ (ໂລໂກ້/ຂໍ້ຄວາມ) — ບໍ່ມີ QR ສະແດງເລີຍ — ແລະການຂາຍຈະຖືກບັນທຶກ ແລະ ພິມທັນທີ ຄືກັບເງິນສົດ. ນີ້ແມ່ນຕັ້ງຄ່າສະເພາະອຸປະກອນ ດັ່ງນັ້ນມີແຕ່ເຄື່ອງທີ່ຕິດຈໍທີສອງເທົ່ານັ້ນທີ່ຕ້ອງເປີດມັນ. ເງິນສົດ, E-Gets, ແລະ FoodPanda ຈະບໍ່ຖືກກະທົບບໍ່ວ່າຈະຕັ້ງແບບໃດ.',
     customer_display_logo_label:'ໂລໂກ້ໜ້າຈໍວ່າງ',
     customer_display_logo_hint:'ສະແດງໃຫຍ່ ແລະ ຢູ່ກາງຈໍລູກຄ້າເມື່ອບໍ່ໄດ້ສະແດງ QR ຈ່າຍເງິນ. PNG ພື້ນຫຼັງໂປ່ງໃສດີທີ່ສຸດ — ຈະຄົງຮູບຮ່າງເດີມໄວ້ ບໍ່ຖືກຕັດ.',
     customer_display_message_label:'ຂໍ້ຄວາມໜ້າຈໍວ່າງ',
@@ -4372,13 +4372,13 @@ var TRANSLATIONS = {
     lapnet_qr_placeholder:'00020101021115...', lapnet_qr_valid:'✓ ถูกต้อง', lapnet_qr_invalid:'⚠ อ่านเป็น QR ชำระเงินไม่ได้ — กรุณาตรวจสอบว่าวางข้อความครบถ้วน',
     scan_to_pay_label:'สแกนเพื่อจ่าย',
     customer_display_section_title:'🖥️ หน้าจอชำระเงินสำหรับลูกค้า',
-    customer_display_section_hint:'เปิดหน้าต่างที่สองสำหรับจอที่หันหน้าเข้าหาลูกค้า ทันทีที่คุณยืนยันออเดอร์แบบโอนเงินหรือแบ่งจ่าย หน้าจอจะเปลี่ยนเป็นคิวอาร์โค้ด "สแกนเพื่อจ่าย" ขนาดใหญ่ — ออเดอร์เงินสด, E-Gets หรือ FoodPanda จะไม่เปิดหน้าจอนี้ เพราะไม่มีอะไรให้สแกน ลากหน้าต่างไปไว้ที่จอที่สองแล้วทำให้เต็มจอครั้งเดียว หลังจากนั้นจะซิงค์อัตโนมัติ',
+    customer_display_section_hint:'เปิดหน้าต่างที่สองสำหรับจอที่หันหน้าเข้าหาลูกค้า เมื่อสวิตช์ด้านล่างเปิดอยู่ การยืนยันออเดอร์แบบโอนเงินหรือแบ่งจ่ายจะเปลี่ยนหน้าจอเป็นคิวอาร์โค้ด "สแกนเพื่อจ่าย" ขนาดใหญ่ — ออเดอร์เงินสด, E-Gets หรือ FoodPanda จะไม่เปิดหน้าจอนี้ เพราะไม่มีอะไรให้สแกน ลากหน้าต่างไปไว้ที่จอที่สองแล้วทำให้เต็มจอครั้งเดียว หลังจากนั้นจะซิงค์อัตโนมัติ',
     customer_display_open_button:'🖥️ เปิดหน้าจอลูกค้า',
     customer_display_qr_showing:'คิวอาร์โค้ดชำระเงินกำลังแสดงอยู่ที่หน้าจอลูกค้า',
     customer_display_dismiss:'ล้าง',
     customer_display_no_qr_hint:'⚠ ยังไม่ได้ตั้งค่าคิวอาร์โค้ด LAPNet ด้านบน ดังนั้นหน้าจอนี้จะยังไม่มีอะไรแสดงสำหรับออเดอร์โอนเงิน/แบ่งจ่าย จนกว่าคุณจะเพิ่ม',
-    customer_display_enable_toggle_label:'รอ "ชำระเงินแล้ว" บนอุปกรณ์นี้',
-    customer_display_enable_toggle_hint:'เมื่อเปิดใช้งาน การยืนยันออเดอร์แบบโอนเงิน/แบ่งจ่าย บนอุปกรณ์นี้จะแสดงคิวอาร์โค้ดที่หน้าจอลูกค้าก่อน แล้วรอให้คุณกด "ชำระเงินแล้ว" ก่อนตัดสต็อกหรือพิมพ์ใบเสร็จ — จะไม่มีการบันทึกใดๆ จนกว่าคุณจะยืนยัน ปิด (ค่าเริ่มต้น) จะคงพฤติกรรมเดิมไว้: บันทึกและพิมพ์ทันที การตั้งค่านี้เฉพาะอุปกรณ์ ดังนั้นมีแค่เครื่องที่ต่อจอที่สองเท่านั้นที่ต้องเปิด เงินสด, E-Gets และ FoodPanda จะไม่ได้รับผลกระทบไม่ว่าจะตั้งค่าแบบใด',
+    customer_display_enable_toggle_label:'แสดงคิวอาร์โค้ดชำระเงิน & รอ "ชำระเงินแล้ว" บนอุปกรณ์นี้',
+    customer_display_enable_toggle_hint:'เมื่อเปิดใช้งาน การยืนยันออเดอร์แบบโอนเงิน/แบ่งจ่าย บนอุปกรณ์นี้จะแสดงคิวอาร์โค้ดที่หน้าจอลูกค้า แล้วรอให้คุณกด "ชำระเงินแล้ว" ก่อนตัดสต็อกหรือพิมพ์ใบเสร็จ — จะไม่มีการบันทึกใดๆ จนกว่าคุณจะยืนยัน ปิด (ค่าเริ่มต้น) จะให้หน้าจอลูกค้าคงอยู่ที่หน้าจอว่าง (โลโก้/ข้อความ) — ไม่มีคิวอาร์โค้ดแสดงเลย — และการขายจะถูกบันทึกและพิมพ์ทันที เหมือนเงินสด การตั้งค่านี้เฉพาะอุปกรณ์ ดังนั้นมีแค่เครื่องที่ต่อจอที่สองเท่านั้นที่ต้องเปิด เงินสด, E-Gets และ FoodPanda จะไม่ได้รับผลกระทบไม่ว่าจะตั้งค่าแบบใด',
     customer_display_logo_label:'โลโก้หน้าจอว่าง',
     customer_display_logo_hint:'แสดงขนาดใหญ่ตรงกลางหน้าจอลูกค้าเมื่อยังไม่แสดงคิวอาร์โค้ดชำระเงิน ไฟล์ PNG พื้นหลังโปร่งใสจะให้ผลลัพธ์ดีที่สุด — จะคงรูปทรงเดิมไว้ ไม่ถูกครอบตัด',
     customer_display_message_label:'ข้อความหน้าจอว่าง',
@@ -7201,6 +7201,15 @@ function showCustomerDisplayQr(order){
   /* Cash, E-Gets, and FoodPanda never show anything here — see
      paymentMethodHasQr(). */
   if(!paymentMethodHasQr(order.paymentMethod)) return;
+  /* The customer screen only ever shows a payment QR when this device
+     has the toggle on (see isCustomerDisplayEnabled() below). When
+     it's off, checkout still records/prints instantly like before —
+     it just never puts anything on the second screen, which stays on
+     its idle logo/message. Without this check, a Transfer/Split
+     checkout would push a QR to the customer screen even on a device
+     that has this workflow turned off, which is exactly the bug this
+     guards against. */
+  if(!isCustomerDisplayEnabled()) return;
   /* For Split, the amount to show/scan is only the transfer portion —
      see qrAmountLAKFor(). If a split order somehow ends up with
      nothing left to transfer (e.g. cash alone covers the total), skip
